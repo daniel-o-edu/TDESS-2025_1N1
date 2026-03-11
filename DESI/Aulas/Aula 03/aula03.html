@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 03 - Modelagem UML e UX</title>
+<style>
+:root {
+--bg: #ffffff;
+--surface: #f5f7fa;
+--accent: #1a56db;
+--accent2: #0e7a5c;
+--accent3: #c0392b;
+--text: #111827;
+--muted: #4b5563;
+--border: #d1d5db;
+--code-bg: #f0f2f5;
+--highlight: #e8f0fe;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(--bg);
+color: var(--text);
+font-family: Arial, Helvetica, sans-serif;
+height: 100vh;
+overflow: hidden;
+}
+
+#deck { width: 100vw; height: 100vh; position: relative; }
+
+.slide {
+position: absolute;
+inset: 0;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: clamp(30px, 5vw, 80px);
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.4s ease;
+background: var(--bg);
+}
+.slide.active { opacity: 1; pointer-events: all; }
+
+.content-box {
+max-width: 900px;
+width: 100%;
+padding: clamp(20px, 3vw, 40px);
+}
+
+.slide-label {
+font-size: clamp(13px, 2vw, 17px);
+font-weight: 700;
+letter-spacing: 1px;
+text-transform: uppercase;
+color: var(--accent);
+margin-bottom: 12px;
+text-align: center;
+}
+
+.slide-title {
+font-size: clamp(24px, 5vw, 48px);
+font-weight: 700;
+line-height: 1.2;
+margin-bottom: 24px;
+color: var(--text);
+text-align: center;
+border-bottom: 3px solid var(--accent);
+padding-bottom: 16px;
+}
+.slide-title em { color: var(--accent); font-style: normal; }
+
+.slide-hero {
+background: #f0f4f8;
+border-left: 8px solid var(--accent);
+justify-content: center;
+}
+.hero-kicker {
+font-size: clamp(14px, 2.5vw, 19px);
+font-weight: 700;
+letter-spacing: 2px;
+color: var(--accent);
+margin-bottom: 16px;
+text-transform: uppercase;
+text-align: center;
+}
+.hero-title {
+font-size: clamp(32px, 7vw, 68px);
+font-weight: 700;
+line-height: 1.1;
+margin-bottom: 16px;
+text-align: center;
+}
+.hero-title span { color: var(--accent); }
+.hero-subtitle {
+font-size: clamp(16px, 2.5vw, 22px);
+color: var(--muted);
+line-height: 1.6;
+margin-bottom: 28px;
+text-align: center;
+}
+
+.slide-section {
+background: #e8eef5;
+justify-content: center;
+}
+.section-number {
+font-size: clamp(80px, 18vw, 180px);
+font-weight: 700;
+color: rgba(26,86,219,0.1);
+line-height: 1;
+margin-bottom: -10px;
+text-align: center;
+display: block;
+}
+.section-heading {
+font-size: clamp(28px, 6vw, 60px);
+font-weight: 700;
+line-height: 1.1;
+color: var(--text);
+text-align: center;
+}
+
+.bullet-list {
+list-style: none;
+display: flex;
+flex-direction: column;
+gap: 12px;
+margin: 16px 0;
+}
+.bullet-list li {
+display: flex;
+align-items: flex-start;
+gap: 12px;
+font-size: clamp(16px, 2.2vw, 19px);
+line-height: 1.6;
+color: var(--muted);
+}
+.bullet-list li::before {
+content: '▸';
+color: var(--accent);
+font-size: 16px;
+margin-top: 4px;
+flex-shrink: 0;
+}
+
+#progress-bar {
+position: fixed;
+top: 0;
+left: 0;
+height: 4px;
+background: var(--accent);
+transition: width 0.4s ease;
+z-index: 100;
+}
+
+#nav {
+position: fixed;
+bottom: 20px;
+right: 24px;
+display: flex;
+align-items: center;
+gap: 12px;
+z-index: 100;
+}
+#slide-counter {
+font-size: clamp(14px, 1.8vw, 17px);
+color: var(--muted);
+font-weight: 700;
+}
+.nav-btn {
+width: 46px;
+height: 46px;
+border-radius: 50%;
+border: 2px solid var(--border);
+background: #fff;
+color: var(--text);
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 20px;
+transition: all 0.2s;
+box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.nav-btn:hover {
+background: var(--accent);
+border-color: var(--accent);
+color: #fff;
+}
+
+@media (max-width: 600px) {
+.slide { padding: 20px; }
+.content-box { padding: 16px; }
+}
+</style>
+
+</head>
+<body>
+<div id="deck">
+
+<section class="slide slide-hero active">
+<div class="content-box">
+<h1 class="hero-title">Aula 03 - Modelagem UML e UX </h1>
+<ul class="bullet-list" style="display: inline-block; text-align: left;">
+<li>Tópicos: </li>
+<li>Exposição: Diagrama de Casos de Uso e Diagrama de Classes </li>
+<li>Demo ao vivo: modelar entidades do projeto TechLog </li>
+<li>Prática em equipe: identificar entidades do próprio projeto </li>
+<li>Desenhar Diagrama de Classes com atributos e relacionamentos (Draw.io) </li>
+<li>Exposição: prototipação, wireframes, usabilidade, WCAG </li>
+</ul>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">Entregas: </h2>
+<ul class="bullet-list">
+<li>Prática: criar wireframes de baixa fidelidade no Figma </li>
+<li>Telas obrigatórias: Login, Dashboard, Listagem, Formulário CRUD </li>
+<li>Considerações de acessibilidade: contraste, labels, navegação por teclado </li>
+<li>✓ Diagrama de Casos de Uso </li>
+<li>✓ Diagrama de Classes v1.0 </li>
+<li>✓ Wireframes de 4-5 telas no Figma </li>
+</ul>
+</div>
+</section>
+
+<section class="slide slide-section">
+<div class="content-box">
+<span class="section-number">1</span>
+<h2 class="section-heading">Parte 1: Modelagem UML</h2>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">1.1 Exposição: Diagramas de Casos de Uso e de Classes</h2>
+<ul class="bullet-list">
+<li>Fundamento da UML: A Linguagem de Modelagem Unificada (UML) é o padrão para descrever, visualizar e documentar artefatos de sistemas de software. Ela permite que arquitetos e desenvolvedores planejem a construção do software de forma clara. </li>
+</ul>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">Diagrama de Casos de Uso: </h2>
+<ul class="bullet-list">
+<li>Conceito: Representa as funções do sistema sob o ponto de vista do usuário. </li>
+<li>Atores: São papéis desempenhados por pessoas ou dispositivos externos que interagem com o sistema. </li>
+<li>Relacionamentos: Inclui associações simples e o uso de &lt;&lt;include&gt;&gt; para atividades duplicadas que são incorporadas a outros casos de uso. </li>
+</ul>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">Diagrama de Classes: </h2>
+<ul class="bullet-list">
+<li>Conceito: Fornece uma visão estática e estrutural do sistema, modelando classes, atributos e operações. </li>
+<li>Estrutura de uma Classe: Composta por Nome, Atributos (estado) e Operações/Métodos  (comportamento). </li>
+</ul>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">Relacionamentos: </h2>
+<ul class="bullet-list">
+<li>Associação: Uma referência estrutural entre objetos. </li>
+<li>Agregação e Composição: Relações "todo/parte". Na composição, as partes dependem da existência do objeto pai. </li>
+<li>Generalização: Representa a herança, onde subclasses derivam de uma superclasse. </li>
+</ul>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">1.2 Demo ao Vivo: Modelagem de Entidades</h2>
+<ul class="bullet-list">
+<li>Exemplo Prático: Modelar uma entidade "Produto" em um sistema de vendas. Atributos: Descrição, estoque, preço. </li>
+<li>Associações: Mostrar como o "Produto" se associa a "Fabricante" e "Unidade". </li>
+<li>Responsabilidade: Demonstrar que os métodos devem ser coesos (ex: um método para calcular margem de lucro dentro da classe Produto). </li>
+</ul>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">1.3 Prática em Equipe</h2>
+<ul class="bullet-list">
+<li>Tarefa 1: Identificar os atores e as metas do projeto da equipe. </li>
+<li>Tarefa 2: Desenhar o Diagrama de Casos de Uso inicial. </li>
+<li>Tarefa 3: Identificar atributos e operações para as classes principais (Pessoa, Produto, Tarefa, etc.). </li>
+<li>Tarefa 4: Desenhar o Diagrama de Classes v1.0 no Draw.io, definindo visibilidade (público/privado) e multiplicidade. </li>
+</ul>
+</div>
+</section>
+
+<section class="slide slide-section">
+<div class="content-box">
+<span class="section-number">2</span>
+<h2 class="section-heading">Parte 2: UX, Prototipação e Acessibilidade</h2>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">2.1 Exposição: Prototipação e Usabilidade</h2>
+<ul class="bullet-list">
+<li>Projeto de UX: É o processo de aumentar a satisfação do cliente através de interações utilizáveis, acessíveis e prazerosas. </li>
+<li>Regras de Ouro da Interface: 1) Deixar o usuário no comando; 2) Reduzir a carga de memória do usuário; 3) Tornar a interface consistente. </li>
+</ul>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">Prototipação de Baixa Fidelidade </h2>
+<ul class="bullet-list">
+<li>O uso de protótipos de papel ou digitais simples permite validar conceitos antes de iniciar a codificação. </li>
+<li>É uma técnica econômica para obter feedback rápido. </li>
+</ul>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">2.2 Acessibilidade e WCAG</h2>
+<ul class="bullet-list">
+<li>Engenharia de Acessibilidade: Foca em permitir que pessoas com necessidades especiais (visuais, auditivas, motoras ou cognitivas) possam interagir com o software. </li>
+<li>Diretrizes Essenciais (WCAG): </li>
+<li>Contraste: Garantir contraste alto entre texto e fundo, especialmente para idosos e deficientes visuais. </li>
+<li>Labels (Rótulos): Todo campo de entrada deve ter um rótulo claro. Mensagens de erro devem ser descritivas e nunca culpar o usuário. </li>
+</ul>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">Diretrizes Essenciais (Cont.) </h2>
+<ul class="bullet-list">
+<li>Navegação por Teclado: A interface deve permitir a navegação completa sem o uso de mouse. </li>
+<li>Consistência: Ícones e menus devem ter posicionamento padrão para facilitar o aprendizado. </li>
+</ul>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">2.3 Prática: Figma Wireframes</h2>
+<ul class="bullet-list">
+<li>Instrução: Criar wireframes de baixa fidelidade para as telas obrigatórias: </li>
+<li>Login: Campo para identificação e senha. </li>
+<li>Dashboard: Visão geral com indicadores ou gráficos simples. </li>
+<li>Listagem: Exibição de dados em formato de tabela com ações de Editar/Excluir. </li>
+<li>Formulário CRUD: Campos de entrada organizados logicamente com botões de Salvar/Cancelar. </li>
+</ul>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">Checklist de Entrega: </h2>
+<ul class="bullet-list">
+<li>Verificar se o contraste das cores é adequado. </li>
+<li>Garantir que os rótulos (labels) estão presentes em todos os inputs. </li>
+</ul>
+</div>
+</section>
+
+<section class="slide">
+<div class="content-box">
+<h2 class="slide-title">Entregas da Aula </h2>
+<ul class="bullet-list">
+<li>Ao final das 4 horas, cada equipe deve postar ou apresentar: </li>
+<li>Diagrama de Casos de Uso (PNG/PDF). </li>
+<li>Diagrama de Classes v1.0 (PNG/PDF criado no Draw.io). </li>
+<li>Link do Figma com os wireframes de 4 a 5 telas essenciais, aplicando as considerações de acessibilidade discutidas. </li>
+</ul>
+</div>
+</section>
+
+</div>
+
+<div id="progress-bar"></div>
+
+<div id="nav">
+<span id="slide-counter"></span>
+<button class="nav-btn" id="btn-prev" title="Anterior (←)">&#8592;</button>
+<button class="nav-btn" id="btn-next" title="Próximo (→)">&#8594;</button>
+</div>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+const total = slides.length;
+let current = 0;
+
+const counter = document.getElementById('slide-counter');
+const bar = document.getElementById('progress-bar');
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function updateNav() {
+counter.textContent = `${pad(current+1)} / ${pad(total)}`;
+bar.style.width = `${((current+1)/total)*100}%`;
+}
+
+function goTo(next) {
+if (next === current || next < 0 || next >= total) return;
+slides[current].classList.remove('active');
+current = next;
+slides[current].classList.add('active');
+updateNav();
+}
+
+document.getElementById('btn-next').addEventListener('click', () => goTo(current+1));
+document.getElementById('btn-prev').addEventListener('click', () => goTo(current-1));
+
+document.addEventListener('keydown', (e) => {
+if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+e.preventDefault(); goTo(current+1);
+} else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+e.preventDefault(); goTo(current-1);
+}
+});
+
+let touchStart = null;
+document.addEventListener('touchstart', (e) => { touchStart = e.touches[0].clientX; });
+document.addEventListener('touchend', (e) => {
+if (touchStart === null) return;
+const dx = e.changedTouches[0].clientX - touchStart;
+if (Math.abs(dx) > 50) goTo(dx < 0 ? current+1 : current-1);
+touchStart = null;
+});
+
+updateNav();
+</script>
+
+</body>
+</html>

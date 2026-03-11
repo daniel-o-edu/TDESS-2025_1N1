@@ -1,0 +1,71 @@
+<!DOCTYPE html >
+<html lang="pt-br">
+<head>
+<style>
+body {
+margin: 0;
+/* O body inteiro vira um container flex vertical */
+display: flex;
+flex-direction: column;
+height: 100vh; /* Ocupa 100% da altura da tela */
+}
+header {
+background: #005A9C;
+color: white;
+padding: 20px;
+/* Alinha os itens do header (Logo e Menu) */
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.container-meio {
+/* Ocupa todo o espaço restante disponível na tela */
+flex: 1;
+display: flex; /* Transforma esta seção para colocar nav e main lado a lado */
+flex-direction: row;
+}
+nav {
+background: #e0e0e0;
+width: 250px;
+padding: 20px;
+}
+
+main {
+background: #f4f4f4;
+flex: 1; /* Faz o conteúdo principal esticar para preencher o resto da largura */
+padding: 20px;
+}
+
+footer {
+background: #333;
+color: white;
+text-align: center;
+padding: 10px;
+}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">Minha Startup</div>
+<div>Botão Login</div>
+</header>
+
+<div class="container-meio">
+<nav>
+Menu Lateral<br>
+- Dashboard<br>
+- Configurações
+</nav>
+<main>
+<h1>Área de Trabalho</h1>
+<p>Conteúdo da nossa aplicação web.</p>
+</main>
+</div>
+
+<footer>
+© 2026 - Empresa Júnior de Tecnologia
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 04 – Setup e Metodologia</title>
+<style>
+:root {
+--bg: #ffffff;
+--surface: #f5f7fa;
+--accent: #1a56db;
+--accent2: #0e7a5c;
+--accent3: #c0392b;
+--text: #111827;
+--muted: #4b5563;
+--border: #d1d5db;
+--code-bg: #f0f2f5;
+--highlight: #e8f0fe;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(--bg);
+color: var(--text);
+font-family: Arial, Helvetica, sans-serif;
+height: 100vh;
+overflow: hidden;
+}
+
+#deck { width: 100vw; height: 100vh; position: relative; }
+
+.slide {
+position: absolute;
+inset: 0;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: clamp(30px, 5vw, 80px);
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.4s ease;
+background: var(--bg);
+}
+.slide.active { opacity: 1; pointer-events: all; }
+
+.content-box {
+max-width: 900px;
+width: 100%;
+padding: clamp(20px, 3vw, 40px);
+}
+
+.slide-label {
+font-size: clamp(13px, 2vw, 17px);
+font-weight: 700;
+letter-spacing: 1px;
+text-transform: uppercase;
+color: var(--accent);
+margin-bottom: 12px;
+text-align: center;
+}
+
+.slide-title {
+font-size: clamp(24px, 5vw, 48px);
+font-weight: 700;
+line-height: 1.2;
+margin-bottom: 24px;
+color: var(--text);
+text-align: center;
+border-bottom: 3px solid var(--accent);
+padding-bottom: 16px;
+}
+.slide-title em { color: var(--accent); font-style: normal; }
+
+.slide-hero {
+background: #f0f4f8;
+border-left: 8px solid var(--accent);
+justify-content: center;
+}
+.hero-kicker {
+font-size: clamp(14px, 2.5vw, 19px);
+font-weight: 700;
+letter-spacing: 2px;
+color: var(--accent);
+margin-bottom: 16px;
+text-transform: uppercase;
+text-align: center;
+}
+.hero-title {
+font-size: clamp(32px, 7vw, 68px);
+font-weight: 700;
+line-height: 1.1;
+margin-bottom: 16px;
+text-align: center;
+}
+.hero-title span { color: var(--accent); }
+.hero-subtitle {
+font-size: clamp(16px, 2.5vw, 22px);
+color: var(--muted);
+line-height: 1.6;
+margin-bottom: 28px;
+text-align: center;
+}
+.hero-objectives {
+display: flex;
+flex-direction: column;
+gap: 12px;
+max-width: 700px;
+}
+.hero-obj-item {
+display: flex;
+align-items: flex-start;
+gap: 14px;
+font-size: clamp(15px, 2.2vw, 19px);
+line-height: 1.5;
+}
+.hero-obj-item .dot {
+width: 10px;
+height: 10px;
+border-radius: 50%;
+background: var(--accent);
+margin-top: 7px;
+flex-shrink: 0;
+}
+
+.slide-section {
+background: #e8eef5;
+justify-content: center;
+}
+.section-number {
+font-size: clamp(80px, 18vw, 180px);
+font-weight: 700;
+color: rgba(26,86,219,0.1);
+line-height: 1;
+margin-bottom: -10px;
+text-align: center;
+}
+.section-part {
+font-size: clamp(14px, 2.5vw, 18px);
+font-weight: 700;
+letter-spacing: 3px;
+color: var(--accent);
+text-transform: uppercase;
+margin-bottom: 12px;
+text-align: center;
+}
+.section-heading {
+font-size: clamp(28px, 6vw, 60px);
+font-weight: 700;
+line-height: 1.1;
+color: var(--text);
+text-align: center;
+}
+.section-heading span { color: var(--accent); }
+.section-sub {
+font-size: clamp(15px, 2.2vw, 20px);
+color: var(--muted);
+margin-top: 18px;
+max-width: 600px;
+line-height: 1.6;
+text-align: center;
+}
+
+.prose {
+font-size: clamp(16px, 2.2vw, 20px);
+line-height: 1.7;
+color: var(--muted);
+margin: 16px 0;
+}
+.prose strong { color: var(--text); font-weight: 700; }
+.prose em { color: var(--accent); font-weight: 700; font-style: normal; }
+
+.analogy-box {
+border-left: 4px solid var(--accent);
+background: var(--highlight);
+border-radius: 0 8px 8px 0;
+padding: clamp(16px, 2.5vw, 24px);
+margin: 20px 0;
+font-size: clamp(16px, 2.2vw, 19px);
+line-height: 1.7;
+}
+.analogy-box strong { color: var(--accent); }
+
+.bullet-list {
+list-style: none;
+display: flex;
+flex-direction: column;
+gap: 12px;
+margin: 16px 0;
+}
+.bullet-list li {
+display: flex;
+align-items: flex-start;
+gap: 12px;
+font-size: clamp(16px, 2.2vw, 19px);
+line-height: 1.6;
+color: var(--muted);
+}
+.bullet-list li::before {
+content: '▸';
+color: var(--accent);
+font-size: 16px;
+margin-top: 4px;
+flex-shrink: 0;
+}
+.bullet-list li strong { color: var(--text); }
+
+.card {
+background: var(--surface);
+border: 1px solid var(--border);
+border-radius: 10px;
+padding: clamp(18px, 2.5vw, 28px);
+margin: 16px 0;
+}
+.card-title {
+font-size: clamp(14px, 2vw, 18px);
+font-weight: 700;
+letter-spacing: 1px;
+text-transform: uppercase;
+margin-bottom: 14px;
+}
+.card-title.yellow { color: #b45309; }
+.card-title.green  { color: var(--accent2); }
+.card-title.red    { color: var(--accent3); }
+.card-title.blue   { color: var(--accent); }
+
+.styled-table {
+width: 100%;
+border-collapse: collapse;
+font-size: clamp(15px, 2vw, 19px);
+margin: 20px 0;
+}
+.styled-table thead tr { background: var(--accent); }
+.styled-table th {
+padding: 14px 18px;
+text-align: left;
+font-weight: 700;
+color: #ffffff;
+font-size: clamp(14px, 2vw, 18px);
+}
+.styled-table td {
+padding: 12px 18px;
+border-bottom: 1px solid var(--border);
+color: var(--muted);
+vertical-align: top;
+}
+.styled-table tr:nth-child(even) td { background: var(--surface); }
+.styled-table td:first-child {
+font-family: 'Courier New', monospace;
+color: var(--accent2);
+font-weight: 700;
+}
+
+.code-block {
+background: var(--code-bg);
+border: 1px solid var(--border);
+border-radius: 8px;
+padding: clamp(16px, 2.5vw, 24px);
+font-family: 'Courier New', monospace;
+font-size: clamp(15px, 2vw, 18px);
+line-height: 1.7;
+overflow-x: auto;
+margin: 20px 0;
+}
+.code-block .kw  { color: #9b2335; font-weight: 700; }
+.code-block .cls { color: var(--accent); font-weight: 700; }
+.code-block .str { color: var(--accent2); }
+.code-block .cmt { color: #9ca3af; font-style: italic; }
+
+.badge-row {
+display: flex;
+flex-wrap: wrap;
+gap: 12px;
+margin: 16px 0;
+justify-content: center;
+}
+.badge {
+background: var(--surface);
+border: 1px solid var(--border);
+border-radius: 6px;
+padding: 10px 18px;
+font-family: 'Courier New', monospace;
+font-size: clamp(14px, 2vw, 18px);
+}
+.badge.good { border-color: var(--accent2); color: var(--accent2); background: #f0fdf4; }
+.badge.bad  { border-color: var(--accent3); color: var(--accent3); background: #fef2f2; text-decoration: line-through; }
+
+.step-card {
+background: var(--surface);
+border: 1px solid var(--border);
+border-radius: 10px;
+padding: clamp(16px, 2.5vw, 24px);
+display: flex;
+gap: 18px;
+align-items: flex-start;
+margin: 12px 0;
+}
+.step-number {
+width: 40px;
+height: 40px;
+border-radius: 50%;
+background: var(--accent);
+color: #ffffff;
+font-weight: 700;
+font-size: 18px;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+}
+.step-body { flex: 1; }
+.step-title {
+font-weight: 700;
+font-size: clamp(16px, 2.2vw, 20px);
+color: var(--text);
+margin-bottom: 6px;
+}
+.step-desc {
+font-size: clamp(15px, 2vw, 19px);
+color: var(--muted);
+line-height: 1.6;
+}
+
+.checklist {
+display: flex;
+flex-direction: column;
+gap: 12px;
+margin: 16px 0;
+}
+.check-item {
+display: flex;
+align-items: flex-start;
+gap: 14px;
+font-size: clamp(16px, 2.2vw, 20px);
+line-height: 1.5;
+}
+.check-box {
+width: 22px;
+height: 22px;
+border: 2px solid var(--border);
+border-radius: 4px;
+flex-shrink: 0;
+margin-top: 2px;
+background: #fff;
+}
+
+.faq-item {
+background: var(--surface);
+border: 1px solid var(--border);
+border-left: 4px solid var(--accent);
+border-radius: 0 8px 8px 0;
+padding: clamp(14px, 2vw, 20px);
+margin: 12px 0;
+}
+.faq-q {
+font-weight: 700;
+color: var(--accent);
+font-size: clamp(16px, 2.2vw, 20px);
+margin-bottom: 8px;
+}
+.faq-a {
+font-size: clamp(15px, 2vw, 19px);
+color: var(--muted);
+line-height: 1.65;
+}
+
+#progress-bar {
+position: fixed;
+top: 0;
+left: 0;
+height: 4px;
+background: var(--accent);
+transition: width 0.4s ease;
+z-index: 100;
+}
+
+#nav {
+position: fixed;
+bottom: 20px;
+right: 24px;
+display: flex;
+align-items: center;
+gap: 12px;
+z-index: 100;
+}
+#slide-counter {
+font-size: clamp(14px, 1.8vw, 17px);
+color: var(--muted);
+font-weight: 700;
+}
+.nav-btn {
+width: 46px;
+height: 46px;
+border-radius: 50%;
+border: 2px solid var(--border);
+background: #fff;
+color: var(--text);
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 20px;
+transition: all 0.2s;
+box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.nav-btn:hover {
+background: var(--accent);
+border-color: var(--accent);
+color: #fff;
+}
+
+@media (max-width: 600px) {
+.slide { padding: 20px; }
+.content-box { padding: 16px; }
+}
+</style>
+
+</head>
+<body>
+<div id="deck">
+
+<div class="slide slide-hero active">
+<div class="content-box">
+<div class="hero-kicker">Aula 04 </div>
+<h1 class="hero-title">Setup e <span>Metodologia</span></h1>
+<p class="hero-subtitle">Arquitetura de Software, Definição de Stack Tecnológica e Versionamento de Projetos </p>
+<div class="hero-objectives">
+<div class="hero-obj-item"><div class="dot"></div><span>Definição de stack tecnológica e requisitos do sistema </span></div>
+<div class="hero-obj-item"><div class="dot"></div><span>Configuração de ambiente com PHP, MySQL e JavaScript </span></div>
+<div class="hero-obj-item"><div class="dot"></div><span>Estruturação profissional no GitHub e XAMPP </span></div>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Contextualização Estratégica </div>
+<h2 class="slide-title">A <em>Sprint 0</em></h2>
+<p class="prose">No universo do Desenvolvimento de Sistemas, a fase que antecede a primeira linha de código define o sucesso ou o fracasso de um produto digital. Em uma <strong>Sprint 0</strong>, equipes profissionais não abrem suas IDEs de forma aleatória; elas analisam os Requisitos Não Funcionais (RNF) e tomam decisões arquiteturais. </p>
+<div class="analogy-box">
+Hoje, vocês atuarão como <strong>squads</strong> de uma Software House, definindo as ferramentas para o MVP que será apresentado a investidores anjo na Feira de Inovação. 
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Roteiro da Aula </div>
+<h2 class="slide-title">Objetivos <em>Práticos</em></h2>
+<p class="prose">Esta aula conduzirá vocês desde a fundamentação teórica sobre o que constitui uma stack tecnológica e como ela responde aos requisitos do sistema, até a execução prática de um setup profissional. </p>
+<ul class="bullet-list">
+<li>Adoção de PHP, MySQL e JavaScript para a Situação de Aprendizagem. </li>
+<li>Configuração do ambiente local com XAMPP e VS Code. </li>
+<li>Estruturação do repositório remoto no GitHub (/frontend, /backend, /docs). </li>
+</ul>
+</div>
+</div>
+
+<div class="slide slide-section">
+<div class="content-box">
+<span class="section-number">01</span>
+<div class="section-part">Parte 1</div>
+<h2 class="section-heading">Fundamentação e <span>Contextualização</span></h2>
+<p class="section-sub">A Ciência por Trás da Escolha da Stack. </p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Narrativa de TI </div>
+<h2 class="slide-title">O Perigo do <em>Hype</em></h2>
+<p class="prose">Imagine uma startup que decide construir seu aplicativo revolucionário usando a linguagem mais "da moda" no momento, sem analisar a viabilidade a longo prazo. Seis meses depois, o sistema precisa escalar, surgem bugs críticos e a empresa descobre que não há desenvolvedores qualificados no mercado para essa tecnologia específica. </p>
+<div class="card">
+<div class="card-title red">Consequência</div>
+<p class="prose">O banco de dados não suporta o tráfego e os investidores retiram o aporte financeiro. A empresa morre não por uma ideia ruim, mas por uma péssima decisão de <strong>Stack Tecnológica</strong>. </p>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Conceituação Técnica </div>
+<h2 class="slide-title">O que é a <em>Stack</em>?</h2>
+<p class="prose">A <strong>Stack Tecnológica</strong> é o conjunto de ferramentas, linguagens e frameworks que compõem as camadas de uma aplicação. No nosso ecossistema SENAI, trabalharemos com a tríade clássica e robusta: </p>
+<div class="card">
+<div class="card-title blue">PHP (Linguagem de Script Server-side)</div>
+<p class="prose">Escolhida por sua maturidade, vasta documentação e compatibilidade nativa com quase todos os servidores web. No mercado, o PHP alimenta desde pequenos sites até gigantes como o Facebook e WordPress. </p>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Conceituação Técnica </div>
+<h2 class="slide-title">Banco de Dados e <em>Client-side</em></h2>
+<div class="card">
+<div class="card-title green">MySQL (SGBD Relacional)</div>
+<p class="prose">Um Sistema de Gerenciamento de Banco de Dados que utiliza a linguagem SQL. É o padrão de ouro para aplicações que exigem integridade de dados e relacionamentos complexos. </p>
+</div>
+<div class="card">
+<div class="card-title yellow">JavaScript (Client-side)</div>
+<p class="prose">Essencial para a interatividade no navegador, permitindo que a aplicação responda ao usuário sem recarregar a página constantemente. </p>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Conexão com a SA </div>
+<h2 class="slide-title">Por que esta <em>escolha</em>?</h2>
+<p class="prose">A escolha desta stack para o seu projeto não é por acaso. Ela atende aos RNFs de <strong>interoperabilidade</strong> e <strong>baixo custo de infraestrutura</strong>. </p>
+<div class="analogy-box">
+Como vocês apresentarão para "investidores", precisam provar que a tecnologia escolhida é sustentável, segura e possui mão de obra disponível. 
+</div>
+</div>
+</div>
+
+<div class="slide slide-section">
+<div class="content-box">
+<span class="section-number">02</span>
+<div class="section-part">Parte 2</div>
+<h2 class="section-heading">Ambiente <span>Local</span></h2>
+<p class="section-sub">Ferramentas de Produtividade e o Ambiente Local. </p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Expansão Conceitual </div>
+<h2 class="slide-title">Por que <em>emular</em>?</h2>
+<p class="prose">Diferente do HTML, o PHP não "roda" diretamente no navegador. Ele precisa de um <strong>interpretador</strong> no lado do servidor. Para não precisarmos de um servidor real na nuvem em cada aula, utilizamos o <strong>XAMPP</strong>. </p>
+<div class="card">
+<div class="card-title blue">Definição Técnica: XAMPP</div>
+<p class="prose">O XAMPP é um pacote de software livre que consiste principalmente no servidor HTTP Apache, no banco de dados MariaDB (um fork do MySQL) e interpretadores para linguagens de script como PHP. </p>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Analogia </div>
+<h2 class="slide-title">Canteiro de <em>Obras</em></h2>
+<div class="analogy-box">
+Configurar o XAMPP é como montar um "canteiro de obras" isolado. Você testa tudo ali antes de levar para o prédio real (o servidor de produção). 
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Diagnóstico </div>
+<h2 class="slide-title">Erros de <em>Estudantes</em></h2>
+<ul class="bullet-list">
+<li><strong>Esquecer de iniciar os módulos:</strong> O erro mais comum é tentar acessar o projeto via localhost sem "dar Start" no Apache e MySQL no painel do XAMPP. </li>
+<li><strong>Caminho de arquivo incorreto:</strong> Salvar os arquivos fora da pasta C:\xampp\htdocs. Se o arquivo não estiver lá, o Apache não o encontrará. </li>
+<li><strong>Conflitos de porta:</strong> Outros programas (como Skype ou Docker) podem usar a porta 80, impedindo o Apache de iniciar. </li>
+</ul>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Ferramentas </div>
+<h2 class="slide-title">A Central de <em>Comando</em></h2>
+<p class="prose">Um desenvolvedor sênior nunca trabalha sem uma IDE (Integrated Development Environment) potente.  O <strong>VS Code</strong> será nossa central de comando. Ele não é apenas um editor de texto; </p>
+<div class="card">
+<div class="card-title green">Funcionalidades</div>
+<p class="prose">Com as extensões certas (PHP Intelephense, GitLens), ele se torna uma ferramenta de diagnóstico que avisa sobre erros de sintaxe antes mesmo de você rodar o código. </p>
+</div>
+</div>
+</div>
+
+<div class="slide slide-section">
+<div class="content-box">
+<span class="section-number">03</span>
+<div class="section-part">Parte 3</div>
+<h2 class="section-heading">Versionamento e <span>Estrutura</span></h2>
+<p class="section-sub">Versionamento com Git e Hierarquia de Projeto. </p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Colaboração </div>
+<h2 class="slide-title">O Fluxo do <em>Git</em></h2>
+<p class="prose">Trabalhar em equipe sem Git é um caos. O Git permite o <strong>Controle de Versão</strong>, garantindo que nenhum membro da equipe sobrescreva o código do outro. </p>
+<div class="step-card">
+<div class="step-number">1</div>
+<div class="step-body"><div class="step-title">Git Init</div><div class="step-desc">Inicializa o rastreamento. </div></div>
+</div>
+<div class="step-card">
+<div class="step-number">2</div>
+<div class="step-body"><div class="step-title">Git Add/Commit</div><div class="step-desc">Cria um "ponto de salvamento" (checkpoint) com uma mensagem descritiva. </div></div>
+</div>
+<div class="step-card">
+<div class="step-number">3</div>
+<div class="step-body"><div class="step-title">Git Push</div><div class="step-desc">Envia suas alterações para o repositório remoto (GitHub). </div></div>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Organização </div>
+<h2 class="slide-title">Hierarquia <em>Profissional</em></h2>
+<p class="prose">Um projeto desorganizado é um projeto propenso a falhas. Adotaremos a seguinte hierarquia: </p>
+<div class="code-block">
+/frontend : Arquivos HTML, CSS e imagens. 
+
+
+
+/backend : Scripts PHP, lógica de negócio e conexão com banco. 
+
+
+
+/docs : Modelagem UML e Documento de Definição Tecnológica. 
+
+
+
+.gitignore : Ignora arquivos desnecessários (config locais). 
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Justificativa </div>
+<h2 class="slide-title">Decisão <em>Técnica</em></h2>
+<p class="prose">As equipes devem agora preencher o <strong>Documento de Definição Tecnológica</strong>.  Não basta dizer "vamos usar PHP". Vocês devem justificar:</p>
+<div class="analogy-box">
+"Usaremos PHP devido à facilidade de integração com o MySQL via PDO, garantindo a segurança contra SQL Injection exigida nos requisitos de segurança do projeto". 
+</div>
+</div>
+</div>
+
+<div class="slide slide-section">
+<div class="content-box">
+<span class="section-number">04</span>
+<div class="section-part">Parte 4</div>
+<h2 class="section-heading">O Setup <span>Final</span></h2>
+<p class="section-sub">Consolidação e Desafio. </p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Mercado </div>
+<h2 class="slide-title">Boas <em>Práticas</em></h2>
+<div class="card">
+<div class="card-title yellow">README.md impecável</div>
+<p class="prose">O seu repositório no GitHub é o seu cartão de visitas. O arquivo README deve conter o título do projeto, a descrição do problema, as instruções de instalação e a lista de tecnologias. </p>
+</div>
+<div class="card">
+<div class="card-title blue">Commits Semânticos</div>
+<p class="prose">Evite mensagens como "ajuste" ou "teste". Use padrões como <strong>feat: adiciona login</strong> ou <strong>docs: atualiza manual</strong>. </p>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Liderança </div>
+<h2 class="slide-title">Início das <em>Squads</em></h2>
+<p class="prose">O Líder Técnico de cada squad deve agora criar o repositório da organização, convidar os membros e garantir que todos consigam realizar o git clone e o primeiro git push de teste. </p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">FAQ </div>
+<h2 class="slide-title">Dúvidas <em>Reais</em></h2>
+<div class="faq-item">
+<div class="faq-q">"Professor, por que não usamos Node.js ou Python que são mais 'modernos'?" </div>
+<div class="faq-a">PHP ainda domina cerca de 77% da web servida por linguagens server-side. Para um MVP em um semestre técnico, oferece a curva de aprendizado mais eficiente e ferramentas estáveis como o XAMPP. </div>
+</div>
+<div class="faq-item">
+<div class="faq-q">"O XAMPP deu erro de porta 80 ocupada. O que eu faço?" </div>
+<div class="faq-a">Acesse as configurações (Config) do Apache no painel, abra o arquivo httpd.conf e altere Listen 80 para Listen 8080. Acesse via localhost:8080. </div>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">FAQ </div>
+<h2 class="slide-title">Git vs <em>GitHub</em></h2>
+<table class="styled-table">
+<thead><tr><th>Ferramenta</th><th>Definição </th></tr></thead>
+<tbody>
+<tr><td>Git</td><td>Software instalado no PC para gerenciar versões. </td></tr>
+<tr><td>GitHub</td><td>Plataforma na nuvem para hospedar e colaborar em arquivos. </td></tr>
+</tbody>
+</table>
+<div class="faq-item">
+<div class="faq-q">"Preciso commitar cada linha que eu escrevo?" </div>
+<div class="faq-a">Não. Commite "unidades de trabalho completas". Ex: terminou a estrutura do cabeçalho ou a conexão com o banco. Commits pequenos e frequentes facilitam a correção. </div>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Evidência de Desempenho </div>
+<h2 class="slide-title">O <em>Desafio</em></h2>
+<p class="prose"><strong>Objetivo:</strong> Configurar o ecossistema de desenvolvimento e o repositório oficial do projeto. </p>
+<div class="card">
+<div class="card-title yellow">Requisitos Obrigatórios </div>
+<ul class="bullet-list">
+<li>Painel XAMPP configurado e funcional. </li>
+<li>Repositório no GitHub com convite para todos os membros e professores. </li>
+<li>Pasta /docs com "Documento de Definição Tecnológica". </li>
+<li>Arquivo .gitignore configurado. </li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Execução </div>
+<h2 class="slide-title">Passo a <em>Passo</em></h2>
+<div class="step-card">
+<div class="step-number">1</div>
+<div class="step-body"><div class="step-title">Setup Local</div><div class="step-desc">Líder cria a pasta em C:\xampp\htdocs\nome_do_projeto. </div></div>
+</div>
+<div class="step-card">
+<div class="step-number">2</div>
+<div class="step-body"><div class="step-title">Estruturação</div><div class="step-desc">Criar /frontend, /backend e /docs. Mover diagramas anteriores para /docs. </div></div>
+</div>
+<div class="step-card">
+<div class="step-number">3</div>
+<div class="step-body"><div class="step-title">Versionamento</div><div class="step-desc">Executar git init, git add ., git commit -m "feat: estrutura inicial". </div></div>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Execução </div>
+<h2 class="slide-title">Deploy e <em>Colaboração</em></h2>
+<div class="step-card">
+<div class="step-number">4</div>
+<div class="step-body"><div class="step-title">Deploy Remoto</div><div class="step-desc">Criar repo no GitHub, vincular o remote e realizar git push. </div></div>
+</div>
+<div class="step-card">
+<div class="step-number">5</div>
+<div class="step-body"><div class="step-title">Colaboração</div><div class="step-desc">Membros executam git clone em suas máquinas. </div></div>
+</div>
+<div class="card">
+<div class="card-title green">Entregáveis</div>
+<p class="prose">URL do repositório no GitHub submetida na plataforma de aprendizagem (AVA). </p>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Conexão </div>
+<h2 class="slide-title">Próxima <em>Aula</em></h2>
+<p class="prose">Hoje criamos o alicerce. Temos os tijolos (Linguagens), o terreno (Localhost/XAMPP) e a planta (Documentação). Mas um terreno vazio não gera valor. </p>
+<div class="analogy-box">
+Na nossa próxima aula, iniciaremos o <strong>Bloco de Frontend</strong>, onde daremos "cara" ao sistema usando <strong>HTML5 Semântico</strong>. Como transformar aquele código branco e preto em uma interface que um investidor desejaria comprar? 
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="progress-bar"></div>
+
+<div id="nav">
+<span id="slide-counter">01 / 26</span>
+<button class="nav-btn" id="btn-prev" title="Anterior (←)">&#8592;</button>
+<button class="nav-btn" id="btn-next" title="Próximo (→)">&#8594;</button>
+</div>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+const total = slides.length;
+let current = 0;
+
+const counter = document.getElementById('slide-counter');
+const bar = document.getElementById('progress-bar');
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function goTo(next) {
+if (next === current || next < 0 || next >= total) return;
+slides[current].classList.remove('active');
+current = next;
+slides[current].classList.add('active');
+counter.textContent = `${pad(current+1)} / ${pad(total)}`;
+bar.style.width = `${((current+1)/total)*100}%`;
+}
+
+document.getElementById('btn-next').addEventListener('click', () => goTo(current+1));
+document.getElementById('btn-prev').addEventListener('click', () => goTo(current-1));
+
+document.addEventListener('keydown', (e) => {
+if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+e.preventDefault(); goTo(current+1);
+} else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+e.preventDefault(); goTo(current-1);
+}
+});
+
+let touchStart = null;
+document.addEventListener('touchstart', (e) => { touchStart = e.touches[0].clientX; });
+document.addEventListener('touchend', (e) => {
+if (touchStart === null) return;
+const dx = e.changedTouches[0].clientX - touchStart;
+if (Math.abs(dx) > 50) goTo(dx < 0 ? current+1 : current-1);
+touchStart = null;
+});
+
+bar.style.width = `${(1/total)*100}%`;
+</script>
+
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masterclass: CSS3 - Estilização Fundamental</title>
+    <style>
+        :root {
+            --primary: #003366;
+            --secondary: #007bff;
+            --accent: #eef7ff;
+            --text: #1a1a1a;
+            --white: #ffffff;
+            --code-bg: #2d2d2d;
+            --practice-bg: #f0faff;
+            --practice-border: #007bff;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--primary);
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: var(--white);
+            padding: 60px 100px;
+            box-sizing: border-box;
+            animation: slideIn 0.4s ease-out;
+            overflow-y: auto;
+        }
+
+        .slide.active { 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h1 { font-size: 3rem; color: var(--primary); margin-bottom: 20px; border-left: 15px solid var(--secondary); padding-left: 20px; }
+        h2 { font-size: 2rem; color: var(--secondary); margin-top: 0; }
+        p, li { font-size: 1.4rem; line-height: 1.6; color: var(--text); }
+        
+        pre { 
+            background: var(--code-bg); 
+            color: #f8f8f2; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-size: 1.1rem;
+            margin: 10px 0;
+        }
+
+        .practice-box {
+            background: var(--practice-bg);
+            border-left: 5px solid var(--practice-border);
+            padding: 15px;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        .practice-box b { color: var(--primary); }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: var(--primary);
+            color: white;
+            border: 2px solid var(--white);
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button:hover { background: var(--secondary); transform: scale(1.1); }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 8px;
+            background: var(--secondary);
+            transition: width 0.3s;
+            z-index: 101;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            color: var(--primary);
+            background: var(--accent);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+<div class="slide-container" id="container"></div>
+<div class="slide-counter" id="counter">1 / 40</div>
+
+<div class="controls">
+    <button onclick="prev()">⬅ Volt</button>
+    <button onclick="next()">Prox ➡</button>
+</div>
+
+<script>
+    const slides = [
+        { t: "CSS3: Estilização Fundamental", c: "<h2>Dando Vida à Estrutura</h2><p>Na aula passada criamos o esqueleto (HTML). Hoje, vamos definir a pele, os músculos e a identidade visual do nosso projeto.</p>" },
+        { t: "O que é CSS3?", c: "<ul><li>Cascading Style Sheets (Folhas de Estilo em Cascata).</li><li>Responsável por separar o <strong>conteúdo</strong> da <strong>apresentação</strong>.</li><li>Permite que um mesmo HTML tenha visuais completamente diferentes.</li></ul>" },
+        { t: "Onde escrever o CSS?", c: "<ul><li><strong>Inline:</strong> Direto na tag (Não recomendado).</li><li><strong>Interno:</strong> Dentro de &lt;style&gt; no HTML.</li><li><strong>Externo:</strong> Em um arquivo .css separado (Melhor Prática).</li></ul>" },
+        { t: "Linkando o Arquivo Externo", c: "<p>No seu &lt;head&gt; do HTML, adicione:</p><code>&lt;link rel='stylesheet' href='style.css'&gt;</code><div class='practice-box'><b>Uso Prático:</b> Isso permite que você mude a cor de 100 páginas editando apenas um arquivo.</div>" },
+        { t: "Anatomia de uma Regra", c: "<code>seletor { propriedade: valor; }</code><p>O seletor aponta para o HTML, a propriedade diz o 'o quê' e o valor diz o 'como'.</p>" },
+        { t: "Seletores de Tipo (Tags)", c: "<code>p { color: blue; }</code><p>Afeta todos os parágrafos da página. Útil para definições globais.</p><div class='practice-box'><b>Uso Prático:</b> Redefinir a fonte padrão de todo o site usando o seletor <code>body</code>.</div>" },
+        { t: "Seletores de Classe (.)", c: "<code>.botao-azul { background: blue; }</code><p>Classes são reutilizáveis. Vários elementos podem ter a mesma classe.</p><div class='practice-box'><b>Uso Prático:</b> Criar um padrão de 'card' que se repete em vários produtos.</div>" },
+        { t: "Seletores de ID (#)", c: "<code>#logo { width: 200px; }</code><p>IDs são únicos. Apenas um elemento por página deve ter aquele ID.</p>" },
+        { t: "Atividade I: DevTools e Seletores", c: "<h2>Investigação de Estilos</h2><p>1. Acesse um site de notícias (ex: G1).<br>2. Clique com o botão direito em um título e vá em 'Inspecionar'.<br>3. Na aba 'Styles', tente mudar a <code>color</code> para <strong>red</strong>.<br>4. Observe qual seletor o site usa (classe ou ID?).</p>" },
+        { t: "O Modelo de Caixa (Box Model)", c: "<h2>Tudo é uma caixa</h2><p>O navegador renderiza cada elemento como um retângulo composto por: Content, Padding, Border e Margin.</p>" },
+        { t: "Box Model: Padding", c: "<code>padding: 20px;</code><p>Espaço interno entre o conteúdo e a borda. 'Respira' o texto dentro do botão.</p><div class='practice-box'><b>Uso Prático:</b> Evitar que o texto de um parágrafo encoste nas bordas de um quadro.</div>" },
+        { t: "Box Model: Border", c: "<code>border: 2px solid #000;</code><p>A linha que envolve o preenchimento. Pode ter estilo, cor e espessura.</p>" },
+        { t: "Box Model: Margin", c: "<code>margin: 10px;</code><p>Espaço externo. Empurra outros elementos para longe. Não tem cor de fundo.</p><div class='practice-box'><b>Uso Prático:</b> Centralizar um bloco usando <code>margin: 0 auto;</code>.</div>" },
+        { t: "Box-sizing: border-box", c: "<code>* { box-sizing: border-box; }</code><p>Faz com que o Padding e Border não aumentem o tamanho total definido para a caixa. Essencial para layout.</p>" },
+        { t: "A Cascata (Cascading)", c: "<h2>A Hierarquia de Poder</h2><p>O CSS segue uma ordem. Se houver conflito, o navegador decide qual regra vence baseado em: Origem, Especificidade e Ordem.</p>" },
+        { t: "Especificidade: O Cálculo", c: "<ul><li>Tag: 1 ponto</li><li>Classe: 10 pontos</li><li>ID: 100 pontos</li><li>Estilo Inline: 1000 pontos</li></ul><div class='practice-box'><b>Uso Prático:</b> Se um botão não muda de cor, verifique se não há um ID ou estilo inline 'vencendo' sua classe.</div>" },
+        { t: "A Ordem Importa", c: "<p>Se dois seletores têm a mesma especificidade, o que foi escrito por **último** no arquivo será o vencedor.</p>" },
+        { t: "Cores: Hex e RGB", c: "<code>color: #003366;</code> ou <code>color: rgb(0, 51, 102);</code><p>Cores hexadecimais são o padrão da web para fidelidade de marca.</p>" },
+        { t: "Cores: Transparência (RGBA)", c: "<code>background-color: rgba(0, 0, 0, 0.5);</code><p>O último valor (0.5) define a opacidade de 0 a 1.</p>" },
+        { t: "Atividade II: Engenharia de Cores", c: "<h2>Extraindo Identidade</h2><p>1. Vá ao site da <strong>Coca-Cola</strong> ou <strong>Nike</strong>.<br>2. Use o DevTools para encontrar o código Hexadecimal exato da cor principal.<br>3. Tente desativar a propriedade <code>background-color</code> desmarcando a caixa no DevTools.</p>" },
+        { t: "Tipografia: Font-Family", c: "<code>font-family: 'Arial', sans-serif;</code><p>Sempre forneça uma 'fonte de segurança' caso a principal falhe.</p>" },
+        { t: "Font-Weight e Font-Size", c: "<code>font-size: 16px; font-weight: bold;</code><p>Controle de legibilidade e hierarquia visual.</p>" },
+        { t: "Google Fonts", c: "<p>Como usar fontes modernas sem que o usuário precise tê-las instaladas.</p><code>@import url('...');</code>" },
+        { t: "Alinhamento de Texto", c: "<code>text-align: center | justify | left;</code><p>Fundamental para blocos de leitura.</p>" },
+        { t: "Line-Height (Entrelinha)", c: "<code>line-height: 1.6;</code><p>Melhora drasticamente a experiência de leitura em telas digitais.</p><div class='practice-box'><b>Uso Prático:</b> Use valores sem unidade (ex: 1.5) para que seja relativo ao tamanho da fonte.</div>" },
+        { t: "Estilizando Botões", c: "<p>Um botão atraente usa: <code>cursor: pointer</code>, <code>border-radius</code> e <code>transition</code>.</p>" },
+        { t: "Pseudo-classes: :hover", c: "<code>button:hover { background: #555; }</code><p>Dá feedback visual ao usuário quando ele passa o mouse.</p>" },
+        { t: "O que é um Design System?", c: "<h2>Consistência é Profissionalismo</h2><p>Um guia de estilos que define como cada elemento deve parecer em todo o ecossistema do produto.</p>" },
+        { t: "Definindo sua Paleta", c: "<ul><li>Cor Primária (Ação principal)</li><li>Cor Secundária (Apoio)</li><li>Cor de Destaque (Alertas/Sucesso)</li><li>Cores Neutras (Fundo/Texto)</li></ul>" },
+        { t: "Variáveis CSS", c: "<code>:root { --main-blue: #003366; }</code><p>Permite centralizar a paleta de cores e mudar o tema do site instantaneamente.</p>" },
+        { t: "Display: Block vs Inline", c: "<p>Block ocupa a largura toda (div, h1). Inline ocupa só o espaço do conteúdo (span, a).</p>" },
+        { t: "Display: None vs Visibility", c: "<p><code>display: none</code> remove o elemento do layout. <code>visibility: hidden</code> apenas o esconde, mantendo o espaço vazio.</p>" },
+        { t: "Estilizando Listas", c: "<code>list-style: none;</code><p>Remover os 'pontinhos' padrão para criar menus de navegação modernos.</p>" },
+        { t: "Background-Image", c: "<code>background-image: url('imagem.jpg');</code><p>Use <code>background-size: cover</code> para garantir que a imagem preencha o fundo sem distorcer.</p>" },
+        { t: "Sombras (Box-Shadow)", c: "<code>box-shadow: 2px 2px 10px rgba(0,0,0,0.1);</code><p>Adiciona profundidade (elevação) aos elementos do design.</p>" },
+        { t: "O Poder do Inspector (DevTools)", c: "<h2>Aba 'Computed'</h2><p>Onde você vê o cálculo final que o navegador fez ignorando as brigas de especificidade.</p>" },
+        { t: "Checklist de Estilização", c: "<ul><li>Variáveis definidas?</li><li>Box-sizing configurado?</li><li>Fontes importadas?</li><li>Contrastes acessíveis?</li></ul>" },
+        { t: "Atividade III: O Botão Perfeito", c: "<h2>Desafio Prático Final</h2><p>Crie um arquivo <strong>style.css</strong> e estilize um botão com:<br>1. Fundo azul escuro e texto branco.<br>2. Sem borda e com cantos arredondados.<br>3. Efeito de mudar de cor ao passar o mouse.<br>4. Sombra suave.</p>" },
+        { t: "Design System da Equipe", c: "<h2>Trabalho em Grupo</h2><p>Definam agora: 3 cores principais e 2 fontes para o projeto final. Criem as variáveis CSS para esses itens.</p>" },
+        { t: "Conclusão e Próximos Passos", c: "<h2>Layout Avançado</h2><p>Dominamos a pintura. Na próxima aula, aprenderemos <strong>Flexbox e Grid</strong> para posicionar esses elementos com precisão cirúrgica.</p>" }
+    ];
+
+    let current = 0;
+    const container = document.getElementById('container');
+    const counterDisplay = document.getElementById('counter');
+    const progress = document.getElementById('progress');
+
+    function render() {
+        container.innerHTML = '';
+        slides.forEach((s, i) => {
+            const div = document.createElement('div');
+            div.className = `slide ${i === current ? 'active' : ''}`;
+            div.innerHTML = `<h1>${s.t}</h1>${s.c}`;
+            container.appendChild(div);
+        });
+        counterDisplay.innerText = `${current + 1} / ${slides.length}`;
+        progress.style.width = `${((current + 1) / slides.length) * 100}%`;
+    }
+
+    function next() { if(current < slides.length - 1) { current++; render(); } }
+    function prev() { if(current > 0) { current--; render(); } }
+
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowRight') next();
+        if(e.key === 'ArrowLeft') prev();
+    });
+
+    render();
+</script>
+</body>
+</html>

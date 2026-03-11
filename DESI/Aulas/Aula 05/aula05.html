@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 05 - HTML5 Semântico</title>
+<style>
+:root {
+--bg: #ffffff;
+--surface: #f5f7fa;
+--accent: #1a56db;
+--accent2: #0e7a5c;
+--accent3: #c0392b;
+--text: #111827;
+--muted: #4b5563;
+--border: #d1d5db;
+--code-bg: #f0f2f5;
+--highlight: #e8f0fe;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(--bg);
+color: var(--text);
+font-family: Arial, Helvetica, sans-serif;
+height: 100vh;
+overflow: hidden;
+}
+
+#deck { width: 100vw; height: 100vh; position: relative; }
+
+.slide {
+position: absolute;
+inset: 0;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: clamp(30px, 5vw, 80px);
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.4s ease;
+background: var(--bg);
+}
+.slide.active { opacity: 1; pointer-events: all; }
+
+.content-box {
+max-width: 900px;
+width: 100%;
+padding: clamp(20px, 3vw, 40px);
+}
+
+.slide-label {
+font-size: clamp(13px, 2vw, 17px);
+font-weight: 700;
+letter-spacing: 1px;
+text-transform: uppercase;
+color: var(--accent);
+margin-bottom: 12px;
+text-align: center;
+}
+
+.slide-title {
+font-size: clamp(24px, 5vw, 48px);
+font-weight: 700;
+line-height: 1.2;
+margin-bottom: 24px;
+color: var(--text);
+text-align: center;
+border-bottom: 3px solid var(--accent);
+padding-bottom: 16px;
+}
+.slide-title em { color: var(--accent); font-style: normal; }
+
+.slide-hero {
+background: #f0f4f8;
+border-left: 8px solid var(--accent);
+justify-content: center;
+}
+.hero-kicker {
+font-size: clamp(14px, 2.5vw, 19px);
+font-weight: 700;
+letter-spacing: 2px;
+color: var(--accent);
+margin-bottom: 16px;
+text-transform: uppercase;
+text-align: center;
+}
+.hero-title {
+font-size: clamp(32px, 7vw, 68px);
+font-weight: 700;
+line-height: 1.1;
+margin-bottom: 16px;
+text-align: center;
+}
+.hero-title span { color: var(--accent); }
+.hero-subtitle {
+font-size: clamp(16px, 2.5vw, 22px);
+color: var(--muted);
+line-height: 1.6;
+margin-bottom: 28px;
+text-align: center;
+}
+
+.slide-section {
+background: #e8eef5;
+justify-content: center;
+}
+.section-number {
+font-size: clamp(80px, 18vw, 180px);
+font-weight: 700;
+color: rgba(26,86,219,0.1);
+line-height: 1;
+margin-bottom: -10px;
+text-align: center;
+}
+.section-part {
+font-size: clamp(14px, 2.5vw, 18px);
+font-weight: 700;
+letter-spacing: 3px;
+color: var(--accent);
+text-transform: uppercase;
+margin-bottom: 12px;
+text-align: center;
+}
+.section-heading {
+font-size: clamp(28px, 6vw, 60px);
+font-weight: 700;
+line-height: 1.1;
+color: var(--text);
+text-align: center;
+}
+.section-heading span { color: var(--accent); }
+
+.prose {
+font-size: clamp(16px, 2.2vw, 20px);
+line-height: 1.7;
+color: var(--muted);
+margin: 16px 0;
+}
+.prose strong { color: var(--text); font-weight: 700; }
+
+.bullet-list {
+list-style: none;
+display: flex;
+flex-direction: column;
+gap: 12px;
+margin: 16px 0;
+}
+.bullet-list li {
+display: flex;
+align-items: flex-start;
+gap: 12px;
+font-size: clamp(16px, 2.2vw, 19px);
+line-height: 1.6;
+color: var(--muted);
+}
+.bullet-list li::before {
+content: '▸';
+color: var(--accent);
+font-size: 16px;
+margin-top: 4px;
+flex-shrink: 0;
+}
+
+.card {
+background: var(--surface);
+border: 1px solid var(--border);
+border-radius: 10px;
+padding: clamp(18px, 2.5vw, 28px);
+margin: 16px 0;
+}
+
+.code-block {
+background: var(--code-bg);
+border: 1px solid var(--border);
+border-radius: 8px;
+padding: clamp(16px, 2.5vw, 24px);
+font-family: 'Courier New', monospace;
+font-size: clamp(14px, 1.8vw, 16px);
+line-height: 1.5;
+overflow-x: auto;
+margin: 20px 0;
+white-space: pre;
+}
+
+#progress-bar {
+position: fixed;
+top: 0;
+left: 0;
+height: 4px;
+background: var(--accent);
+transition: width 0.4s ease;
+z-index: 100;
+}
+
+#nav {
+position: fixed;
+bottom: 20px;
+right: 24px;
+display: flex;
+align-items: center;
+gap: 12px;
+z-index: 100;
+}
+#slide-counter {
+font-size: clamp(14px, 1.8vw, 17px);
+color: var(--muted);
+font-weight: 700;
+}
+.nav-btn {
+width: 46px;
+height: 46px;
+border-radius: 50%;
+border: 2px solid var(--border);
+background: #fff;
+color: var(--text);
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 20px;
+transition: all 0.2s;
+box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.nav-btn:hover {
+background: var(--accent);
+border-color: var(--accent);
+color: #fff;
+}
+
+.two-col {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 30px;
+width: 100%;
+align-items: start;
+}
+</style>
+
+</head>
+<body>
+<div id="deck">
+
+<div class="slide slide-hero active">
+<div class="content-box">
+<div class="hero-kicker">Desenvolvimento Web</div>
+<h1 class="hero-title">Aula 05: <span>HTML5 Semântico</span></h1>
+<p class="hero-subtitle"><strong>Descrição</strong>: Nesta aula iremos tratar da estrutura HTML5, doctype, head, body. Como atividade prática vamos inspecionar HTML de sites reais com DevTools e criar estrutura semântica das páginas do projeto (header, nav, main, section, footer). No final iremos realizar um atividade de corrigir código com erros de semântica.</p>
+</div>
+</div>
+
+<div class="slide slide-section">
+<div class="content-box">
+<span class="section-number">01</span>
+<div class="section-part">Parte 1</div>
+<h2 class="section-heading">A Anatomia do Documento: <span>Doctype, Head e Body</span></h2>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Anatomia do Documento</div>
+<p class="prose">A construção de uma página web assemelha-se à organização de um livro físico, mas com capacidades de interatividade e hipertexto que revolucionaram a comunicação humana. A transição das máquinas de escrever para a informação digital instantânea exigiu uma linguagem que desse estrutura ao caos da informação.</p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Anatomia do Documento</div>
+<h2 class="slide-title">O <em>&lt;!DOCTYPE html&gt;</em></h2>
+<p class="prose">Embora não seja uma "tag" HTML no sentido estrito de marcar conteúdo, o DOCTYPE é a primeira instrução que um navegador deve ler. Sua função é declarar o "<strong>modo de renderização</strong>". Em versões antigas (HTML 4.01), essa declaração era longa e complexa. No HTML5, ela foi simplificada para &lt;!DOCTYPE html&gt;. Sem ela, os navegadores podem entrar no "quirks mode" (modo de compatibilidade), o que faz com que o site seja exibido de forma inconsistente, ignorando padrões modernos de CSS.</p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Anatomia do Documento</div>
+<h2 class="slide-title">A Estrutura Base: <em>&lt;html&gt;</em></h2>
+<p class="prose">Uma página HTML padrão deve ser delimitada pelas tags &lt;html&gt; e &lt;/html&gt;. Elas representam a raiz do documento. Dentro desta "casca" obrigatória, definimos duas seções fundamentais: o cabeçalho e o corpo.</p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Anatomia do Documento</div>
+<h2 class="slide-title">O Cabeçalho: <em>&lt;head&gt;</em></h2>
+<p class="prose">O &lt;head&gt; é a área declarativa da página. É um local para informações que, a princípio, não pretendemos mostrar diretamente no espaço de navegação. No entanto, seu papel é vital:</p>
+<ul class="bullet-list">
+<li><strong>Metadados</strong>: Instruções para motores de busca e configurações de codificação (como o UTF-8 para garantir que acentos em português funcionem corretamente).</li>
+<li><strong>Título (&lt;title&gt;)</strong>: É a única tag do cabeçalho que gera um efeito visível, mas não no corpo da página, e sim na borda da janela ou aba do navegador.</li>
+<li><strong>Vínculos externos</strong>: Onde conectamos arquivos de estilo CSS ou fontes externas que darão o "aspecto visual" aos elementos.</li>
+</ul>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Anatomia do Documento</div>
+<h2 class="slide-title">O Corpo: <em>&lt;body&gt;</em></h2>
+<p class="prose">O &lt;body&gt; é a parte visível em si mesma. É aqui que o programador insere todo o conteúdo — textos, imagens, tabelas e formulários — que terá um efeito visível para o usuário final. A ordem das tags é rígida: o &lt;head&gt; deve preceder o &lt;body&gt;, e ambos devem estar contidos em &lt;html&gt;.</p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Fixação</div>
+<h2 class="slide-title">Exercício de Fixação 1.1</h2>
+<div class="card">
+<p class="prose">Crie a estrutura básica de um arquivo chamado index.html. No &lt;head&gt;, defina o título como "Minha Jornada HTML5". No &lt;body&gt;, escreva um parágrafo (&lt;p&gt;) explicando por que a separação entre o que é "declarativo" e o que é "visível" é importante para a organização do código.</p>
+</div>
+</div>
+</div>
+
+<div class="slide slide-section">
+<div class="content-box">
+<span class="section-number">02</span>
+<div class="section-part">Parte 2</div>
+<h2 class="section-heading">Modo Detetive: <span>Inspecionando a Web com DevTools</span></h2>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Modo Detetive</div>
+<p class="prose">Para entender como a Internet e as páginas Web funcionam, não basta apenas ler o código; é preciso observar como os navegadores interpretam e executam esses arquivos em tempo real. As Ferramentas do Desenvolvedor (DevTools) são o "microscópio" do programador moderno.</p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Modo Detetive</div>
+<h2 class="slide-title">O Navegador como <em>Interpretador</em></h2>
+<p class="prose">Um navegador web é um programa projetado para ler e interpretar arquivos acessados pela Internet. Quando abrimos o DevTools (geralmente com a tecla F12), estamos acessando a camada de processamento do navegador.</p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Modo Detetive</div>
+<h2 class="slide-title">A Aba Elements (Elementos)</h2>
+<p class="prose">Nesta aba, vemos o <strong>DOM (Document Object Model)</strong>. O DOM é a representação viva do seu HTML. Diferente do seu arquivo de texto estático editado no bloco de notas, o DOM reflete todas as alterações feitas via scripts ou erros de interpretação do navegador.</p>
+<ul class="bullet-list">
+<li><strong>Inspecionar</strong>: Ao clicar com o botão direito em qualquer parte de um site e selecionar "Inspecionar", o DevTools destaca exatamente onde aquele elemento está no código.</li>
+<li><strong>Edição em tempo real</strong>: Você pode alterar textos, deletar imagens ou mudar cores diretamente no navegador. Isso é útil para prototipagem rápida, embora as mudanças desapareçam ao atualizar a página (pois o arquivo original em disco permanece intacto ).</li>
+</ul>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Modo Detetive</div>
+<h2 class="slide-title">Diagnosticando <em>Erros</em></h2>
+<p class="prose">Diferentes navegadores têm tolerâncias distintas aos erros. Se você esquecer de fechar uma tag ou escrever um comando mal escrito, o navegador tentará "adivinhar" o que você quis fazer. O DevTools mostra essa "interpretação" do navegador, permitindo que o desenvolvedor identifique falhas de hierarquia que não são óbvias apenas olhando para o código fonte.</p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Fixação</div>
+<h2 class="slide-title">Atividade de Fixação 2.1</h2>
+<div class="card">
+<p class="prose">Acesse o site de um grande portal de notícias. Use o DevTools para encontrar:</p>
+<ol class="prose" style="margin-left: 20px;">
+<li>A tag &lt;h1&gt; principal.</li>
+<li>Quantas tags &lt;img&gt; existem na página inicial.</li>
+<li>Tente alterar o título de uma notícia para "Aprendendo DevTools com Limongi". O que acontece se você atualizar a página? Explique o porquê com base no conceito de "arquivo em disco" versus "interpretação do navegador".</li>
+</ol>
+</div>
+</div>
+</div>
+
+<div class="slide slide-section">
+<div class="content-box">
+<span class="section-number">03</span>
+<div class="section-part">Parte 3</div>
+<h2 class="section-heading">Arquitetura Semântica: <span>Do &lt;div&gt; ao Significado Real</span></h2>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Arquitetura Semântica</div>
+<p class="prose">Na era inicial do HTML, programadores utilizavam tags como &lt;center&gt; para centralizar textos ou &lt;font&gt; para mudar cores. No entanto, a evolução da web exigiu que as tags não apenas dissessem "como algo deve parecer", mas sim "o que algo é". Isso é o que chamamos de <strong>Semântica</strong>.</p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Arquitetura Semântica</div>
+<h2 class="slide-title">A Limitação das Divs</h2>
+<p class="prose">A tag &lt;div&gt; como uma das melhores formas de organizar a informação. Por muito tempo, as &lt;div&gt;s (divisores) foram usadas para tudo: cabeçalhos, menus, rodapés. O problema é que, para um motor de busca como o Google ou um leitor de tela para cegos, uma &lt;div&gt; não tem significado; ela é apenas uma "caixa genérica".</p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Arquitetura Semântica</div>
+<h2 class="slide-title">As Novas Tags de Estrutura</h2>
+<p class="prose">O HTML5 introduziu tags que dão significado à estrutura que antes era feita apenas com &lt;div&gt;s com atributos de ID ou classe:</p>
+<ul class="bullet-list">
+<li><strong>&lt;header&gt;</strong>: Define o cabeçalho de uma página ou de uma seção específica. Contém logos, títulos e, frequentemente, a navegação.</li>
+<li><strong>&lt;nav&gt;</strong>: Reserva-se especificamente para blocos de links de navegação principal. Não deve ser usada para qualquer link, mas para os caminhos essenciais do site.</li>
+<li><strong>&lt;main&gt;</strong>: Representa o conteúdo principal e exclusivo daquele documento. Deve haver apenas um por página.</li>
+</ul>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Arquitetura Semântica</div>
+<h2 class="slide-title">As Novas Tags de Estrutura (Cont.)</h2>
+<ul class="bullet-list">
+<li><strong>&lt;section&gt;</strong>: Agrupa conteúdos relacionados tematicamente. Pense nela como os "capítulos" mencionados por Limongi.</li>
+<li><strong>&lt;footer&gt;</strong>: O rodapé. Contém informações de copyright, contatos ou links secundários.</li>
+</ul>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Arquitetura Semântica</div>
+<h2 class="slide-title">Benefícios: Acessibilidade e SEO</h2>
+<p class="prose">Utilizar tags semânticas é fundamental para a acessibilidade. Leitores de tela utilizam essas marcas para permitir que usuários com deficiência visual saltem diretamente para o "conteúdo principal" (&lt;main&gt;) ou encontrem o "menu de navegação" (&lt;nav&gt;) sem ter que ler a página inteira. Além disso, melhora o SEO (Search Engine Optimization), pois ajuda os robôs de busca a entenderem a hierarquia da informação.</p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Fixação</div>
+<h2 class="slide-title">Atividade de Fixação 3.1</h2>
+<div class="card">
+<p class="prose">Desenhe o esqueleto de um site de receitas. Utilize as tags semânticas aprendidas para organizar:</p>
+<ul class="prose" style="margin-left: 20px;">
+<li>O nome do site e o menu.</li>
+<li>A área central com o título da receita (&lt;h1&gt;) e o modo de preparo.</li>
+<li>Uma área lateral com ingredientes.</li>
+<li>O rodapé com o nome do chef.</li>
+</ul>
+<p class="prose">Escreva o código HTML correspondente para essa estrutura.</p>
+</div>
+</div>
+</div>
+
+<div class="slide slide-section">
+<div class="content-box">
+<span class="section-number">04</span>
+<div class="section-part">Parte 4</div>
+<h2 class="section-heading">Atividade Diagnóstica: <span>O "Médico do Código"</span></h2>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Atividade Diagnóstica</div>
+<h2 class="slide-title">O Caso Clínico</h2>
+<p class="prose">Neste desafio final, vocês atuarão como consultores de desenvolvimento web para corrigir um "paciente" (um site) que sofre de "Divite Aguda" — o uso excessivo de tags genéricas sem significado.</p>
+<p class="prose">Analise o código abaixo. Ele funciona visualmente, mas é um desastre em termos de boas práticas modernas e acessibilidade.</p>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Atividade Diagnóstica</div>
+<div class="code-block">
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Meu Portal de Notícias&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id="topo-do-site"&gt;
+&lt;h1&gt;Notícias do Dia&lt;/h1&gt;
+&lt;div class="links-menu"&gt;
+&lt;a href="#"&gt;Brasil&lt;/a&gt; | &lt;a href="#"&gt;Mundo&lt;/a&gt; | &lt;a href="#"&gt;Esportes&lt;/a&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+```
+&lt;div id="conteudo-importante"&gt;
+    &lt;div class="postagem"&gt;
+        &lt;h2&gt;Novo curso de HTML5 lançado&lt;/h2&gt;
+        &lt;p&gt;Aprenda a criar páginas do zero com semântica.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="postagem"&gt;
+        &lt;h2&gt;Dicas de DevTools&lt;/h2&gt;
+        &lt;p&gt;Inspecione elementos como um profissional.&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="final-da-pagina"&gt;
+    &lt;p&gt;© 2024 - Todos os direitos reservados.&lt;/p&gt;
+&lt;/div&gt;
+
+```
+
+</body>
+</html></div>
+</div>
+
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Atividade Diagnóstica</div>
+<h2 class="slide-title">Missão</h2>
+<p class="prose">Refatore o código acima seguindo estas diretrizes:</p>
+<ul class="bullet-list">
+<li><strong>1. Adicione a Declaração de Tipo</strong>: Insira o DOCTYPE correto.</li>
+<li><strong>2. Substitua as Divs</strong>: Troque as &lt;div&gt;s com IDs por tags semânticas adequadas (&lt;header&gt;, &lt;nav&gt;, &lt;main&gt;, &lt;article&gt; ou &lt;section&gt;, e &lt;footer&gt;).</li>
+<li><strong>3. Melhore a Hierarquia</strong>: Certifique-se de que os títulos (&lt;h1&gt;, &lt;h2&gt;) estão seguindo uma ordem lógica de importância.</li>
+</ul>
+</div>
+</div>
+
+<div class="slide">
+<div class="content-box">
+<div class="slide-label">Relatório Técnico</div>
+<h2 class="slide-title">Justificativa Técnica (Mínimo 300 palavras)</h2>
+<p class="prose">Após realizar a correção, escreva um pequeno relatório explicando:</p>
+<ul class="bullet-list">
+<li>Por que a tag &lt;header&gt; é melhor que &lt;div id="topo"&gt; para um leitor de tela.</li>
+<li>Qual a diferença entre usar &lt;main&gt; e apenas colocar o conteúdo solto no &lt;body&gt;.</li>
+<li>Como a estrutura correta de títulos (h1 a h6) ajuda os motores de busca a indexar seu site.</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div id="progress-bar"></div>
+
+<div id="nav">
+<span id="slide-counter">01 / 26</span>
+<button class="nav-btn" id="btn-prev" title="Anterior (←)">&#8592;</button>
+<button class="nav-btn" id="btn-next" title="Próximo (→)">&#8594;</button>
+</div>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+const total = slides.length;
+let current = 0;
+
+const counter = document.getElementById('slide-counter');
+const bar = document.getElementById('progress-bar');
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function goTo(next) {
+if (next === current || next < 0 || next >= total) return;
+slides[current].classList.remove('active');
+current = next;
+slides[current].classList.add('active');
+counter.textContent = `${pad(current+1)} / ${pad(total)}`;
+bar.style.width = `${((current+1)/total)*100}%`;
+}
+
+document.getElementById('btn-next').addEventListener('click', () => goTo(current+1));
+document.getElementById('btn-prev').addEventListener('click', () => goTo(current-1));
+
+document.addEventListener('keydown', (e) => {
+if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') {
+e.preventDefault(); goTo(current+1);
+} else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+e.preventDefault(); goTo(current-1);
+}
+});
+
+let touchStart = null;
+document.addEventListener('touchstart', (e) => { touchStart = e.touches[0].clientX; });
+document.addEventListener('touchend', (e) => {
+if (touchStart === null) return;
+const dx = e.changedTouches[0].clientX - touchStart;
+if (Math.abs(dx) > 50) goTo(dx < 0 ? current+1 : current-1);
+touchStart = null;
+});
+
+bar.style.width = `${(1/total)*100}%`;
+</script>
+
+</body>
+</html>

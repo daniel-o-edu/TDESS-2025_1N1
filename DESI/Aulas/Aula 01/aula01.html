@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apresentação da SA e Sprint 0</title>
+<style>
+  :root { --bg: #ffffff; --surface: #f5f7fa; --accent: #1a56db; --accent2: #0e7a5c; --accent3: #c0392b; --text: #111827; --muted: #4b5563; --border: #d1d5db; --code-bg: #f0f2f5; --highlight: #e8f0fe; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; height: 100vh; overflow: hidden; }
+  #deck { width: 100vw; height: 100vh; position: relative; }
+  .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: clamp(30px, 5vw, 80px); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; background: var(--bg); }
+  .slide.active { opacity: 1; pointer-events: all; }
+  .content-box { max-width: 900px; width: 100%; padding: clamp(20px, 3vw, 40px); }
+  .slide-label { font-size: clamp(13px, 2vw, 17px); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; text-align: center; }
+  .slide-title { font-size: clamp(24px, 5vw, 48px); font-weight: 700; line-height: 1.2; margin-bottom: 24px; color: var(--text); text-align: center; border-bottom: 3px solid var(--accent); padding-bottom: 16px; }
+  .slide-title em { color: var(--accent); font-style: normal; }
+  .slide-hero { background: #f0f4f8; border-left: 8px solid var(--accent); justify-content: center; }
+  .hero-kicker { font-size: clamp(14px, 2.5vw, 19px); font-weight: 700; letter-spacing: 2px; color: var(--accent); margin-bottom: 16px; text-transform: uppercase; text-align: center; }
+  .hero-title { font-size: clamp(32px, 7vw, 68px); font-weight: 700; line-height: 1.1; margin-bottom: 16px; text-align: center; }
+  .hero-title span { color: var(--accent); }
+  .hero-subtitle { font-size: clamp(16px, 2.5vw, 22px); color: var(--muted); line-height: 1.6; margin-bottom: 28px; text-align: center; }
+  .hero-objectives { display: flex; flex-direction: column; gap: 12px; max-width: 700px; margin: 0 auto; }
+  .hero-obj-item { display: flex; align-items: flex-start; gap: 14px; font-size: clamp(15px, 2.2vw, 19px); line-height: 1.5; }
+  .hero-obj-item .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin-top: 7px; flex-shrink: 0; }
+  .slide-section { background: #e8eef5; justify-content: center; }
+  .section-number { font-size: clamp(80px, 18vw, 180px); font-weight: 700; color: rgba(26,86,219,0.1); line-height: 1; margin-bottom: -10px; text-align: center; }
+  .section-part { font-size: clamp(14px, 2.5vw, 18px); font-weight: 700; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; text-align: center; }
+  .section-heading { font-size: clamp(28px, 6vw, 60px); font-weight: 700; line-height: 1.1; color: var(--text); text-align: center; }
+  .section-heading span { color: var(--accent); }
+  .section-sub { font-size: clamp(15px, 2.2vw, 20px); color: var(--muted); margin-top: 18px; max-width: 600px; line-height: 1.6; text-align: center; margin-left: auto; margin-right: auto; }
+  .prose { font-size: clamp(16px, 2.2vw, 20px); line-height: 1.7; color: var(--muted); margin: 16px 0; }
+  .prose strong { color: var(--text); font-weight: 700; }
+  .prose em { color: var(--accent); font-weight: 700; font-style: normal; }
+  .analogy-box { border-left: 4px solid var(--accent); background: var(--highlight); border-radius: 0 8px 8px 0; padding: clamp(16px, 2.5vw, 24px); margin: 20px 0; font-size: clamp(16px, 2.2vw, 19px); line-height: 1.7; }
+  .analogy-box strong { color: var(--accent); }
+  .bullet-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+  .bullet-list li { display: flex; align-items: flex-start; gap: 12px; font-size: clamp(16px, 2.2vw, 19px); line-height: 1.6; color: var(--muted); }
+  .bullet-list li::before { content: '▸'; color: var(--accent); font-size: 16px; margin-top: 4px; flex-shrink: 0; }
+  .bullet-list li strong { color: var(--text); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: clamp(18px, 2.5vw, 28px); margin: 16px 0; }
+  .card-title { font-size: clamp(14px, 2vw, 18px); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
+  .card-title.yellow { color: #b45309; } .card-title.green { color: var(--accent2); } .card-title.red { color: var(--accent3); } .card-title.blue { color: var(--accent); }
+  .styled-table { width: 100%; border-collapse: collapse; font-size: clamp(15px, 2vw, 19px); margin: 20px 0; }
+  .styled-table thead tr { background: var(--accent); }
+  .styled-table th { padding: 14px 18px; text-align: left; font-weight: 700; color: #ffffff; font-size: clamp(14px, 2vw, 18px); }
+  .styled-table td { padding: 12px 18px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  .styled-table tr:nth-child(even) td { background: var(--surface); }
+  .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: clamp(16px, 2.5vw, 24px); font-family: 'Courier New', monospace; font-size: clamp(15px, 2vw, 18px); line-height: 1.7; overflow-x: auto; margin: 20px 0; }
+  .code-block .kw { color: #9b2335; font-weight: 700; } .code-block .cls { color: var(--accent); font-weight: 700; } .code-block .str { color: var(--accent2); } .code-block .cmt { color: #9ca3af; font-style: italic; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; justify-content: center; }
+  .badge { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px 18px; font-family: 'Courier New', monospace; font-size: clamp(14px, 2vw, 18px); }
+  .badge.good { border-color: var(--accent2); color: var(--accent2); background: #f0fdf4; } .badge.bad { border-color: var(--accent3); color: var(--accent3); background: #fef2f2; text-decoration: line-through; }
+  .step-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: clamp(16px, 2.5vw, 24px); display: flex; gap: 18px; align-items: flex-start; margin: 12px 0; }
+  .step-number { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #ffffff; font-weight: 700; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-body { flex: 1; }
+  .step-title { font-weight: 700; font-size: clamp(16px, 2.2vw, 20px); color: var(--text); margin-bottom: 6px; }
+  .step-desc { font-size: clamp(15px, 2vw, 19px); color: var(--muted); line-height: 1.6; }
+  .checklist { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+  .check-item { display: flex; align-items: flex-start; gap: 14px; font-size: clamp(16px, 2.2vw, 20px); line-height: 1.5; }
+  .check-box { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; margin-top: 2px; background: #fff; }
+  .rm-item { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 20px; font-size: clamp(15px, 2vw, 19px); margin: 8px 0; }
+  .rm-item.active { background: var(--highlight); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+  .rm-item.done { background: #f0fdf4; border-color: var(--accent2); color: var(--accent2); font-weight: 700; }
+  .faq-item { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; padding: clamp(14px, 2vw, 20px); margin: 12px 0; }
+  .faq-q { font-weight: 700; color: var(--accent); font-size: clamp(16px, 2.2vw, 20px); margin-bottom: 8px; }
+  .faq-a { font-size: clamp(15px, 2vw, 19px); color: var(--muted); line-height: 1.65; }
+  #progress-bar { position: fixed; top: 0; left: 0; height: 4px; background: var(--accent); transition: width 0.4s ease; z-index: 100; }
+  #nav { position: fixed; bottom: 20px; right: 24px; display: flex; align-items: center; gap: 12px; z-index: 100; }
+  #slide-counter { font-size: clamp(14px, 1.8vw, 17px); color: var(--muted); font-weight: 700; }
+  .nav-btn { width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--border); background: #fff; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all 0.2s; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  .nav-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  @media (max-width: 600px) { .slide { padding: 20px; } .content-box { padding: 16px; } }
+</style>
+</head>
+<body>
+<div id="deck">
+
+  <div class="slide slide-hero">
+    <div class="content-box">
+      <div class="hero-kicker">Aula 01 • 23/02/2026 • Prof. Daniel Gonçalves Oliveira</div>
+      <h1 class="hero-title">Apresentação da SA e <span>Sprint 0</span></h1>
+      <p class="hero-subtitle"><strong>Bloco de Estudo:</strong> Bloco 01 - Fundamentos, Planejamento e Design<br><br>
+      <strong>Resumo da Aula:</strong> Nesta aula inaugural, os alunos vão conhecer o cenário do semestre: a criação de um produto para uma Feira de Inovação. Mais do que alunos, eles atuarão como sócios-fundadores de uma startup. A aula focará na formação das equipes e na definição do problema real que irão solucionar através de tecnologia, utilizando a ferramenta do Canvas de Proposta de Valor.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-hero">
+    <div class="content-box">
+      <h1 class="hero-title">Objetivos da <span>Aprendizagem</span></h1>
+      <div class="hero-objectives">
+        <div class="hero-obj-item"><div class="dot"></div><div><strong>Compreender</strong> o desafio da Situação de Aprendizagem (SA): Desenvolvimento e Implantação de Soluções Digitais Inovadoras.</div></div>
+        <div class="hero-obj-item"><div class="dot"></div><div><strong>Identificar</strong> e debater um problema real da sociedade ou mercado que possa ser solucionado por meio do desenvolvimento de software.</div></div>
+        <div class="hero-obj-item"><div class="dot"></div><div><strong>Aplicar</strong> o Canvas de Proposta de Valor Simplificado para alinhar a solução idealizada às dores do público-alvo.</div></div>
+        <div class="hero-obj-item"><div class="dot"></div><div><strong>Trabalhar em equipe</strong> para tomar decisões estratégicas no estágio zero do produto (Mobilizando a Capacidade Socioemocional CS1: Demonstrar espírito colaborativo em atividades coletivas).</div></div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <div class="section-number">01</div>
+      <div class="section-part">Desenvolvimento do Conteúdo</div>
+      <h2 class="section-heading">O "Game" do <span>Semestre</span></h2>
+      <p class="section-sub">Apresentação da Situação de Aprendizagem (SA)</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Bloco 1</div>
+      <h2 class="slide-title">A <em>Abordagem</em> e o Ponto de Conexão</h2>
+      
+      <div class="card">
+        <div class="card-title blue">A Abordagem</div>
+        <p class="prose">Esqueça a sala de aula tradicional. A partir de hoje, somos uma incubadora de startups. O objetivo final do semestre não é apenas entregar um código, mas sim apresentar um projeto funcional em uma "Feira de Inovação" para investidores anjo.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title green">Ponto de Conexão</div>
+        <p class="prose">Explicar que para codificar sistemas com os requisitos de qualidade e integridade exigidos no mercado (Capacidade Técnica CT01), precisamos primeiro entender <strong>por que</strong> esse software existe.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Bloco 1</div>
+      <h2 class="slide-title">O código não é o <em>fim</em>, é o <em>meio</em></h2>
+      
+      <div class="analogy-box">
+        <strong>Analogia de Impacto:</strong> Por que o TikTok é um sucesso e outros apps de vídeo morreram?<br><br>
+        Porque o algoritmo deles resolveu a "dor" do usuário de ter que procurar conteúdo (o app entrega o que você quer antes de você pedir).
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <div class="section-number">02</div>
+      <div class="section-part">Desenvolvimento do Conteúdo</div>
+      <h2 class="section-heading">O <span>"Match"</span></h2>
+      <p class="section-sub">Formação das Equipes e Brainstorming</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Bloco 2</div>
+      <h2 class="slide-title">Definindo o <em>Problema</em></h2>
+      
+      <p class="prose"><strong>A Abordagem:</strong> Formação das equipes e definição do problema que o produto digital irá resolver.</p>
+      
+      <div class="card">
+        <div class="card-title red">A Pergunta Disparadora</div>
+        <p class="prose">"Que problema real nossa equipe vai resolver com tecnologia?"</p>
+      </div>
+
+      <p class="prose"><strong>Instrução:</strong> Foquem em nichos.</p>
+      
+      <ul class="bullet-list">
+        <li>A gestão da cantina do colégio é um problema real.</li>
+        <li>O agendamento de banho e tosa no petshop do bairro é um problema real.</li>
+        <li>Achar jogadores da mesma patente em jogos online é um problema real.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <div class="section-number">03</div>
+      <div class="section-part">Desenvolvimento do Conteúdo</div>
+      <h2 class="section-heading">Modelando o <span>Produto</span></h2>
+      <p class="section-sub">Canvas de Proposta de Valor</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Bloco 3</div>
+      <h2 class="slide-title">Canvas de Proposta de <em>Valor</em></h2>
+      
+      <p class="prose"><strong>A Abordagem:</strong> Entendendo as Dores (o que frustra o usuário), os Ganhos (o que o faria feliz) e as Tarefas do Cliente.</p>
+      
+            
+      <div class="card">
+        <div class="card-title yellow">Atividade</div>
+        <p class="prose">Dinâmica de preenchimento do Canvas de Proposta de Valor Simplificado.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Bloco 3</div>
+      <h2 class="slide-title">O Efeito <em>Analgésico</em></h2>
+      
+      <div class="analogy-box">
+        <strong>Analogia de Impacto:</strong> Pense no Spotify. Existia pirataria (MP3 grátis), mas era uma dor procurar links seguros, arrumar as capas dos álbuns, passar pro celular.<br><br>
+        O Spotify agiu como um "analgésico" cobrando uma assinatura para remover toda essa dor e entregando a música com 1 clique (Criador de ganho).
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="content-box">
+      <div class="section-number">04</div>
+      <div class="section-part">Desenvolvimento do Conteúdo</div>
+      <h2 class="section-heading">Pitch e <span>Desafio Prático</span></h2>
+      <p class="section-sub">Colocando a Mão na Massa</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Bloco 4 & Prática</div>
+      <h2 class="slide-title">Apresentação e Mão na <em>Massa</em></h2>
+      
+      <p class="prose"><strong>A Abordagem:</strong> Cada equipe tem 3 minutos para apresentar sua ideia para a turma, explicando o problema escolhido e o esboço da proposta de valor.</p>
+      
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <div class="step-body">
+          <div class="step-title">Atividade Colaborativa</div>
+          <div class="step-desc">Preenchimento do Canvas de Proposta de Valor Simplificado em ferramentas colaborativas como o Miro, Figma Jam.</div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <div class="step-body">
+          <div class="step-title">Evidência de Desempenho</div>
+          <div class="step-desc">Entrega do Canvas validado pelo professor, contendo a declaração clara do problema e os pilares iniciais da solução da equipe. Esse material será a "bíblia" das próximas Sprints do projeto.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Seção de Dúvidas</div>
+      <h2 class="slide-title">Perguntas Frequentes <em>(FAQ)</em> - Parte 1</h2>
+      
+      <div class="faq-item">
+        <div class="faq-q">P: "Professor, e se a nossa equipe não tiver nenhuma ideia super inovadora?"</div>
+        <div class="faq-a"><strong>R:</strong> Inovar não é apenas inventar a roda ou o próximo ChatGPT! Muitas vezes, a inovação está em pegar um processo lento (como anotar pedidos de hambúrguer no papel) e criar um sistema web simples e rápido. O arroz com feijão bem feito, com Clean Code e banco de dados rodando liso, tem um valor imenso.</div>
+      </div>
+
+      
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Seção de Dúvidas</div>
+      <h2 class="slide-title">Perguntas Frequentes <em>(FAQ)</em> - Parte 2</h2>
+      
+      <div class="faq-item">
+        <div class="faq-q">P: "Nós vamos programar hoje?"</div>
+        <div class="faq-a"><strong>R:</strong> Ainda não! Você começaria a construir uma casa levantando paredes sem ter a planta baixa? Em Engenharia de Software, antes de abrir o VS Code e escrever a primeira linha de código, a gente precisa modelar o negócio. Codificar o sistema errado é o maior bug que uma startup pode cometer.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Seção de Dúvidas</div>
+      <h2 class="slide-title">Perguntas Frequentes <em>(FAQ)</em> - Parte 3</h2>
+
+      <div class="faq-item">
+        <div class="faq-q">P: "Eu não curto muito falar com cliente ou pensar no design, eu só quero codar o backend. Posso fazer o projeto sozinho?"</div>
+        <div class="faq-a"><strong>R:</strong> No mercado real de TI, ninguém faz o deploy (coloca um software em produção) sozinho. O desenvolvimento de sistemas modernos exige dividir funções no time (Stack de Frontend, Backend, Banco de Dados). Aqui vamos focar forte no aprendizado colaborativo.</div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="slide">
+    <div class="content-box">
+      <div class="slide-label">Gatilho</div>
+      <h2 class="slide-title">Referências e Próximos <em>Passos</em></h2>
+      
+      <p class="prose"><strong>Material de Apoio:</strong> Roteiro do Projeto da Situação de Aprendizagem e o Livro de "Engenharia de Software" do Pressman.</p>
+      
+      <div class="card">
+        <div class="card-title blue">Spoiler da Aula 2</div>
+        <p class="prose">“Agora que sabemos o problema, na Aula 2 (Engenharia de Requisitos) vamos começar a estruturar a solução. O que nosso sistema precisa ter obrigatoriamente? Tela de Login? Perfil de Usuário? Preparem-se, pois nós vamos pegar esses post-its do Canvas e transformar em Histórias de Usuários (User Stories) e montar o nosso primeiro Backlog no Trello!”</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="progress-bar"></div>
+<div id="nav">
+  <span id="slide-counter">00 / 00</span>
+  <button class="nav-btn" id="btn-prev">&#8592;</button>
+  <button class="nav-btn" id="btn-next">&#8594;</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let current = 0;
+  const counter = document.getElementById('slide-counter');
+  const bar = document.getElementById('progress-bar');
+  
+  function pad(n) { return String(n).padStart(2,'0'); }
+  
+  function goTo(next) {
+    if (next === current || next < 0 || next >= total) return;
+    slides[current].classList.remove('active');
+    current = next;
+    slides[current].classList.add('active');
+    counter.textContent = `${pad(current+1)} / ${pad(total)}`;
+    bar.style.width = `${((current+1)/total)*100}%`;
+  }
+  
+  document.getElementById('btn-next').addEventListener('click', () => goTo(current+1));
+  document.getElementById('btn-prev').addEventListener('click', () => goTo(current-1));
+  
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); goTo(current+1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); goTo(current-1); }
+  });
+  
+  let touchStart = null;
+  document.addEventListener('touchstart', (e) => { touchStart = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    if (touchStart === null) return;
+    const dx = e.changedTouches[0].clientX - touchStart;
+    if (Math.abs(dx) > 50) goTo(dx < 0 ? current+1 : current-1);
+    touchStart = null;
+  });
+  
+  if(total > 0) { 
+    slides[0].classList.add('active'); 
+    counter.textContent = `01 / ${pad(total)}`; 
+    bar.style.width = `${(1/total)*100}%`; 
+  }
+</script>
+</body>
+</html>
