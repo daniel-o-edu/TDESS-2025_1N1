@@ -1,9 +1,11 @@
 Repositório de Unidades Curriculares
 Este repositório é utilizado para centralizar os arquivos das seguintes unidades curriculares:
+
 • DESI (Desenvolvimento de Sistemas)
 Também os documentos da Situação de Aprendizagem Integrada.
 
 *** Passo a passo para clonar o repositório ***
+
 Para baixar os arquivos e trabalhar no seu computador, siga as instruções abaixo:
 
 1. Instale o Git: Caso ainda não tenha, baixe e instale o Git em seu computador.
