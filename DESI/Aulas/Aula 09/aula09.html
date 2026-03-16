@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 09 – Design Responsivo</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #3d3d5c;
+    --accent: #c0392b;
+    --accent2: #2980b9;
+    --accent3: #27ae60;
+    --bg: #fafaf8;
+    --surface: #ffffff;
+    --border: #e0ddd5;
+    --code-bg: #f4f1eb;
+    --tag-bg: #eaf4fb;
+    --tag-border: #2980b9;
+    --slide-max: 100%;
+  }
+
+  html, body {
+    font-family: 'Roboto', sans-serif;
+    background: #ededea;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  #nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    height: 52px;
+    box-shadow: 0 -2px 12px rgba(0,0,0,.18);
+  }
+  #nav button {
+    background: none; border: none;
+    color: #fff;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 24px;
+    height: 52px;
+    transition: background .15s;
+  }
+  #nav button:hover { background: rgba(255,255,255,.1); }
+  #nav button:disabled { opacity: .35; cursor: default; }
+  #slide-counter {
+    color: rgba(255,255,255,.65);
+    font-size: .85rem;
+    min-width: 80px;
+    text-align: center;
+    font-family: 'Source Code Pro', monospace;
+  }
+
+  /* ── PROGRESS ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 101;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--accent);
+    transition: width .3s ease;
+  }
+
+  /* ── SLIDE WRAPPER ── */
+  #stage {
+    min-height: 100vh;
+    padding: 0 0 52px 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+  }
+
+  .slide {
+    display: none;
+    width: 100%;
+    max-width: var(--slide-max);
+    min-height: calc(100vh - 52px);
+    background: var(--surface);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 8vh 10vw;
+    animation: fadeIn .3s ease;
+  }
+  .slide.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .slide-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .slide h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .slide h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--accent);
+    padding-left: 14px;
+  }
+  .slide h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    font-weight: 700;
+    color: var(--ink-light);
+    margin: 20px 0 10px;
+  }
+  .slide p {
+    font-size: clamp(.95rem, 2vw, 1.05rem);
+    line-height: 1.75;
+    color: var(--ink-light);
+    margin-bottom: 14px;
+  }
+  .slide ul, .slide ol {
+    padding-left: 22px;
+    margin-bottom: 14px;
+  }
+  .slide li {
+    font-size: clamp(.93rem, 2vw, 1.02rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+  }
+  .slide li strong { color: var(--ink); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 24px 0;
+  }
+
+  /* ── COVER ── */
+  .cover-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .cover-meta span {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: .8rem;
+    padding: 4px 12px;
+    color: var(--ink-light);
+  }
+  .cover-desc {
+    font-size: clamp(1rem, 2.2vw, 1.15rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    border-left: 3px solid var(--border);
+    padding-left: 18px;
+    margin: 24px 0;
+  }
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .topic-chip {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 3px;
+    padding: 10px 14px;
+    font-size: .95rem;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent2);
+    border-radius: 3px;
+    padding: 18px 20px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: clamp(.78rem, 1.6vw, .88rem);
+    line-height: 1.65;
+    color: var(--ink);
+    overflow-x: auto;
+    margin: 16px 0;
+    white-space: pre;
+  }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: clamp(.93rem, 2vw, 1.02rem);
+    line-height: 1.7;
+  }
+  .callout.blue {
+    background: #eaf4fb;
+    border-left: 4px solid var(--accent2);
+    color: #1a3a50;
+  }
+  .callout.green {
+    background: #eafaf1;
+    border-left: 4px solid var(--accent3);
+    color: #1a3a28;
+  }
+  .callout.red {
+    background: #fdf0ee;
+    border-left: 4px solid var(--accent);
+    color: #3a1a18;
+  }
+  .callout.yellow {
+    background: #fefbe6;
+    border-left: 4px solid #f39c12;
+    color: #3a2e10;
+  }
+  .callout .callout-title {
+    font-weight: 700;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .78rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: .75;
+  }
+
+  /* ── TWO COLUMN ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin: 16px 0;
+  }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  .col-card {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 18px;
+  }
+  .col-card h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(.85rem, 1.8vw, .95rem);
+  }
+  thead th {
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: .85rem;
+    letter-spacing: .04em;
+  }
+  tbody tr:nth-child(even) { background: var(--code-bg); }
+  tbody tr:hover { background: #e8f4fd; }
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-light);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  tbody td strong { color: var(--ink); }
+
+  /* ── ENTITY CARDS ── */
+  .entity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .entity-card {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .entity-card .entity-name {
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    padding: 10px 14px;
+    font-size: 1rem;
+  }
+  .entity-card ul {
+    padding: 12px 18px;
+    margin: 0;
+  }
+  .entity-card li {
+    font-size: .9rem;
+    color: var(--ink-light);
+    margin-bottom: 4px;
+  }
+
+  /* ── FAQ ── */
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .faq-q {
+    background: var(--code-bg);
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: clamp(.93rem, 2vw, 1rem);
+    color: var(--ink);
+    border-left: 4px solid var(--accent2);
+  }
+  .faq-a {
+    padding: 12px 18px;
+    font-size: clamp(.9rem, 1.9vw, .98rem);
+    color: var(--ink-light);
+    line-height: 1.7;
+    background: var(--surface);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .slide { padding: 28px 22px 36px; }
+    #nav button { padding: 0 14px; font-size: .9rem; }
+  }
+  @media (max-width: 400px) {
+    .slide { padding: 20px 14px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"><div id="progress-bar"></div></div>
+
+<div id="stage">
+
+  <div class="slide active">
+    <div class="slide-label">Frontend</div>
+    <h1>Aula 09 — Design Responsivo</h1>
+    <p class="cover-desc">Nesta aula iremos tratar do conceito mobile-first, breakpoints (576px, 768px, 1024px) e media queries. Vamos realizar uma prática de tornar 3 páginas responsivas para mobile, tablet e desktop.</p>
+    <hr class="divider">
+    <h3>Tópicos desta aula</h3>
+    <div class="topics-grid">
+      <div class="topic-chip">Mobile-First</div>
+      <div class="topic-chip">Breakpoints</div>
+      <div class="topic-chip">Media Queries</div>
+      <div class="topic-chip">DevTools e Usabilidade</div>
+    </div>
+    <div class="cover-meta">
+      <span>Aula 09</span>
+      <span>Frontend</span>
+      <span>HTML/CSS</span>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 1</div>
+    <h2>Abertura da Aula</h2>
+    <p>Hoje entraremos na etapa de Frontend: HTML, CSS, Responsividade. Pensem no cenário do nosso projeto final: vocês fazem parte da equipe de desenvolvimento de uma empresa júnior de tecnologia e apresentarão uma proposta de inovação digital.</p>
+    <p>Imaginem o investidor abrindo a aplicação web funcional de vocês no celular dele durante a apresentação. Se o sistema estiver quebrado, com botões minúsculos e texto ilegível, a credibilidade do projeto vai a zero.</p>
+    <p>Hoje, vamos focar no design de interface para interação de subsistemas e aprender a reconhecer requisitos de usabilidade e qualidade.</p>
+    <div class="callout blue">
+      <div class="callout-title">Objetivo</div>
+      O objetivo desta aula é garantir que a interface do nosso sistema se adapte perfeitamente a qualquer tamanho de tela, seja um celular, um tablet ou um monitor ultrawide, utilizando a abordagem Mobile-First e Media Queries.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>Conceitos Fundamentais</h2>
+      <p>Compreendendo Mobile-First, Breakpoints e Media Queries para criação de interfaces flexíveis.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.1</div>
+    <h2>Conceito 1: Abordagem Mobile-First</h2>
+    <p>No desenvolvimento web moderno, a abordagem Mobile-First (Primeiro para Dispositivos Móveis) é uma estratégia de design e programação onde começamos a criar a interface focando primeiro nas telas menores (celulares) e, progressivamente, adicionamos complexidade e novos layouts para telas maiores (tablets e desktops).</p>
+    <p>Essa prática inverte a lógica antiga de criar para o desktop e depois tentar "espremer" o conteúdo para o celular.</p>
+    <div class="callout blue">
+      <div class="callout-title">Vantagens</div>
+      Ao priorizar o mobile, garantimos que o conteúdo essencial seja carregado mais rápido, economizando dados do usuário, e forçamos o desenvolvedor a focar na usabilidade primordial do sistema, o que é um requisito de qualidade essencial no mercado atual.
+    </div>
+    <p>Desenvolver Mobile-First significa que o código CSS padrão (fora de qualquer regra condicional) será o código do celular.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.1 · Demonstração Prática</div>
+    <h2>Demonstração: Mobile-First em Código</h2>
+    <p>Vejam este exemplo simples de CSS. O fundo padrão é azul (celular), mas muda para verde em telas maiores.</p>
+    <div class="code-block">/* CSS Padrão (Mobile-First) - Aplicado primeiro em todas as telas */
+body {
+  background-color: lightblue;
+  font-size: 16px;
+  padding: 10px;
+}
+
+/* Regra condicional para telas maiores que 768px (Tablets e Desktops) */
+@media (min-width: 768px) {
+  body {
+    background-color: lightgreen;
+    padding: 30px;
+  }
+}</div>
+    <p><strong>Explicação do código:</strong> O navegador lê de cima para baixo. Primeiro, ele aplica o lightblue. Se a tela do usuário tiver 768 pixels de largura ou mais, a regra @media é ativada, substituindo a cor de fundo para lightgreen.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.1 · Prática</div>
+    <h2>Exercício Guiado</h2>
+    <div class="callout green">
+      <div class="callout-title">Tarefa 1: Base Mobile</div>
+      Abram o editor de código. Crie um arquivo HTML com um botão &lt;button&gt;Enviar&lt;/button&gt;. No CSS, faça com que esse botão tenha 100% de largura na tela padrão (mobile).
+    </div>
+    <div class="callout green">
+      <div class="callout-title">Tarefa 2: Media Query</div>
+      Em seguida, criem uma regra @media (min-width: 768px) para que o botão passe a ter apenas 200px de largura.
+    </div>
+    <div class="callout green">
+      <div class="callout-title">Tarefa 3: Ajuste de Texto</div>
+      Depois, adicionem um parágrafo de texto abaixo do botão. No mobile, o texto deve estar alinhado à esquerda. A partir de 1024px (desktop), o texto deve ficar centralizado e a fonte deve aumentar para 20px.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.2</div>
+    <h2>Conceito 2: Breakpoints (Pontos de Quebra)</h2>
+    <p>Os Breakpoints são os valores exatos de largura de tela onde o layout do nosso site "quebra" ou precisa ser reorganizado para continuar oferecendo uma boa experiência.</p>
+    <p>No mercado de tecnologia, nós não criamos regras para cada modelo específico de celular (pois existem milhares). Em vez disso, agrupamos os dispositivos em categorias de tamanhos utilizando breakpoints padrão.</p>
+    <div class="callout blue">
+      <div class="callout-title">Padrões de Mercado</div>
+      Os três breakpoints mais utilizados no mercado e em frameworks (como o Bootstrap) são: 576px (limite para celulares em modo paisagem), 768px (tablets em modo retrato) e 1024px (laptops e desktops).
+    </div>
+    <p>Compreender e aplicar esses pontos garante que nossa aplicação atenderá aos requisitos não funcionais de interface e usabilidade em múltiplas plataformas.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.2 · Demonstração Prática</div>
+    <h2>Estruturação de Breakpoints no CSS</h2>
+    <p>Observem como estruturamos nosso CSS para abraçar essas três resoluções.</p>
+    <div class="code-block">/* 1. Mobile-First (Celulares em pé até 575px) */
+.container { width: 100%; display: block; }
+
+/* 2. Dispositivos pequenos / Celulares deitados (Breakpoing: 576px) */
+@media (min-width: 576px) {
+  .container { max-width: 540px; }
+}
+
+/* 3. Tablets (Breakpoint: 768px) */
+@media (min-width: 768px) {
+  .container { max-width: 720px; display: flex; }
+}
+
+/* 4. Desktops (Breakpoint: 1024px) */
+@media (min-width: 1024px) {
+  .container { max-width: 960px; }
+}</div>
+    <p><strong>Explicação do código:</strong> Começamos com uma largura fluida (100%). Conforme a tela cresce, os breakpoints (576, 768, 1024) vão assumindo o controle, limitando a largura máxima para que o conteúdo não fique esticado demais em telas grandes, além de alterar o comportamento de exibição (de block para flex).</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.2 · Prática</div>
+    <h2>Exercício de Fixação</h2>
+    <div class="callout green">
+      <div class="callout-title">Estrutura Inicial</div>
+      Crie três caixas (divs) com a classe .card. No mobile, elas devem ficar empilhadas uma em cima da outra.
+    </div>
+    <div class="callout green">
+      <div class="callout-title">Ajuste para Tablet</div>
+      Usem o breakpoint de 768px para fazer com que elas fiquem lado a lado (usando display: flex).
+    </div>
+    <div class="callout green">
+      <div class="callout-title">Ajuste para Desktop</div>
+      Agora adicionem o breakpoint de 1024px. Quando a tela atingir esse tamanho desktop, as caixas devem ganhar uma margem maior entre elas e uma borda mais grossa. Testem redimensionando a janela do navegador.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.3</div>
+    <h2>Conceito 3: Media Queries</h2>
+    <p>São uma das ferramentas mais importantes do CSS moderno. De forma simples, elas funcionam como filtros condicionais que dizem ao navegador: "Aplique estes estilos apenas se a tela do usuário tiver determinadas características" (como uma largura ou altura específica).</p>
+    <p>É o conceito central do Design Responsivo, permitindo que um único site se adapte perfeitamente a um iPhone, um tablet ou um monitor UltraWide de 30 polegadas.</p>
+    <div class="callout blue">
+      <div class="callout-title">Sintaxe Base</div>
+      Uma media query geralmente é composta por um tipo de mídia e uma ou mais expressões que verificam as condições dos dispositivos.<br><br>
+      <strong>@media (condição) { ...estilos aqui... }</strong>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.3</div>
+    <h2>Componentes das Media Queries</h2>
+    <p>Os componentes principais são:</p>
+    <ul>
+      <li><strong>1. @media:</strong> A regra que inicia a consulta.</li>
+      <li><strong>2. Media Type:</strong> Define o dispositivo (ex: screen para telas, print para impressoras). Se não for especificado, o padrão é all.</li>
+      <li><strong>3. Media Features (Condições):</strong> As características que você quer testar, como:</li>
+    </ul>
+    <ul>
+      <li><strong>min-width:</strong> "Se a tela tiver no mínimo X de largura".</li>
+      <li><strong>max-width:</strong> "Se a tela tiver no máximo X de largura".</li>
+      <li><strong>orientation:</strong> Verifica se o celular está em pé (portrait) ou deitado (landscape).</li>
+    </ul>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.3 · Demonstração Prática</div>
+    <h2>Media Queries na Prática</h2>
+    <h3>Mobile-First (O padrão atual)</h3>
+    <p>Nesta abordagem, você escreve o CSS para celular primeiro e usa a media query para "adicionar" estilo conforme a tela cresce:</p>
+    <div class="code-block">/* Estilo para todos (foco no celular) */
+body { background-color: white; }
+
+/* Quando a tela for maior que 768px (Tablets/Laptops) */
+@media (min-width: 768px) {
+  body { background-color: lightblue; }
+}</div>
+    <h3>Mudando a Orientação</h3>
+    <p>Você pode alterar o layout dependendo de como o usuário segura o celular:</p>
+    <div class="code-block">@media (orientation: landscape) {
+  .menu { display: flex; } /* Mostra o menu de lado se o celular estiver deitado */
+}</div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.3</div>
+    <h2>Por que isso é importante?</h2>
+    <p>Antigamente, as empresas criavam dois sites: www.site.com e m.site.com (específico para mobile).</p>
+    <p>Com as Media Queries, você mantém um único código HTML e apenas ajusta a "roupa" (o CSS) conforme o tamanho da janela.</p>
+    <div class="callout yellow">
+      <div class="callout-title">Impacto Real</div>
+      Isso melhora a manutenção do código, ajuda no SEO (Google prefere sites responsivos) e garante que nenhum usuário tenha uma experiência ruim, independente do aparelho que use.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 3</div>
+    <h2>Demonstração Aplicada no DevTools</h2>
+    <p>Vamos ver isso funcionando na prática usando uma ferramenta de desenvolvimento profissional do Google Chrome.</p>
+    <ul>
+      <li><strong>1.</strong> Cliquem com o botão direito na página e selecionem "Inspecionar" (ou pressionem F12).</li>
+      <li><strong>2.</strong> Procurem o ícone de "Dispositivos" (um celular desenhado ao lado de um tablet) no canto superior esquerdo do DevTools, ou usem Ctrl+Shift+M.</li>
+      <li><strong>3.</strong> Isso ativa o modo de design responsivo. No topo da tela, vocês verão uma barra onde podem escolher modelos específicos (como iPhone 12 ou iPad Air) ou digitar os nossos breakpoints manuais: 576, 768 e 1024.</li>
+      <li><strong>4.</strong> Vamos redimensionar a tela! Notem como, ao arrastar a barra e passar de 767px para 768px, a estrutura muda instantaneamente de empilhada para lado a lado.</li>
+    </ul>
+    <p>É assim que garantimos a qualidade do código visualmente antes de entregar ao cliente.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 4</div>
+    <h2>Casos Reais do Mercado</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <h4>E-commerce (Lojas Virtuais)</h4>
+        <p>Grandes plataformas de vendas, como a Amazon ou o Mercado Livre, usam Mobile-First agressivamente. Se você acessar pelo celular, a barra de pesquisa domina o topo e os menus complexos são escondidos em um botão "hambúrguer" (três linhas).</p>
+        <p>Se a conversão (venda) cair 1% por causa de um botão difícil de clicar no celular, a empresa perde milhões. A responsividade aqui é puramente dinheiro e sobrevivência.</p>
+      </div>
+      <div class="col-card">
+        <h4>Sistemas de Gestão (Dashboards SaaS)</h4>
+        <p>Quando criamos um painel administrativo (dashboard), no desktop ele exibe tabelas com 10 colunas, gráficos gigantes e menus laterais. No mobile, uma tabela de 10 colunas quebraria o layout.</p>
+        <p>O mercado resolve isso transformando as linhas da tabela em "cards" individuais no celular através de Media Queries, ou escondendo colunas menos importantes, garantindo a integridade e usabilidade da informação.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 5</div>
+    <h2>FAQ -- Dúvidas (1/2)</h2>
+    <div class="faq-item">
+      <div class="faq-q">1. Qual a diferença entre usar min-width e max-width nas media queries?</div>
+      <div class="faq-a"><strong>min-width</strong> aplica a regra de um tamanho específico para cima (ideal para Mobile-First). Exemplo: min-width: 768px afeta tablets e desktops.<br><br><strong>max-width</strong> aplica a regra do tamanho para baixo (ideal para Desktop-First). Recomenda-se sempre padronizar em min-width.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">2. Eu preciso testar o site no meu celular físico toda vez?</div>
+      <div class="faq-a">Não necessariamente. O DevTools do navegador é excelente e simula muito bem 95% dos casos. Porém, antes de apresentar para os investidores na feira, abra o sistema no celular físico da equipe para testar a sensação real do toque (touch).</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">3. Por que minhas media queries não estão funcionando?</div>
+      <div class="faq-a">Provavelmente é a ordem no arquivo CSS. O CSS é lido de cima para baixo (Cascata). As media queries devem ficar sempre no final do seu arquivo CSS para poderem sobrescrever o código padrão.</div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 5</div>
+    <h2>FAQ -- Dúvidas (2/2)</h2>
+    <div class="faq-item">
+      <div class="faq-q">4. O que é aquela tag &lt;meta name="viewport"&gt; no HTML?</div>
+      <div class="faq-a">Sem ela, o celular finge que é um monitor de desktop e diminui tudo para caber na tela. A tag viewport avisa ao navegador móvel: "Trate a largura da tela como a largura do dispositivo e não aplique zoom". É obrigatória para a responsividade funcionar.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">5. Posso usar porcentagens (%) em vez de media queries?</div>
+      <div class="faq-a">Eles trabalham juntos! Porcentagens deixam as larguras fluidas (ex: ocupar 50% da tela), enquanto as media queries alteram a estrutura (ex: mudar de 50% para 100% quando a tela ficar muito pequena).</div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 6</div>
+    <h2>Desafio Prático</h2>
+    <p>Aplicando Layouts Responsivos em Páginas Reais</p>
+    <div class="callout yellow">
+      <div class="callout-title">Contexto</div>
+      Nossa aplicação deve conter funcionalidades no front-end e back-end. Para o front-end, vocês precisarão tornar responsivas três páginas essenciais do nosso sistema: a Página de Login, o Dashboard Inicial e o Formulário de Cadastro de Produto/Usuário (que compõe a estrutura CRUD que faremos no futuro).
+    </div>
+    <h3>Requisitos:</h3>
+    <ul>
+      <li>Vocês devem aplicar os breakpoints ensinados: 576px, 768px e 1024px.</li>
+      <li>As 3 páginas devem ter um layout distinto para Mobile (tela pequena), Tablet (tela média) e Desktop (tela grande).</li>
+      <li><strong>Login:</strong> Formulário ocupando 100% da largura no mobile, e centralizado em uma caixa menor no desktop.</li>
+      <li><strong>Dashboard:</strong> Menus empilhados no mobile, organizados lado a lado no desktop.</li>
+      <li><strong>Formulário:</strong> Campos de input em uma coluna no mobile, duas colunas no tablet e desktop.</li>
+    </ul>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 6</div>
+    <h2>Resultado Esperado e Solução</h2>
+    <div class="callout green">
+      <div class="callout-title">Resultado Esperado</div>
+      Ao abrir as 3 páginas no Google Chrome e utilizar o DevTools para inspecionar nos tamanhos de 375px (mobile), 800px (tablet) e 1200px (desktop), as páginas não devem conter barra de rolagem horizontal e os elementos devem estar harmoniosos e legíveis.
+    </div>
+    <div class="callout blue">
+      <div class="callout-title">Sugestão de Solução</div>
+      Comecem sempre pelo CSS do mobile. Estruturem as divs corretamente no HTML. Só depois de o mobile estar perfeito, escrevam o @media (min-width: 768px) no fim do arquivo e façam os ajustes para o tablet.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 7</div>
+    <h2>Conexão com a Situação de Aprendizagem</h2>
+    <div class="callout red">
+      <div class="callout-title">ATENÇÃO</div>
+      Este conteúdo está diretamente ligado à nossa entrega final. Vocês precisam entregar um sistema web funcional acompanhado da documentação. Lembrem-se de que a aplicação será avaliada por potenciais investidores. O investidor acessará a aplicação, muito provavelmente, pelo smartphone.
+    </div>
+    <p>A capacidade de criar um layout responsivo demonstra profissionalismo e o cumprimento dos requisitos de qualidade e usabilidade do software.</p>
+    <p>O front-end que construímos e adaptamos hoje será a "casca" que conectaremos posteriormente ao nosso banco de dados relacional e ao back-end em PHP.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 8</div>
+    <h2>Preparação para a Próxima Aula</h2>
+    <p>Hoje dominamos a parte visual e estática da nossa interface (HTML, CSS e Responsividade).</p>
+    <p>Na próxima aula, o foco será acelerar o desenvolvimento de interfaces utilizando Bootstrap (ou Tailwind), focando em produtividade e padronização através de componentes prontos e sistemas de layout inteligentes.</p>
+  </div>
+
+</div>
+
+<nav id="nav">
+  <button id="btn-prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+  <span id="slide-counter">1 / 22</span>
+  <button id="btn-next" onclick="changeSlide(1)">Próximo →</button>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === total - 1;
+    document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function changeSlide(dir) { showSlide(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'  || e.key === 'PageUp')   changeSlide(-1);
+  });
+
+  let touchX = 0;
+  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    let dx = e.changedTouches[0].clientX - touchX;
+    if (dx > 50) changeSlide(-1);
+    if (dx < -50) changeSlide(1);
+  });
+</script>
+
+</body>
+</html>

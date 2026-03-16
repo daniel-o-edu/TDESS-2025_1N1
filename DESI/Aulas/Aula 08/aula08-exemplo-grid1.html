@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemplo de CSS Grid</title>
+    <style>
+        /* Estilos base para melhorar a visualização */
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+        }
+
+        /* O código CSS que você forneceu */
+        .wrapper {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* Cria 3 colunas de largura igual */
+            gap: 10px; /* Espaço entre os itens */
+            padding: 10px;
+        }
+
+        .wrapper > div {
+            background-color: #ffd8a8;
+            border: 2px solid #ffa94d;
+            padding: 1em;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 4px; /* Um toque extra para suavizar as bordas */
+        }
+    </style>
+</head>
+<body>
+
+    <h2 style="text-align: center;">Minha Grade com CSS Grid</h2>
+
+    <div class="wrapper">
+        <div>One</div>
+        <div>Two</div>
+        <div>Three</div>
+        <div>Four</div>
+        <div>Five</div>
+        <div>Six</div>
+    </div>
+
+</body>
+</html>

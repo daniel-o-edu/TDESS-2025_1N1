@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout com Grid Areas</title>
+    <style>
+        /* Reset básico para remover margens padrão do navegador */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* O código CSS que você forneceu */
+        .container {
+            display: grid;
+            /* Uma coluna estreita (1fr) e uma larga (3fr) */
+            grid-template-columns: 1fr 3fr; 
+            /* Header e Footer ajustam ao conteúdo (auto), Main ocupa o resto (1fr) */
+            grid-template-rows: auto 1fr auto; 
+            grid-template-areas:
+                "header header"
+                "sidebar main"
+                "footer footer";
+            height: 100vh;
+        }
+
+        header { grid-area: header; background-color: #adb5bd !important; }
+        nav { grid-area: sidebar; background-color: #dee2e6 !important; }
+        main { grid-area: main; background-color: #f8f9fa !important; }
+        footer { grid-area: footer; background-color: #adb5bd !important; }
+
+        /* Estilização geral para visibilidade */
+        .container > * { 
+            border: 1px solid #ccc; 
+            padding: 1em; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>Header</header>
+        <nav>Sidebar</nav>
+        <main>Main Content</main>
+        <footer>Footer</footer>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masterclass: CSS3 - Grid Layout</title>
+    <style>
+        :root {
+            --primary: #001a33;
+            --secondary: #007bff;
+            --accent: #e1f0ff;
+            --text: #222;
+            --white: #ffffff;
+            --code-bg: #1e1e1e;
+            --practice-bg: #f0f7ff;
+            --practice-border: #007bff;
+            --grid-line: #007bff;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary);
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: var(--white);
+            padding: 60px 100px; /* Tamanho maior para preenchimento */
+            box-sizing: border-box;
+            animation: fadeIn 0.4s ease-in-out;
+            overflow-y: auto;
+        }
+
+        .slide.active { 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        h1 { font-size: 3.5rem; color: var(--primary); margin-bottom: 20px; border-left: 20px solid var(--secondary); padding-left: 25px; }
+        h2 { font-size: 2.5rem; color: var(--secondary); margin-top: 15px; }
+        p, li { font-size: 1.6rem; line-height: 1.6; color: var(--text); }
+        
+        code {
+            background: var(--accent);
+            color: var(--primary);
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 1.4rem;
+        }
+
+        pre { 
+            background: var(--code-bg); 
+            color: #dcdcdc; 
+            padding: 25px; 
+            border-radius: 15px; 
+            font-size: 1.7rem;
+            margin: 20px 0;
+            border-left: 10px solid var(--secondary);
+            overflow-x: auto;
+        }
+
+        .practice-box {
+            background: var(--practice-bg);
+            border-left: 6px solid var(--practice-border);
+            padding: 20px;
+            margin-top: 20px;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .practice-box b { color: var(--secondary); }
+
+        .controls {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: var(--primary);
+            color: white;
+            border: 2px solid var(--white);
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        button:hover { background: var(--secondary); transform: scale(1.1); }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 12px;
+            background: var(--secondary);
+            transition: width 0.3s ease;
+            z-index: 101;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 40px;
+            left: 40px;
+            color: var(--primary);
+            background: var(--accent);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+<div class="slide-container" id="container"></div>
+<div class="slide-counter" id="counter">1 / 40</div>
+
+<div class="controls">
+    <button onclick="prev()">⬅ Anterior</button>
+    <button onclick="next()">Próximo ➡</button>
+</div>
+
+<script>
+    const slidesData = [
+        { t: "CSS3: Grid Layout", c: "<h2>A Revolução Bidimensional</h2><p>Se o Flexbox era a linha, o Grid é o plano. Hoje aprenderemos a criar layouts complexos com controle total de linhas e colunas.</p>" },
+        { t: "O que é CSS Grid?", c: "<p>É o sistema de layout mais poderoso do CSS. Diferente do Flexbox, ele trabalha simultaneamente com eixos horizontais e verticais.</p><div class='practice-box'><b>Uso Prático:</b> Ideal para layouts de páginas inteiras, dashboards e galerias complexas de imagens.</div>" },
+        { t: "Terminologia: O Grid Container", c: "<p>O elemento pai onde definimos a grade.</p><pre>display: grid;</pre><p>Ativa o contexto de grid para todos os seus filhos diretos.</p>" },
+        { t: "Terminologia: Grid Items", c: "<p>Todos os filhos diretos do container tornam-se itens do grid, prontos para serem posicionados na grade.</p>" },
+        { t: "Terminologia: Grid Tracks", c: "<p>São as linhas ou colunas do seu grid. O espaço entre duas linhas da grade.</p>" },
+        { t: "Grid-Template-Columns", c: "<p>Define o número e a largura das colunas.</p><pre>.container {\n  display: grid;\n  grid-template-columns: 200px 1fr 200px;\n}</pre><div class='practice-box'><b>Uso Prático:</b> Cria um layout de 3 colunas onde a do meio é flexível (fr).</div>" },
+        { t: "A Unidade 'fr' (Fractional)", c: "<p>Representa uma fração do espaço livre no container.</p><pre>grid-template-columns: 1fr 2fr 1fr;</pre><div class='practice-box'><b>Uso Prático:</b> Divide a tela proporcionalmente sem precisar calcular porcentagens (%).</div>" },
+        { t: "Grid-Template-Rows", c: "<p>Define a altura das linhas.</p><pre>.container {\n  grid-template-rows: 100px auto 50px;\n}</pre>" },
+        { t: "Grid Lines", c: "<p>As linhas que dividem o grid. Elas são numeradas começando em 1.</p><p>As colunas e linhas são definidas por essas linhas imaginárias.</p>" },
+        { t: "Atividade I: Caça ao Grid", c: "<h2>Investigação DevTools</h2><p>1. Acesse o site <b>The Verge</b> (theverge.com) ou <b>Pinterest</b>.<br>2. Localize um bloco de notícias ou cards.<br>3. No Inspetor, procure pelo selo <b>'grid'</b> azul ao lado do elemento HTML e clique nele para ver as linhas da grade.</p>" },
+        { t: "Grid Gap (ou Gap)", c: "<p>Define o espaçamento entre as células do grid.</p><pre>gap: 20px;</pre><div class='practice-box'><b>Uso Prático:</b> Garante espaçamento uniforme sem causar problemas de overflow como as margens laterais faziam.</div>" },
+        { t: "Repeat() Function", c: "<p>Facilita a criação de muitas colunas iguais.</p><pre>grid-template-columns: repeat(12, 1fr);</pre><div class='practice-box'><b>Uso Prático:</b> Cria rapidamente o famoso sistema de 12 colunas do Bootstrap de forma nativa.</div>" },
+        { t: "Minmax() Function", c: "<p>Define um tamanho mínimo e máximo para uma track.</p><pre>grid-template-columns: minmax(200px, 1fr);</pre>" },
+        { t: "Auto-Fill vs Auto-Fit", c: "<p>Permite criar grids que se ajustam sozinhos à largura da tela sem Media Queries.</p><pre>grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));</pre>" },
+        { t: "Grid-Column: Posicionamento", c: "<p>Define onde um item começa e termina horizontalmente.</p><pre>.item {\n  grid-column: 1 / 3;\n}</pre><div class='practice-box'><b>Uso Prático:</b> Faz um banner ocupar as duas primeiras colunas de um layout.</div>" },
+        { t: "Grid-Row: Posicionamento", c: "<p>Define onde um item começa e termina verticalmente.</p><pre>.item {\n  grid-row: 1 / 4;\n}</pre>" },
+        { t: "Grid-Area (Atalho)", c: "<p>Combina column e row em uma única propriedade.</p><pre>grid-area: row-start / col-start / row-end / col-end;</pre>" },
+        { t: "Grid-Template-Areas", c: "<p>A forma mais visual de criar layouts. Você 'desenha' o layout com nomes.</p><pre>grid-template-areas:\n  'header header'\n  'sidebar main';</pre>" },
+        { t: "Nomeando Itens com Grid-Area", c: "<p>Para o template-areas funcionar, cada item deve ter um nome.</p><pre>.header { grid-area: header; }\n.nav { grid-area: sidebar; }</pre>" },
+        { t: "Dashboard Realista: A Estrutura", c: "<p>Vamos projetar um Dashboard com Sidebar fixa, Header e Conteúdo Principal.</p><pre>header { grid-area: h; }\naside { grid-area: s; }\nmain { grid-area: m; }</pre>" },
+        { t: "Dashboard: O Template", c: "<pre>.dashboard {\n  display: grid;\n  grid-template-columns: 250px 1fr;\n  grid-template-rows: 80px 1fr;\n  grid-template-areas: \n    's h'\n    's m';\n  height: 100vh;\n}</pre>" },
+        { t: "Atividade II: Engenharia Reversa", c: "<h2>Análise de Áreas</h2><p>1. Acesse o <b>YouTube Studio</b> ou <b>Spotify Web</b>.<br>2. Identifique quais seriam as áreas do grid (Header, Sidebar, Content).<br>3. Desenhe no papel/bloco de notas como ficaria o <code>grid-template-areas</code> desses sites.</p>" },
+        { t: "Justify-Items (Grid)", c: "<p>Alinha os itens dentro de suas células no eixo horizontal.</p><pre>justify-items: center; /* start | end | stretch */</pre>" },
+        { t: "Align-Items (Grid)", c: "<p>Alinha os itens dentro de suas células no eixo vertical.</p><pre>align-items: center;</pre>" },
+        { t: "Place-Items", c: "<p>Atalho para justify e align items ao mesmo tempo.</p><pre>place-items: center;</pre><div class='practice-box'><b>Uso Prático:</b> A forma mais rápida de centralizar absolutamente tudo dentro de uma célula do grid.</div>" },
+        { t: "Justify-Content (Grid Container)", c: "<p>Alinha o grid inteiro dentro do container (se o grid for menor que o container).</p>" },
+        { t: "Align-Content (Grid Container)", c: "<p>Alinha as tracks verticalmente quando há espaço sobrando no container.</p>" },
+        { t: "Flexbox vs Grid: Unidimensional", c: "<p><b>Flexbox:</b> Perfeito para componentes menores (menus, botões alinhados, pequenos grupos).</p>" },
+        { t: "Flexbox vs Grid: Bidimensional", c: "<p><b>Grid:</b> Perfeito para a estrutura da página (áreas grandes, sobreposição de elementos, layouts complexos).</p>" },
+        { t: "Flexbox dentro do Grid", c: "<p>Padrão profissional: Use Grid para o layout da página e Flexbox para alinhar o conteúdo dentro das células do Grid.</p>" },
+        { t: "Grid Implícito vs Explícito", c: "<p>Explícito: O que você define (template-columns). Implícito: Linhas criadas automaticamente quando o conteúdo excede o planejado.</p>" },
+        { t: "Grid-Auto-Rows", c: "<p>Define o tamanho das linhas criadas automaticamente pelo grid implícito.</p><pre>grid-auto-rows: 200px;</pre>" },
+        { t: "Z-Index no Grid", c: "<p>Diferente de outros layouts, o Grid permite sobrepor itens facilmente apenas colocando-os na mesma célula e usando <code>z-index</code>.</p>" },
+        { t: "Responsive Grid sem Media Queries", c: "<p>A mágica do auto-fit.</p><pre>grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));</pre><div class='practice-box'><b>Uso Prático:</b> Cards de produtos que se organizam em 4, 3, 2 ou 1 coluna dependendo do celular.</div>" },
+        { t: "Ordem dos Itens (Order)", c: "<p>Assim como no Flexbox, o <code>order</code> funciona no Grid para mudar a posição visual dos itens.</p>" },
+        { t: "Boas Práticas", c: "<ul><li>Não abuse de áreas nomeadas se o layout for muito simples.</li><li>Use 'fr' para evitar barras de rolagem horizontais.</li><li>Nomeie suas linhas para facilitar a manutenção em grids grandes.</li></ul>" },
+        { t: "Depuração Avançada", c: "<p>Use o Painel Layout do Chrome DevTools para ver nomes de áreas e números de linhas simultaneamente.</p>" },
+        { t: "Checklist de Grid", c: "<ul><li>Definiu display: grid?</li><li>Columns e Rows estão configurados?</li><li>O Gap está adequado?</li><li>O layout é responsivo?</li></ul>" },
+        { t: "Atividade III: O Grande Dashboard", c: "<h2>Desafio Prático</h2><p>1. Crie um HTML com <code>header</code>, <code>aside</code>, <code>main</code> e <code>div.widgets</code>.<br>2. Use Grid para criar um Dashboard onde a Sidebar ocupa toda a lateral esquerda.<br>3. No <code>main</code>, crie um sub-grid com 4 cards usando <code>repeat(auto-fit, minmax(150px, 1fr))</code>.</p>" },
+        { t: "Conclusão e Próximos Passos", c: "<h2>Parabéns!</h2><p>Você agora domina as ferramentas de layout mais modernas da web. Na próxima aula, uniremos Flexbox e Grid em um projeto real completo!</p>" }
+    ];
+
+    let current = 0;
+    const container = document.getElementById('container');
+    const counterDisplay = document.getElementById('counter');
+    const progress = document.getElementById('progress');
+
+    function render() {
+        container.innerHTML = '';
+        slidesData.forEach((s, i) => {
+            const div = document.createElement('div');
+            div.className = `slide ${i === current ? 'active' : ''}`;
+            div.innerHTML = `<h1>${s.t}</h1>${s.c}`;
+            container.appendChild(div);
+        });
+        counterDisplay.innerText = `${current + 1} / ${slidesData.length}`;
+        progress.style.width = `${((current + 1) / slidesData.length) * 100}%`;
+    }
+
+    function next() { if(current < slidesData.length - 1) { current++; render(); } }
+    function prev() { if(current > 0) { current--; render(); } }
+
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowRight') next();
+        if(e.key === 'ArrowLeft') prev();
+    });
+
+    render();
+</script>
+</body>
+</html>
