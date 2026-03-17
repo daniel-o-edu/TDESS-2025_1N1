@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercício de Responsividade</title>
+    <style>
+        /* --- Estilos Mobile (Padrão) --- */
+        
+        button {
+            width: 100%;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        p {
+            text-align: left;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        /* --- Tablet (768px ou mais) --- */
+        @media (min-width: 768px) {
+            button {
+                width: 200px;
+            }
+        }
+
+        /* --- Desktop (1024px ou mais) --- */
+        @media (min-width: 1024px) {
+            p {
+                text-align: center;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button>Enviar</button>
+
+    <p>
+        Este texto muda de alinhamento e tamanho dependendo da largura da sua tela.
+    </p>
+
+</body>
+</html>
