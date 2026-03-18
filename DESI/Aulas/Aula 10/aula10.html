@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 10 – Frameworks CSS (Bootstrap)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #3d3d5c;
+    --accent: #c0392b;
+    --accent2: #2980b9;
+    --accent3: #27ae60;
+    --bg: #fafaf8;
+    --surface: #ffffff;
+    --border: #e0ddd5;
+    --code-bg: #f4f1eb;
+    --tag-bg: #eaf4fb;
+    --tag-border: #2980b9;
+    --slide-max: 100%;
+  }
+
+  html, body {
+    font-family: 'Roboto', sans-serif;
+    background: #ededea;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  #nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    height: 52px;
+    box-shadow: 0 -2px 12px rgba(0,0,0,.18);
+  }
+  #nav button {
+    background: none; border: none;
+    color: #fff;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 24px;
+    height: 52px;
+    transition: background .15s;
+  }
+  #nav button:hover { background: rgba(255,255,255,.1); }
+  #nav button:disabled { opacity: .35; cursor: default; }
+  #slide-counter {
+    color: rgba(255,255,255,.65);
+    font-size: .85rem;
+    min-width: 80px;
+    text-align: center;
+    font-family: 'Source Code Pro', monospace;
+  }
+
+  /* ── PROGRESS ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 101;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--accent);
+    transition: width .3s ease;
+  }
+
+  /* ── SLIDE WRAPPER ── */
+  #stage {
+    min-height: 100vh;
+    padding: 0 0 52px 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+  }
+
+  .slide {
+    display: none;
+    width: 100%;
+    max-width: var(--slide-max);
+    min-height: calc(100vh - 52px);
+    background: var(--surface);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 8vh 10vw;
+    animation: fadeIn .3s ease;
+  }
+  .slide.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .slide-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .slide h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .slide h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--accent);
+    padding-left: 14px;
+  }
+  .slide h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    font-weight: 700;
+    color: var(--ink-light);
+    margin: 20px 0 10px;
+  }
+  .slide p {
+    font-size: clamp(.95rem, 2vw, 1.05rem);
+    line-height: 1.75;
+    color: var(--ink-light);
+    margin-bottom: 14px;
+  }
+  .slide ul, .slide ol {
+    padding-left: 22px;
+    margin-bottom: 14px;
+  }
+  .slide li {
+    font-size: clamp(.93rem, 2vw, 1.02rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+  }
+  .slide li strong { color: var(--ink); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 24px 0;
+  }
+
+  /* ── COVER ── */
+  .cover-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .cover-meta span {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: .8rem;
+    padding: 4px 12px;
+    color: var(--ink-light);
+  }
+  .cover-desc {
+    font-size: clamp(1rem, 2.2vw, 1.15rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    border-left: 3px solid var(--border);
+    padding-left: 18px;
+    margin: 24px 0;
+  }
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .topic-chip {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 3px;
+    padding: 10px 14px;
+    font-size: .95rem;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent2);
+    border-radius: 3px;
+    padding: 18px 20px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: clamp(.78rem, 1.6vw, .88rem);
+    line-height: 1.65;
+    color: var(--ink);
+    overflow-x: auto;
+    margin: 16px 0;
+    white-space: pre;
+  }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: clamp(.93rem, 2vw, 1.02rem);
+    line-height: 1.7;
+  }
+  .callout.blue {
+    background: #eaf4fb;
+    border-left: 4px solid var(--accent2);
+    color: #1a3a50;
+  }
+  .callout.green {
+    background: #eafaf1;
+    border-left: 4px solid var(--accent3);
+    color: #1a3a28;
+  }
+  .callout.red {
+    background: #fdf0ee;
+    border-left: 4px solid var(--accent);
+    color: #3a1a18;
+  }
+  .callout.yellow {
+    background: #fefbe6;
+    border-left: 4px solid #f39c12;
+    color: #3a2e10;
+  }
+  .callout .callout-title {
+    font-weight: 700;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .78rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: .75;
+  }
+
+  /* ── TWO COLUMN ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin: 16px 0;
+  }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  .col-card {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 18px;
+  }
+  .col-card h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(.85rem, 1.8vw, .95rem);
+  }
+  thead th {
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: .85rem;
+    letter-spacing: .04em;
+  }
+  tbody tr:nth-child(even) { background: var(--code-bg); }
+  tbody tr:hover { background: #e8f4fd; }
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-light);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  tbody td strong { color: var(--ink); }
+
+  /* ── FAQ ── */
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .faq-q {
+    background: var(--code-bg);
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: clamp(.93rem, 2vw, 1rem);
+    color: var(--ink);
+    border-left: 4px solid var(--accent2);
+  }
+  .faq-a {
+    padding: 12px 18px;
+    font-size: clamp(.9rem, 1.9vw, .98rem);
+    color: var(--ink-light);
+    line-height: 1.7;
+    background: var(--surface);
+  }
+
+  /* ── NUMBERED STEPS ── */
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: .9rem;
+    font-family: 'Source Code Pro', monospace;
+    margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-body p { margin: 0; }
+
+  /* ── SECTION HEADER SLIDES ── */
+  .section-header {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .section-num {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 3rem;
+    font-weight: 600;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .section-header h2 {
+    border: none;
+    padding: 0;
+    text-align: center;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--ink);
+  }
+  .section-header p {
+    max-width: 560px;
+    margin: 16px auto 0;
+    text-align: center;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .slide { padding: 28px 22px 36px; }
+    #nav button { padding: 0 14px; font-size: .9rem; }
+  }
+  @media (max-width: 400px) {
+    .slide { padding: 20px 14px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"><div id="progress-bar"></div></div>
+
+<div id="stage">
+
+  <div class="slide active">
+    <div class="slide-label">Front-End · Desenvolvimento Web</div>
+    <h1>Aula 10 – Frameworks CSS (Bootstrap)</h1>
+    <p class="cover-desc">Esta aula aborda a integração e refatoração de interfaces utilizando os frameworks Bootstrap, com foco em sistemas de grid e componentes responsivos via CDN. Os alunos aprenderão a otimizar elementos como navbars e modais, aplicando customizações via variáveis CSS para garantir um design moderno e funcional.</p>
+    <hr class="divider">
+    <h3>Tópicos desta aula</h3>
+    <div class="topics-grid">
+      <div class="topic-chip">Integração via CDN</div>
+      <div class="topic-chip">Sistema de Grid de 12 Colunas</div>
+      <div class="topic-chip">Componentes Prontos</div>
+      <div class="topic-chip">Customização via Variáveis CSS</div>
+    </div>
+    <div class="cover-meta">
+      <span>Aula 10</span>
+      <span>Bootstrap</span>
+      <span>Responsividade</span>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 1</div>
+    <h2>Abertura da Aula</h2>
+    <p>Hoje daremos um salto de produtividade incrível no desenvolvimento do nosso front-end aprendendo sobre <strong>Frameworks CSS</strong>, com foco especial na ferramenta mais popular do mercado: o <strong>Bootstrap</strong>.</p>
+    <p>Escrever cada linha de código CSS absolutamente do zero para botões, menus, formulários e tabelas consome um <strong>tempo valioso da equipe</strong> — tempo que poderia ser investido na lógica de negócios e no back-end.</p>
+    <div class="callout blue">
+      <div class="callout-title">A Solução</div>
+      É exatamente esse problema de prazo e padronização que os frameworks resolvem. Eles oferecem uma <strong>biblioteca</strong> gigantesca de componentes visuais prontos e amplamente testados.
+    </div>
+    <p>Com isso, empresas e startups conseguem lançar produtos de forma muito mais rápida no mercado, mantendo a altíssima qualidade de interface, a usabilidade e a responsividade que aprendemos na nossa aula anterior.</p>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>Conceitos Fundamentais</h2>
+      <p>Framework CSS, integração via CDN, sistema de Grid, componentes e variáveis.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.1</div>
+    <h2>Conceito 1: Framework CSS e Integração via CDN</h2>
+    <p>Um Framework CSS é um pacote de códigos pré-escritos (arquivos CSS e JavaScript) que padronizam e facilitam o desenvolvimento de interfaces web.</p>
+    <p>Em vez de criar regras para arredondar bordas e alinhar textos repetidamente, você utiliza "classes" prontas fornecidas pelo framework.</p>
+    <div class="callout blue">
+      <div class="callout-title">O papel da CDN</div>
+      Para usar o Bootstrap no nosso projeto sem precisar baixar dezenas de arquivos, nós utilizamos uma <strong>CDN</strong> (Content Delivery Network ou Rede de Distribuição de Conteúdo). A CDN é um servidor ultrarrápido espalhado pelo mundo que hospeda os arquivos do Bootstrap.
+    </div>
+    <p>Ao colocar um link da CDN no <strong>cabeçalho</strong> do seu HTML, o navegador do usuário faz o download deste código em milissegundos, garantindo que o seu site carregue rápido e já venha com todos os estilos do framework aplicados automaticamente.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.1 · Demonstração Prática</div>
+    <h2>Integrando o Bootstrap no HTML5</h2>
+    <p>Vejam como iniciamos um documento HTML5 integrando o CSS e o JS do Bootstrap via CDN diretamente na tag &lt;head&gt; e no fim do &lt;body&gt;.</p>
+    <div class="code-block">&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Meu Projeto Bootstrap&lt;/title&gt;
+  &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+  &lt;h1 class="text-center text-primary mt-5"&gt;Olá, Investidores!&lt;/h1&gt;
+
+  &lt;script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</div>
+    <div class="callout yellow">
+      <div class="callout-title">Explicação do código</div>
+      Inserimos a tag &lt;link&gt; no &lt;head&gt; puxando o arquivo bootstrap.min.css, imediatamente o navegador entende classes como text-center (centraliza o texto), text-primary (pinta o texto de azul padrão) e mt-5 (aplica uma margem no topo de tamanho 5). No final, o &lt;script&gt; carrega as funções interativas.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.1 · Exercício Guiado</div>
+    <h2>Exercício: Seu Primeiro Botão</h2>
+    <div class="callout green">
+      <div class="callout-title">Tarefa Prática</div>
+      <ol>
+        <li>Abram os editores de código de vocês. Crie um arquivo index.html.</li>
+        <li>Copiem os links da CDN do site oficial do Bootstrap (https://getbootstrap.com/).</li>
+        <li>No corpo do site, criem um botão HTML simples &lt;button&gt; e adicionem as classes class="btn btn-success".</li>
+        <li>Abram no navegador e vejam o <strong>botão verde</strong> e estilizado sem vocês terem escrito uma linha de CSS.</li>
+        <li>Depois adicione mais dois botões ao lado do primeiro. Pesquise na documentação do Bootstrap as classes para criar um botão <strong>vermelho de perigo</strong> (Danger) e um botão <strong>amarelo de aviso</strong> (Warning).</li>
+        <li>Aplique margens entre eles usando as classes de espaçamento do framework (como m-2).</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.2</div>
+    <h2>Conceito 2: O Sistema de Grid (Malha) de 12 Colunas</h2>
+    <p>O recurso mais poderoso do Bootstrap é o seu <strong>Sistema de Grid responsivo</strong>.</p>
+    <p>O mercado de tecnologia adotou um padrão de dividir a tela horizontalmente em <strong>12 colunas invisíveis</strong>.</p>
+    <div class="callout blue">
+      <div class="callout-title">Por que 12?</div>
+      Porque o número 12 é <strong>altamente divisível</strong>: você pode ter 1 bloco de 12 colunas (100% da tela), 2 blocos de 6 colunas (50/50), 3 blocos de 4 colunas (33% cada) ou 4 blocos de 3 colunas (25% cada).
+    </div>
+    <p>O Bootstrap usa três elementos essenciais para isso:</p>
+    <ul>
+      <li>o <code>.container</code> (que centraliza e dá limites ao conteúdo),</li>
+      <li>a <code>.row</code> (que cria uma linha invisível para alinhar os itens) e</li>
+      <li>as <code>.col</code> (que definem o espaço que cada item vai ocupar).</li>
+    </ul>
+    <p>O melhor de tudo é que você pode combinar isso com breakpoints (ex: <code>.col-md-6</code>) para definir que um elemento ocupe 6 colunas no tablet, mas 12 colunas no celular.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.2 · Demonstração Prática</div>
+    <h2>Criando um Layout de Três Colunas</h2>
+    <p>Observem como criar um layout de três colunas que se transforma em uma coluna única em telas de celular, garantindo a abordagem Mobile-First.</p>
+    <div class="code-block">&lt;div class="container"&gt;
+  &lt;div class="row"&gt;
+    &lt;div class="col-12 col-md-4 bg-light border p-3"&gt;
+      Coluna 1 - Produto A
+    &lt;/div&gt;
+    &lt;div class="col-12 col-md-4 bg-light border p-3"&gt;
+      Coluna 2 - Produto B
+    &lt;/div&gt;
+    &lt;div class="col-12 col-md-4 bg-light border p-3"&gt;
+      Coluna 3 - Produto C
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</div>
+    <div class="callout yellow">
+      <div class="callout-title">Explicação do código</div>
+      O .container segura tudo. A .row garante que as colunas fiquem lado a lado. A classe col-12 diz: "no celular (padrão), ocupe todo o espaço". A classe col-md-4 diz: "quando chegar no tamanho de tablet para cima, divida a tela ocupando apenas 4 das 12 colunas disponíveis (ou seja, 1/3 da tela)".
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.2 · Exercício Guiado</div>
+    <h2>Exercício: Aplicando o Grid Responsivo</h2>
+    <div class="callout green">
+      <div class="callout-title">Tarefa Prática</div>
+      <ol>
+        <li>Crie uma nova .row dentro do seu .container. Dentro dela, crie duas colunas: a primeira deve ser um menu lateral (sidebar) ocupando 3 colunas em telas grandes (col-lg-3).</li>
+        <li>A segunda será o conteúdo principal, ocupando 9 colunas (col-lg-9). Coloquem cores de fundo diferentes nelas para visualizar.</li>
+        <li>Modifique o exercício para que, em telas do tamanho de tablet (md), a sidebar ocupe 4 colunas e o conteúdo principal ocupe 8 colunas.</li>
+        <li>No celular (tamanho padrão), ambas devem empilhar, ocupando col-12. Testem no Inspecionar do navegador.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.3</div>
+    <h2>Conceito 3: Refatorando com Componentes Prontos</h2>
+    <p>Além do layout em Grid, o Bootstrap fornece "<strong>Componentes</strong>", que são blocos de interface pré-construídos com HTML, CSS e JavaScript já embutidos.</p>
+    <p>Imagine precisar criar um menu de navegação responsivo (<strong>Navbar</strong>) que vira um botão "hambúrguer" no celular; fazer isso do zero leva horas. Com o Bootstrap, basta copiar a estrutura da Navbar da documentação oficial e colar no seu projeto, ajustando apenas os links e os nomes.</p>
+    <div class="callout blue">
+      <div class="callout-title">Cards e Modais</div>
+      O mesmo vale para <strong>Cards</strong> (caixas de exibição de conteúdo, ideais para e-commerces e dashboards) e <strong>Modais</strong> (aquelas janelas de pop-up que saltam na tela exigindo uma ação do usuário, como confirmar a exclusão de um dado).
+    </div>
+    <p>Saber utilizar a documentação para colar e adaptar esses componentes é uma das habilidades mais exigidas de desenvolvedores front-end juniores.</p>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.3 · Demonstração Prática</div>
+    <h2>Estrutura de um Componente: Card</h2>
+    <p>Vejamos a estrutura de um Card básico, muito utilizado para exibir perfis de usuários ou produtos do nosso sistema.</p>
+    <div class="code-block">&lt;div class="card" style="width: 18rem;"&gt;
+  &lt;img src="https://via.placeholder.com/150" class="card-img-top" alt="Imagem do Produto"&gt;
+  &lt;div class="card-body"&gt;
+    &lt;h5 class="card-title"&gt;Nome do Produto&lt;/h5&gt;
+    &lt;p class="card-text"&gt;Descrição curta do nosso produto revolucionário que será apresentado na feira.&lt;/p&gt;
+    &lt;a href="#" class="btn btn-primary"&gt;Comprar Agora&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</div>
+    <div class="callout yellow">
+      <div class="callout-title">Explicação do código</div>
+      A classe pai .card cria a moldura. A tag &lt;img&gt; com .card-img-top ajusta a imagem perfeitamente ao topo. O .card-body dá o espaçamento interno, e o botão btn btn-primary finaliza o design com uma chamada para ação clara.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.3 · Exercício Guiado</div>
+    <h2>Exercício: Utilizando Navbar e Cards</h2>
+    <div class="callout green">
+      <div class="callout-title">Tarefa Prática</div>
+      <ol>
+        <li>Acessem a documentação do Bootstrap e <strong>pesquisem</strong> por "Navbar".</li>
+        <li><strong>Copiem</strong> o código do primeiro exemplo e <strong>colem</strong> no topo do &lt;body&gt; do seu HTML.</li>
+        <li><strong>Atualizem</strong> a página e vejam um menu completo funcionando.</li>
+        <li>Abaixo da sua Navbar, <strong>crie</strong> um Grid (container, row) e <strong>adicione</strong> 3 Cards (como o do exemplo) lado a lado em telas de desktop, garantindo que fiquem um debaixo do outro em telas móveis.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.4</div>
+    <h2>Conceito 4: Customização via Variáveis CSS</h2>
+    <p>Se todo mundo usar o Bootstrap, todos os sites do mundo ficarão com a mesma cara, certo? É aí que entra a <strong>Customização via Variáveis CSS</strong>.</p>
+    <p>O Bootstrap moderno permite que você reescreva as cores e fontes padrão sem precisar alterar os arquivos originais da CDN.</p>
+    <p>Você cria o seu próprio arquivo style.css, importa ele <strong>depois</strong> da tag do Bootstrap no HTML, e <strong>reescreve</strong> as variáveis globais na <strong>pseudoclasse</strong> :root.</p>
+    <div class="callout blue">
+      <div class="callout-title">Identidade Visual</div>
+      Assim, você mantém a estrutura robusta do framework, mas garante que o visual fique exatamente com a identidade visual da sua empresa ou startup. É o equilíbrio perfeito entre agilidade de produção e design exclusivo, uma exigência constante de diretores de arte no mercado.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.4 · Demonstração Prática</div>
+    <h2>Reescrevendo a Identidade do Projeto</h2>
+    <p>Como mudar a cor "Primary" padrão (azul) do Bootstrap para um tom de roxo da nossa marca.</p>
+    <div class="code-block">&lt;!-- HTML --&gt;
+&lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+&lt;link href="style.css" rel="stylesheet"&gt;
+
+/* No arquivo style.css */
+:root {
+  /* Reescrevendo a variável de cor primária do Bootstrap */
+  --bs-primary: #6f42c1;
+  --bs-primary-rgb: 111, 66, 193;
+
+  /* Alterando o arredondamento padrão dos botões e cards */
+  --bs-border-radius: 0.2rem;
+}
+
+/* Forçando a mudança no botão para garantir a compatibilidade */
+.btn-primary {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}</div>
+    <div class="callout yellow">
+      <div class="callout-title">Explicação do código</div>
+      Ao mexer no :root, estamos dizendo ao navegador: "Sempre que o Bootstrap tentar usar a cor primária dele, substitua pela minha cor #6f42c1". O CSS obedece a regra de cascata, então nosso arquivo ganha prioridade.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 2.4 · Exercício Guiado</div>
+    <h2>Exercício: Aplicando Identidade Própria</h2>
+    <div class="callout green">
+      <div class="callout-title">Tarefa Prática</div>
+      <ol>
+        <li>Crie um arquivo style.css e linke no seu HTML. Altere a variável --bs-success para uma cor verde bem escura e estilize o botão "success" que vocês criaram no primeiro exercício.</li>
+        <li>Utilizando as variáveis CSS customizadas, mude a fonte global de todo o site (--bs-body-font-family) para alguma fonte importada do <strong>Google Fonts</strong> (ex: Roboto ou Montserrat).</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2>Demonstração Aplicada</h2>
+      <p>Construindo uma página completa com as ferramentas aprendidas.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 3</div>
+    <h2>Cenário Real: Landing Page Corporativa</h2>
+    <p>Vamos criar um pequeno cenário real de aplicação. Imaginem que a tela inicial da nossa plataforma precisa de um menu, um banner central e a apresentação de 3 módulos do sistema.</p>
+    <h3>Passo a passo lógico (Parte 1)</h3>
+    <ul>
+      <li><strong>Estrutura Base:</strong> Importo o Bootstrap via CDN e o meu custom.css logo em seguida.</li>
+      <li><strong>Navbar:</strong> Colo o componente <strong>Navbar</strong> no topo e troco a classe bg-light por bg-dark e navbar-dark para ter um menu elegante e escuro.</li>
+      <li><strong>Hero Section (Banner):</strong> Crio uma div com as classes container-fluid bg-primary text-white text-center py-5. Isso cria um banner de ponta a ponta (container-fluid), com padding no eixo Y (py-5).</li>
+    </ul>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 3</div>
+    <h2>Cenário Real: Landing Page Corporativa</h2>
+    <h3>Passo a passo lógico (Parte 2)</h3>
+    <ul>
+      <li><strong>Grid de Módulos:</strong> Crio um .container, uma .row e três .col-md-4.</li>
+      <li><strong>Cards:</strong> Dentro de cada .col-md-4, insiro um componente .card.</li>
+      <li><strong>Modal Integrado:</strong> No último Card, coloco um botão que dispara um componente <strong>Modal</strong>. Esse Modal exibe um formulário de "Contato com a equipe", que só aparece por cima da tela quando o investidor clica no botão.</li>
+    </ul>
+    <div class="callout blue">
+      <div class="callout-title">Agilidade</div>
+      Tudo isso é feito apenas utilizando os atributos data-bs-toggle="modal" data-bs-target="#meuModal" no HTML, sem eu ter que escrever JavaScript no momento.
+    </div>
+    <p>O resultado é uma landing page corporativa altamente profissional, criada em menos de 20 minutos de digitação de HTML, que atende perfeitamente ao requisito de interface de mercado.</p>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <h2>Casos Reais do Mercado</h2>
+      <p>Como grandes empresas e startups validam suas ideias e operam no dia a dia.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 4</div>
+    <h2>Aplicação Prática no Mercado de Trabalho</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <h4>Validação de MVP em Startups</h4>
+        <p>Quando uma startup tem uma ideia de negócio genial, ela não tem meses para desenhar o design perfeito. Ela precisa criar um <strong>MVP (Produto Mínimo Viável)</strong> rapidamente. O Bootstrap é a ferramenta número 1 para isso.</p>
+        <p>Startups como o <strong>Twitter</strong> (que inclusive criou a versão inicial do Bootstrap) utilizam bibliotecas de componentes para validar se os usuários gostam da aplicação antes de investir em designers caríssimos.</p>
+      </div>
+      <div class="col-card">
+        <h4>Sistemas de Back-office (Painéis)</h4>
+        <p>Pensem em um sistema interno de um supermercado para registrar produtos e funcionários (o famoso CRUD). O cliente interno não se importa se o botão tem uma animação 3D; ele quer que a tabela funcione e que seja legível.</p>
+        <p>Templates baseados em Bootstrap, como o <strong>AdminLTE</strong>, são a espinha dorsal de milhões de sistemas gerenciais ao redor do mundo por sua robustez e fácil integração com tabelas de bancos de dados.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <h2>FAQ — Dúvidas Reais de Alunos</h2>
+      <p>Perguntas frequentes e melhores práticas com o Bootstrap.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 5 · FAQ</div>
+    <h2>Perguntas Frequentes (1/2)</h2>
+    <div class="faq-item">
+      <div class="faq-q">Qual a diferença entre usar Bootstrap e usar o Tailwind CSS?</div>
+      <div class="faq-a">O <strong>Bootstrap</strong> te entrega <strong>componentes pré-prontos</strong> (ex: você escreve .btn e ele te dá um botão inteiro, com cor, sombra e borda). O <strong>Tailwind</strong> é <strong>focado em "utilitários"</strong> (ex: você escreve as classes da cor, do padding, da borda, uma a uma). O Bootstrap é mais rápido para quem quer peças prontas; o Tailwind dá mais liberdade criativa avançada.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Se eu usar Bootstrap, as empresas vão achar que sou um desenvolvedor preguiçoso?</div>
+      <div class="faq-a"><strong>Absolutamente não</strong>. A indústria prioriza a eficiência e a entrega de valor. Saber customizar um framework é uma <strong>habilidade valiosa</strong>. O problema é não saber adaptar o framework à marca do cliente.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">O que é essa tag CDN e por que não baixar o arquivo localmente para o meu projeto?</div>
+      <div class="faq-a">CDN entrega o arquivo a partir do servidor mais próximo fisicamente do usuário. Além disso, se o usuário já visitou outro site que usa a mesma CDN do Bootstrap, o arquivo já estará no cache do navegador dele, fazendo seu site carregar instantaneamente.</div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 5 · FAQ</div>
+    <h2>Perguntas Frequentes (2/2)</h2>
+    <div class="faq-item">
+      <div class="faq-q">Por que o Grid do Bootstrap usa 12 colunas e não 10 ou 100?</div>
+      <div class="faq-a">Matemática pura. O número 12 pode ser perfeitamente dividido por 1, 2, 3, 4, 6 e 12. O número 10 só divide por 1, 2, 5 e 10. Ter 12 colunas te permite criar layouts muito mais flexíveis (ex: dividir a tela em 3 partes exatas de 4 colunas).</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Posso misturar meu código de CSS puro e antigo com as classes do Bootstrap no mesmo projeto?</div>
+      <div class="faq-a"><strong>Sim!</strong> O ideal é que você use as classes do Bootstrap para 90% do trabalho (layout, margens, cores base) e escreva CSS puro (no seu arquivo customizado) apenas para os 10% de detalhes ultra-específicos, como uma animação customizada ou uma sobreposição complexa.</div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <h2>Desafio Prático</h2>
+      <p>Refatorando o seu projeto para ganhar cara de produto final.</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 6</div>
+    <h2>Desafio Prático — Refatorando a Interface</h2>
+    <div class="callout blue">
+      <div class="callout-title">Contexto</div>
+      Agora vamos aplicar esse poder de fogo à nossa Situação de Aprendizagem. Na aula anterior, vocês fizeram páginas responsivas "na unha". Agora, a tarefa é refatorar (reescrever de maneira melhorada) a interface do projeto para ganhar cara de produto final utilizando Bootstrap.
+    </div>
+    <h3>Requisitos</h3>
+    <ul>
+      <li><strong>Integração:</strong> Adicione os links da CDN do Bootstrap (CSS e JS) nos três arquivos HTML que vocês possuem: Login, Dashboard Inicial e Formulário de Cadastro.</li>
+      <li><strong>Refatoração Geral:</strong> Substituam todo o CSS manual de layout pelo sistema de Grid do Bootstrap.</li>
+      <li><strong>Componentes:</strong> A tela de <strong>Dashboard</strong> deve obrigatoriamente ter um componente <strong>Navbar</strong> no topo. O conteúdo principal do Dashboard deve ser composto por componentes <strong>Cards</strong> organizados em Grid (lado a lado no desktop, empilhados no mobile).</li>
+      <li><strong>Interatividade (Modal):</strong> Na tela de Formulário de Cadastro, o botão de "Salvar" não deve enviar os dados imediatamente. Ele deve abrir um <strong>Modal</strong> do Bootstrap perguntando: <em>"Deseja confirmar a gravação dos dados?"</em> com botões de Sim e Não.</li>
+      <li><strong>Customização Visual:</strong> Vocês devem criar um arquivo style.css e utilizar as Variáveis CSS para alterar a cor primária (Primary) e secundária (Secondary) do Bootstrap para as cores oficiais do logotipo do projeto da equipe de vocês.</li>
+    </ul>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 6</div>
+    <h2>Desafio Prático — Resultado e Sugestões</h2>
+    <div class="callout green">
+      <div class="callout-title">Resultado Esperado</div>
+      Três páginas totalmente responsivas, interativas (com menu expansível e modais funcionando) e estilizadas com a identidade visual da equipe, sem depender de centenas de linhas de CSS customizado, garantindo profissionalismo na visualização.
+    </div>
+    <div class="callout yellow">
+      <div class="callout-title">Sugestões de Solução</div>
+      <ol>
+        <li>Comecem limpando o arquivo CSS antigo para não dar conflito.</li>
+        <li>Foquem em ler a documentação no site getbootstrap.com.</li>
+        <li>Não tentem decorar classes; usem a ferramenta de busca do site deles.</li>
+        <li>Primeiro façam a estrutura funcionar crua, e por último apliquem a customização via :root.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="slide-label">Seção 7</div>
+    <h2>Conexão com a Situação de Aprendizagem</h2>
+    <p>Vocês estão desenvolvendo e implantando soluções digitais inovadoras. A banca vai julgar a usabilidade e a integridade da aplicação.</p>
+    <div class="callout blue">
+      <div class="callout-title">Impacto da Qualidade</div>
+      Ao integrar um framework de mercado como o Bootstrap, vocês cumprem imediatamente requisitos não funcionais de interface de altíssima qualidade. O layout que antes demandava dias de ajuste fino em CSS, agora é padronizado rapidamente.
+    </div>
+    <p>Isso deixa a equipe com tempo livre para focar no que realmente torna o sistema funcional: a estruturação do Banco de Dados e as lógicas de negócio em PHP, garantindo que o protótipo apresentado seja atraente visualmente e robusto tecnologicamente.</p>
+  </div>
+
+</div><nav id="nav">
+  <button id="btn-prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+  <span id="slide-counter">1 / 27</span>
+  <button id="btn-next" onclick="changeSlide(1)">Próximo →</button>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === total - 1;
+    document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function changeSlide(dir) { showSlide(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'  || e.key === 'PageUp')   changeSlide(-1);
+  });
+
+  // Touch swipe
+  let touchX = 0;
+  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) changeSlide(dx < 0 ? 1 : -1);
+  });
+
+  // Init progress bar
+  document.getElementById('progress-bar').style.width = (1 / total * 100) + '%';
+</script>
+</body>
+</html>
