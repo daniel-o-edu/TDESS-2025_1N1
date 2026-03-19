@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercícios - Aula 10 Bootstrap</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Alterando a variável --bs-success para uma cor verde bem escura */
+            --bs-success: #004d00;
+            --bs-success-rgb: 0, 77, 0;
+
+            /* Mudando a fonte global de todo o site para Roboto */
+            --bs-body-font-family: 'Roboto', sans-serif;
+        }
+
+        /* Forçando a mudança no botão para garantir a compatibilidade */
+        .btn-success {
+            background-color: var(--bs-success);
+            border-color: var(--bs-success);
+        }
+
+        /* Cores de fundo auxiliares para visualizar o grid do Exercício 2 */
+        .bg-sidebar { background-color: #f8f9fa; }
+        .bg-main { background-color: #e9ecef; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Meu Projeto</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Módulos</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="mb-5">
+            <h2>Exercício 1: Botões</h2>
+            <button class="btn btn-success m-2">Sucesso (Customizado)</button>
+            <button class="btn btn-danger m-2">Perigo (Danger)</button>
+            <button class="btn btn-warning m-2">Aviso (Warning)</button>
+        </div>
+
+        <div class="mb-5">
+            <h2>Exercício 2 & 3: Grid Responsivo e Cards</h2>
+            <div class="row">
+                <div class="col-12 col-md-4 col-lg-3 bg-sidebar border p-3">
+                    <h4>Menu Lateral</h4>
+                    <p>Esta sidebar ocupa 3 colunas no desktop, 4 no tablet e 12 no celular.</p>
+                </div>
+                
+                <div class="col-12 col-md-8 col-lg-9 bg-main border p-3">
+                    <h4>Conteúdo Principal</h4>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12 col-md-4 mb-3">
+                            <div class="card">
+                                <img src="https://via.placeholder.com/150" class="card-img-top" alt="Produto A">
+                                <div class="card-body">
+                                    <h5 class="card-title">Produto A</h5>
+                                    <p class="card-text">Descrição curta do produto A.</p>
+                                    <a href="#" class="btn btn-primary">Comprar Agora</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 mb-3">
+                            <div class="card">
+                                <img src="https://via.placeholder.com/150" class="card-img-top" alt="Produto B">
+                                <div class="card-body">
+                                    <h5 class="card-title">Produto B</h5>
+                                    <p class="card-text">Descrição curta do produto B.</p>
+                                    <a href="#" class="btn btn-primary">Comprar Agora</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 mb-3">
+                            <div class="card">
+                                <img src="https://via.placeholder.com/150" class="card-img-top" alt="Produto C">
+                                <div class="card-body">
+                                    <h5 class="card-title">Produto C</h5>
+                                    <p class="card-text">Descrição curta do produto C.</p>
+                                    <a href="#" class="btn btn-primary">Comprar Agora</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
