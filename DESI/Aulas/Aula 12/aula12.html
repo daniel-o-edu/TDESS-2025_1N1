@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 12 - Acessibilidade web</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0d2a4a;
+    --ink-light: #1e4976;
+    --accent: #1565c0;
+    --accent2: #1976d2;
+    --accent3: #0288d1;
+    --bg: #e8f0fe;
+    --surface: #ffffff;
+    --border: #b3cde8;
+    --code-bg: #eaf2fb;
+    --tag-bg: #dceefb;
+    --tag-border: #1976d2;
+    --slide-max: 90%;
+    --slide-title-max: 70%;
+  }
+
+  html, body {
+    font-family: 'Roboto', sans-serif;
+    background: #c5d8f0;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── IMAGENS DE FUNDO ── */
+  .slide-cover {
+    background-image: url('https://i.ibb.co/fzwwYWW6/img-frente01.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.82);
+    border-radius: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-cover > * { position: relative; z-index: 1; }
+
+  .slide-section {
+    background-image: url('https://i.ibb.co/1tBjw9p9/img-tit01.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.80);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-section > * { position: relative; z-index: 1; }
+
+  .slide-common {
+    background-image: url('https://i.ibb.co/m1J6vPd/img-frente02.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-common::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.88);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-common > * { position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  #nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    height: 52px;
+    box-shadow: 0 -2px 12px rgba(13,42,74,.28);
+  }
+  #nav button {
+    background: none; border: none;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 24px;
+    height: 52px;
+    transition: background .15s;
+  }
+  #nav button:hover { background: rgba(255,255,255,.12); }
+  #nav button:disabled { opacity: .35; cursor: default; }
+  #slide-counter {
+    color: rgba(255,255,255,.65);
+    font-size: .85rem;
+    min-width: 80px;
+    text-align: center;
+    font-family: 'Source Code Pro', monospace;
+  }
+
+  /* ── PROGRESS ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 101;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--accent2);
+    transition: width .3s ease;
+  }
+
+  /* ── SLIDE WRAPPER ── */
+  #stage {
+    min-height: 100vh;
+    padding: 0 0 52px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── SLIDES GENÉRICOS ── */
+  .slide {
+    display: none;
+    width: var(--slide-max);
+    max-width: var(--slide-max);
+    min-height: calc(100vh - 52px);
+    background: var(--surface);
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 4px 32px rgba(13,42,74,.12);
+    padding: 7vh 8vw;
+    animation: fadeIn .3s ease;
+    margin: 0 auto;
+  }
+  .slide.active { display: block; }
+
+  .slide.slide-section,
+  .slide.slide-cover {
+    width: var(--slide-title-max);
+    max-width: var(--slide-title-max);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .slide-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .slide h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .slide h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--accent2);
+    padding-left: 14px;
+  }
+  .slide h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    font-weight: 700;
+    color: var(--ink-light);
+    margin: 20px 0 10px;
+  }
+  .slide p {
+    font-size: clamp(.95rem, 2vw, 1.05rem);
+    line-height: 1.75;
+    color: var(--ink-light);
+    margin-bottom: 14px;
+  }
+  .slide ul, .slide ol {
+    padding-left: 22px;
+    margin-bottom: 14px;
+  }
+  .slide li {
+    font-size: clamp(.93rem, 2vw, 1.02rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+  }
+  .slide li strong { color: var(--ink); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 24px 0;
+  }
+
+  /* ── COVER ── */
+  .cover-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .cover-meta span {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: .8rem;
+    padding: 4px 12px;
+    color: var(--ink-light);
+  }
+  .cover-desc {
+    font-size: clamp(1rem, 2.2vw, 1.15rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    border-left: 3px solid var(--border);
+    padding-left: 18px;
+    margin: 24px 0;
+  }
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .topic-chip {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 3px;
+    padding: 10px 14px;
+    font-size: .95rem;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent2);
+    border-radius: 3px;
+    padding: 18px 20px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: clamp(.78rem, 1.6vw, .88rem);
+    line-height: 1.65;
+    color: var(--ink);
+    overflow-x: auto;
+    margin: 16px 0;
+    white-space: pre;
+  }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: clamp(.93rem, 2vw, 1.02rem);
+    line-height: 1.7;
+  }
+  .callout.blue {
+    background: #dceefb;
+    border-left: 4px solid var(--accent2);
+    color: var(--ink);
+  }
+  .callout.green {
+    background: #e1f5e8;
+    border-left: 4px solid #2e7d32;
+    color: #1a3a28;
+  }
+  .callout.red {
+    background: #e3f0fb;
+    border-left: 4px solid var(--accent);
+    color: var(--ink);
+  }
+  .callout.yellow {
+    background: #e8f4fd;
+    border-left: 4px solid var(--accent3);
+    color: var(--ink);
+  }
+  .callout .callout-title {
+    font-weight: 700;
+    font-family: 'Roboto', sans-serif;
+    font-size: .78rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: .75;
+  }
+
+  /* ── TWO COLUMN ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin: 16px 0;
+  }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  .col-card {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 18px;
+  }
+  .col-card h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(.85rem, 1.8vw, .95rem);
+  }
+  thead th {
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: .85rem;
+    letter-spacing: .04em;
+  }
+  tbody tr:nth-child(even) { background: var(--code-bg); }
+  tbody tr:hover { background: #d0e8f8; }
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-light);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  tbody td strong { color: var(--ink); }
+
+  /* ── ENTITY CARDS ── */
+  .entity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .entity-card {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .entity-card .entity-name {
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    padding: 10px 14px;
+    font-size: 1rem;
+  }
+  .entity-card ul {
+    padding: 12px 18px;
+    margin: 0;
+  }
+  .entity-card li {
+    font-size: .9rem;
+    color: var(--ink-light);
+    margin-bottom: 4px;
+  }
+
+  /* ── FAQ ── */
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .faq-q {
+    background: var(--code-bg);
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: clamp(.93rem, 2vw, 1rem);
+    color: var(--ink);
+    border-left: 4px solid var(--accent2);
+  }
+  .faq-a {
+    padding: 12px 18px;
+    font-size: clamp(.9rem, 1.9vw, .98rem);
+    color: var(--ink-light);
+    line-height: 1.7;
+    background: var(--surface);
+  }
+
+  /* ── NUMBERED STEPS ── */
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    background: var(--accent2);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: .9rem;
+    font-family: 'Source Code Pro', monospace;
+    margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-body p { margin: 0; }
+
+  /* ── SECTION HEADER SLIDES ── */
+  .section-header {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .section-num {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 3rem;
+    font-weight: 600;
+    color: #b3cde8;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .section-header h2 {
+    border: none;
+    padding: 0;
+    text-align: center;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--ink);
+  }
+  .section-header p {
+    max-width: 560px;
+    margin: 16px auto 0;
+    text-align: center;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .slide { padding: 28px 22px 36px; width: 97%; max-width: 97%; }
+    .slide.slide-section, .slide.slide-cover { width: 97%; max-width: 97%; }
+    #nav button { padding: 0 14px; font-size: .9rem; }
+  }
+  @media (max-width: 400px) {
+    .slide { padding: 20px 14px 28px; }
+  }
+</style>
+</head>
+<body>
+<div id="progress"><div id="progress-bar"></div></div>
+<div id="stage">
+
+  <div class="slide slide-cover active">
+    <div class="slide-label">Bloco 02</div>
+    <h1>Aula 12 Acessibilidade web</h1>
+    <p class="cover-desc">Descrição da Aula: Nesta aula, vamos mergulhar no universo da acessibilidade digital, compreendendo como projetar interfaces inclusivas seguindo as diretrizes WCAG 2.1. Exploraremos a utilização prática de atributos ARIA, o correto emprego da tag alt em imagens e a garantia de uma navegação fluida via teclado. A aula adota uma abordagem prática de auditoria utilizando a ferramenta Lighthouse (DevTools), culminando em um code review orientado por um checklist de acessibilidade, onde cada equipe deverá corrigir ao menos três problemas identificados em seus projetos.</p>
+    <hr class="divider">
+    <h3>Entregas da aula: Relatório Lighthouse + correções aplicadas no projeto.</h3>
+    <div class="topics-grid">
+      <div class="topic-chip">Abertura</div>
+      <div class="topic-chip">Conceitos Fundamentais</div>
+      <div class="topic-chip">FAQ - Dúvidas Reais</div>
+      <div class="topic-chip">Atividade Prática Guiada</div>
+      <div class="topic-chip">Conexão com o Curso</div>
+    </div>
+    <div class="cover-meta">
+      <span>Aula 12</span>
+      <span>Acessibilidade</span>
+      <span>Front-end</span>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Seção 1</div>
+    <h2>1. Abertura (Contexto da aula)</h2>
+    <p>Até o momento, vocês construíram páginas incríveis e responsivas para o produto digital da nossa Situação de Aprendizagem. Porém, um bom produto tecnológico não é apenas visualmente agradável; ele precisa ser utilizável por todas as pessoas, independentemente de suas limitações físicas, motoras ou cognitivas.</p>
+    <p>Atender a requisitos de qualidade e usabilidade é uma capacidade técnica fundamental.</p>
+    <p>Hoje, deixaremos o design estético um pouco de lado para focar na engenharia por trás da inclusão digital.</p>
+    <div class="callout red">
+      <div class="callout-title">Atenção</div>
+      Garantir acessibilidade é uma exigência legal e ética no mercado atual.
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>Conceitos Fundamentais e Base Técnica</h2>
+      <p>Compreendendo as diretrizes de acessibilidade na web e sua aplicação prática no front-end.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conceito 1</div>
+    <h2>Diretrizes WCAG 2.1 e Navegação por Teclado</h2>
+    <div class="callout blue">
+      <div class="callout-title">A. Pergunta</div>
+      Se o seu mouse parasse de funcionar agora, você conseguiria navegar, preencher um formulário e finalizar uma compra no seu site apenas utilizando a tecla Tab e Enter?
+    </div>
+    <div class="callout yellow">
+      <div class="callout-title">B. Cenário Real</div>
+      Imagine um usuário com deficiência motora severa que utiliza um head pointer (ponteiro de cabeça) e um teclado adaptado para navegar na web. Se o seu site não possuir foco visível ou se os botões não puderem ser acessados sequencialmente, esse usuário ficará bloqueado na primeira página e abandonará a plataforma, gerando perda de clientes e possível passivo jurídico para a empresa.
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conceito 1 · Explicação Teórica</div>
+    <h2>O Padrão WCAG 2.1</h2>
+    <p>A acessibilidade na web é regida por um conjunto internacional de diretrizes chamado WCAG (Web Content Accessibility Guidelines), atualmente na versão 2.1.</p>
+    <p>Essas diretrizes baseiam-se em quatro princípios fundamentais, conhecidos pelo acrônimo POUR: o conteúdo deve ser Perceptível (Informação disponível aos sentidos), Operável (Interface navegável), Compreensível (Conteúdo claro) e Robusto (Funciona em diversas tecnologias - leitores de tela).</p>
+    <p>Compreender esses princípios é o primeiro passo para o desenvolvimento de sistemas alinhados aos padrões globais de qualidade e usabilidade.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">C. Explicação Teórica</div>
+    <h2>Princípios POUR - Parte 1</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <h4>Perceptível (Perceivable)</h4>
+        <p>Os usuários devem ser capazes de perceber as informações e os elementos da interface. Nada pode ser "invisível" a todos os sentidos do usuário.</p>
+        <p><strong>Na prática:</strong> Se você tem uma imagem importante, um usuário cego não pode vê-la. Para torná-la perceptível, você adiciona um texto alternativo (alt) que um leitor de tela (como o NVDA ou VoiceOver) lerá em voz alta. Outro exemplo é fornecer legendas para vídeos, beneficiando pessoas surdas.</p>
+      </div>
+      <div class="col-card">
+        <h4>Operável (Operable)</h4>
+        <p>Os componentes da interface e a navegação devem ser operáveis. A interface não pode exigir interações que o usuário não consiga realizar.</p>
+        <p><strong>Na prática:</strong> Muitas pessoas com deficiências motoras não conseguem usar um mouse, dependendo exclusivamente do teclado (ou de dispositivos adaptados) para navegar. Um site operável permite que todos os botões, links e formulários sejam acessados e ativados apenas usando as teclas Tab, Enter e Espaço, sem criar "armadilhas" onde o cursor fica preso.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">C. Explicação Teórica</div>
+    <h2>Princípios POUR - Parte 2</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <h4>Compreensível (Understandable)</h4>
+        <p>A informação e a operação da interface devem ser lógicas e claras.</p>
+        <p><strong>Na prática:</strong> Isso envolve usar uma linguagem simples e direta, evitar jargões desnecessários e garantir que o site se comporte de maneira previsível. Por exemplo, se um usuário preencher um formulário com erro, o site deve explicar claramente onde está o erro e como corrigi-lo, em vez de apenas piscar uma borda vermelha.</p>
+      </div>
+      <div class="col-card">
+        <h4>Robusto (Robust)</h4>
+        <p>O conteúdo deve ser robusto o suficiente para ser interpretado de forma confiável por uma ampla variedade de navegadores e tecnologias assistivas (softwares que ajudam pessoas com deficiência a usar o computador).</p>
+        <p><strong>Na prática:</strong> Isso significa escrever um código HTML semântico e limpo. Usar a tag &lt;button&gt; para botões e &lt;nav&gt; para navegação, em vez de criar tudo usando genéricas &lt;div&gt;. Um código bem estruturado é a base para que os leitores de tela entendam o que está acontecendo na página.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">C. Explicação Teórica</div>
+    <h2>Organização das Diretrizes WCAG</h2>
+    <p>A navegação por teclado é essencial não apenas para pessoas com deficiências visuais que usam leitores de tela, mas também para usuários com mobilidade reduzida, tendinites ou até mesmo usuários avançados (power users) que preferem a agilidade das teclas.</p>
+    <p>Para garantir que a navegação por teclado funcione corretamente, a ordem do código HTML deve ser lógica. O fluxo do documento (Document Object Model - DOM) dita como a tecla Tab percorre os elementos interativos, como links (&lt;a&gt;), botões (&lt;button&gt;) e campos de formulário (&lt;input&gt;).</p>
+    <p>O foco visual (aquela borda que aparece ao redor do elemento selecionado) jamais deve ser removido com CSS (outline: none;) sem que um substituto acessível seja providenciado.</p>
+    <p>As Diretrizes de Acessibilidade para Conteúdo Web (WCAG) são o padrão global para garantir que sites, aplicativos e documentos digitais sejam acessíveis a pessoas com deficiência. Elas são organizadas de forma cumulativa, o que significa que para atingir um nível mais alto, você precisa obrigatoriamente cumprir todos os requisitos dos níveis anteriores.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">C. Explicação Teórica</div>
+    <h2>Nível A: Requisitos básicos (Essencial)</h2>
+    <p>Este é o nível de sobrevivência da acessibilidade. Se um site não atende aos critérios do Nível A, ele é efetivamente impossível de ser usado por um grupo significativo de pessoas com deficiência.</p>
+    <p>O que ele exige: Soluções para as barreiras mais críticas.</p>
+    <p><strong>Exemplos práticos:</strong></p>
+    <ul>
+      <li>Fornecer texto alternativo (a tag alt) para imagens, para que leitores de tela possam descrevê-las para pessoas cegas.</li>
+      <li>Garantir que o site possa ser navegado usando apenas o teclado (sem depender do mouse).</li>
+      <li>Não usar cor como o único meio de transmitir uma informação (ex: "clique no botão vermelho para cancelar").</li>
+      <li>Fornecer legendas para vídeos pré-gravados.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">C. Explicação Teórica</div>
+    <h2>Nível AA: O padrão de mercado</h2>
+    <p>Este é o "ponto de equilíbrio" e a meta que a grande maioria das empresas e governos adota. Atingir o Nível AA significa que seu site é acessível para a maioria das pessoas, abrangendo uma ampla gama de deficiências físicas, visuais, auditivas e cognitivas. Hoje, é considerado o requisito legal básico em muitos países e na maioria das políticas corporativas.</p>
+    <p>O que ele exige: Barreiras removidas, com um foco maior na usabilidade confortável e flexibilidade para o usuário. (Lembre-se: inclui tudo do Nível A).</p>
+    <p><strong>Exemplos práticos:</strong></p>
+    <ul>
+      <li>Contraste de cor: O texto deve ter um contraste mínimo (geralmente 4.5:1) em relação ao fundo para ser lido confortavelmente por pessoas com baixa visão.</li>
+      <li>O site deve continuar legível e funcional se o usuário aplicar um zoom de até 200%.</li>
+      <li>Navegação consistente: os menus e a estrutura do site devem se repetir de forma previsível em todas as páginas.</li>
+      <li>Indicadores visíveis de foco (uma borda ao redor de links e botões quando navegados pelo teclado).</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">C. Explicação Teórica</div>
+    <h2>Nível AAA: Nível máximo (Especializado)</h2>
+    <p>Este é o padrão de excelência (Padrão Ouro). É o nível mais rigoroso e abrangente. A própria W3C (organização que cria a WCAG) alerta que não é recomendado exigir conformidade AAA para sites inteiros, pois muitas vezes é inviável tecnicamente ou compromete severamente o design para certos tipos de conteúdo.</p>
+    <p>O que ele exige: Melhorias que atendem a deficiências muito específicas, maximizando a clareza e o suporte técnico.</p>
+    <p><strong>Exemplos práticos:</strong></p>
+    <ul>
+      <li>Contraste de cor ainda mais alto (mínimo de 7:1).</li>
+      <li>Tradução de vídeos e áudios em Linguagem de Sinais (como Libras no Brasil).</li>
+      <li>Textos escritos em linguagem extremamente simplificada para pessoas com deficiências cognitivas ou de leitura, com glossários para jargões.</li>
+      <li>Nenhum limite de tempo para preencher formulários ou concluir tarefas.</li>
+    </ul>
+    <div class="callout blue">
+      <div class="callout-title">Resumo</div>
+      Comece garantindo o Nível A para que ninguém seja completamente bloqueado, mire e estabeleça o Nível AA como sua meta principal de lançamento, e reserve o Nível AAA para seções específicas do seu site que demandem o máximo de inclusão (como portais de serviços públicos especializados).
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conceito 1 · Explicação Técnica</div>
+    <h2>D. Explicação técnica & E. Exemplo de Código</h2>
+    <p>A navegação por teclado depende intrinsecamente do foco (:focus no CSS) e da ordem do DOM. Elementos nativos do HTML5, como &lt;button&gt; e &lt;a href="..."&gt;, já possuem comportamento de foco automático pelo navegador.</p>
+    <p>Elementos não interativos, como &lt;div&gt; ou &lt;span&gt;, não recebem foco. Se for estritamente necessário tornar uma &lt;div&gt; interativa (o que não é recomendado), deve-se utilizar o atributo tabindex="0" para incluí-la na ordem de tabulação. O tabindex="-1" remove um elemento nativo da tabulação, mas ainda permite que ele receba foco via JavaScript.</p>
+    <p>A propriedade CSS outline é a responsável por dar o feedback visual de onde o usuário está no momento.</p>
+    <div class="code-block">
+&lt;div class="botao-falso" onclick="enviar()"&gt;Enviar&lt;/div&gt;
+&lt;button class="botao-real" onclick="enviar()"&gt;Enviar&lt;/button&gt;
+&lt;style&gt;
+/* NUNCA remova o outline sem prover uma alternativa */
+.botao-real:focus { }
+/* Melhorando a visualização do foco para acessibilidade */
+outline: 3px solid #0056b3;
+outline-offset: 2px;
+&lt;/style&gt;
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conceito 1 · Prática</div>
+    <h2>Estudo de Caso e Exercícios</h2>
+    <div class="callout yellow">
+      <div class="callout-title">F. Estudo de Caso</div>
+      Uma grande varejista criou um modal de promoções lindo, mas esqueceu de "prender" o foco dentro do modal. Usuários de leitores de tela abriam o modal, apertavam a tecla Tab, e o foco ia para os elementos atrás do modal (na página obscurecida), tornando impossível fechar a propaganda ou continuar a navegação. A solução foi criar uma armadilha de foco (Focus Trap) via JavaScript para garantir que o usuário só navegasse dentro do modal até fechá-lo.
+    </div>
+    <div class="callout green">
+      <div class="callout-title">G. Exercícios</div>
+      1. Abra a página inicial do seu projeto. Desconecte (ou ignore) o seu mouse. Tente navegar por todos os links e botões da página utilizando apenas a tecla Tab. Anote os elementos que você não conseguiu acessar.
+      <br><br>
+      2. Inspecione o código do seu projeto para verificar o uso de tabulação.
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conceito 2</div>
+    <h2>Semântica e WAI-ARIA</h2>
+    <div class="callout blue">
+      <div class="callout-title">A. Pergunta</div>
+      Se uma imagem no seu site não carregar devido a problemas de rede, ou se um deficiente visual acessar seu site com um leitor de tela, como ele saberá qual é o conteúdo daquela imagem?
+    </div>
+    <div class="callout yellow">
+      <div class="callout-title">B. Cenário Real</div>
+      Desenvolvedores frequentemente criam menus dropdown complexos ou switches (botões de liga/desliga) estilizados com &lt;div&gt; e CSS. Para um leitor de tela usado por um deficiente visual, aquilo é apenas texto vazio e não interativo. O usuário cego não saberá se o botão está ligado ou desligado, gerando uma barreira crítica na utilização do software.
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conceito 2 · Explicação Teórica</div>
+    <h2>WAI-ARIA</h2>
+    <p>O HTML5 possui semântica própria, mas muitas vezes a criatividade do design exige componentes de interface que não têm uma tag HTML nativa equivalente (como um slider complexo ou um sistema de abas). É aqui que entra o WAI-ARIA (Web Accessibility Initiative - Accessible Rich Internet Applications).</p>
+    <p>O ARIA não muda o comportamento ou o visual de um elemento, ele apenas fornece metadados (informações extras) para tecnologias assistivas.</p>
+    <div class="callout red">
+      <div class="callout-title">Atenção</div>
+      A regra de ouro do ARIA é: O melhor ARIA é não usar ARIA. Sempre prefira as tags semânticas do HTML5 (&lt;nav&gt;, &lt;header&gt;, &lt;main&gt;, &lt;button&gt;). Use atributos ARIA apenas para preencher lacunas de semântica.
+    </div>
+    <p>O aria-hidden="true" esconde um elemento do leitor de tela (útil para ícones decorativos). O alt="" (vazio) diz ao leitor de tela para ignorar a imagem (útil para imagens puramente decorativas). Já o aria-expanded indica se um menu sanfona (accordion) está aberto (true) ou fechado (false).</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conceito 2 · Código</div>
+    <h2>E. Exemplo de Código</h2>
+    <div class="code-block">
+&lt;img src="grafico-vendas.png" alt="Gráfico de barras mostrando aumento de 20% nas vendas do trimestre"&gt;
+&lt;img src="linha-decorativa.png" alt=""&gt;
+&lt;button aria-label="Fechar janela" onclick="fechar Modal()"&gt;
+  &lt;i class="fas fa-times" aria-hidden="true"&gt;&lt;/i&gt;
+&lt;/button&gt;
+    </div>
+    <div class="callout yellow">
+      <div class="callout-title">F. Estudo de Caso</div>
+      Uma prefeitura lançou um portal para agendamento de consultas porque não cumpria o índice mínimo de 90% em acessibilidade exigido no contrato do cliente. O desenvolvedor front-end precisava de uma ferramenta rápida e integrada ao navegador para gerar relatórios, mapear os gargalos e atestar que suas correções resolveram o problema.
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conceito 3</div>
+    <h2>Auditoria com Lighthouse</h2>
+    <p><strong>C. Explicação teórica:</strong> O Lighthouse é uma ferramenta automatizada de código aberto incorporada ao Chrome DevTools, projetada para melhorar a qualidade das páginas da web.</p>
+    <p>Ele executa uma bateria de testes contra a página renderizada e gera um relatório abrangente sobre Desempenho, Acessibilidade, Melhores Práticas e SEO.</p>
+    <p>No pilar de Acessibilidade, o Lighthouse varre o DOM da página em busca de violações das regras WCAG, como contraste de cor insuficiente, falta de rótulos (labels) em formulários e hierarquia incorreta de cabeçalhos (&lt;h1&gt; a &lt;h6&gt;).</p>
+    <p>Auditar o software de forma automatizada garante agilidade no processo de desenvolvimento e está intimamente ligado à capacidade de aplicar boas práticas e garantir a qualidade do produto final. O relatório não apenas aponta o erro, mas indica exatamente em qual elemento ele ocorreu.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conceito 3 · Prática</div>
+    <h2>E. Estudo de Caso: A refatoração do Dashboard</h2>
+    <p>A equipe estava com uma nota 65 no Lighthouse. A análise apontou três problemas: botões pequenos demais em dispositivos móveis (falta de área de toque), contraste baixo entre o texto cinza claro e o fundo branco, e uso excessivo da tag &lt;h1&gt;.</p>
+    <p>Em apenas 30 minutos, a equipe corrigiu o padding dos botões, escureceu a cor da fonte (#333) e ajustou a semântica para &lt;h2&gt; e &lt;h3&gt;. A nova auditoria resultou em nota 98, habilitando o projeto para o pitch final.</p>
+    <div class="callout green">
+      <div class="callout-title">F. Exercícios</div>
+      1. Abra a página principal do seu projeto e rode o Google Lighthouse com foco exclusivo na categoria "Accessibility".
+      <br>
+      2. Salve o relatório inicial. Identifique os três piores erros listados.
+      <br>
+      3. No painel, clique em "Learn more" (Saiba mais) ao lado de um erro que você desconheça. Leia a documentação sugerida para entender o porquê daquele erro existir.
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Seção 3</div>
+    <h2>3. FAQ - Dúvidas Reais</h2>
+    <div class="faq-item">
+      <div class="faq-q">O contraste afeta temas escuros?</div>
+      <div class="faq-a">Muito! Temas escuros frequentemente sofrem com baixo contraste se forem usadas fontes em tons de cinza escuro ou botões escuros sem borda clara. O Lighthouse apontará falhas caso o contraste (ratio) entre o texto e o fundo seja menor que 4.5:1 para textos normais.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Qual a diferença entre esconder elementos com display: none e aria-hidden="true"?</div>
+      <div class="faq-a">O display: none oculta o elemento visualmente na tela E também o esconde do leitor de tela (remove da árvore de acessibilidade). Já o aria-hidden="true" mantém o elemento visível na tela para usuários videntes, mas faz com que as tecnologias assistivas (leitores de tela) ignorem completamente sua existência.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Seção 4</div>
+    <h2>4. Atividade Prática Guiada</h2>
+    <p><strong>Contexto do problema:</strong> A equipe precisa garantir que os formulários e a interface desenvolvidos até agora estejam prontos para o pitch com os investidores, seguindo rigorosos padrões de qualidade e documentação.</p>
+    <p><strong>Requisitos:</strong> Executar uma auditoria do projeto utilizando a ferramenta Lighthouse.</p>
+    <p><strong>Resultado esperado:</strong> Um relatório exportado pelo Lighthouse comprovando a melhora da nota e os commits no GitHub demonstrando as correções semânticas aplicadas na interface.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Seção 5</div>
+    <h2>5. Exercício: Auditoria nos Sites Senai SC</h2>
+    <div class="callout green">
+      <div class="callout-title">Mão na massa</div>
+      Abra os seguintes sites do Sesi/Senai abaixo e rode o Lighthouse (F12 do Chrome):
+      <ul>
+        <li>https://sesisc.org.br</li>
+        <li>https://sc.senai.br</li>
+        <li>https://estudante.sesisenai.org.br</li>
+        <li>https://ava.sesisenai.org.br</li>
+        <li>https://monitor.acessibilidade.gov.pt</li>
+      </ul>
+      <p>Identifique 3 falhas de acessibilidade para cegos ou surdos e explique como você as corrigiria usando código. DICA: teste também mais duas URLs específicas de cada site. Ex.: https://estudante.sesisenai.org.br/documentos</p>
+      <p>Faremos um relatório coletivo em sala a ser entregue ao SENAI SC apontando os principais pontos de melhoria.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Seção 6</div>
+    <h2>6. Conexão com o Curso</h2>
+    <p><strong>Aplicação na Situação de Aprendizagem:</strong> O projeto de vocês será avaliado por uma banca e deve possuir a capacidade de escalar para usuários reais no mercado de startups. Investidores não aportam capital em plataformas que limitam sua base de clientes ou expõem a empresa a processos de quebra de diretrizes de acessibilidade (como a Lei Brasileira de Inclusão).</p>
+    <p>Vocês acabaram de garantir que o produto digital atende perfeitamente ao Requisito Não Funcional (RNF) de Usabilidade, alinhado com a Capacidade Técnica (CT01). Todas as correções feitas e atestadas pelo relatório do Lighthouse hoje servem de documentação comprobatória da qualidade do software de vocês.</p>
+    <div class="callout blue">
+      <div class="callout-title">Próxima Aula</div>
+      Com a acessibilidade validada e a estrutura construída, vamos para a reta final do front-end na nossa Aula 13 - Revisão Frontend! Vamos integrar todas essas páginas num fluxo de navegação completo ($Login \rightarrow Dashboard \rightarrow Lista \rightarrow Formulario$), faremos revisões entre duplas e consolidaremos o versionamento no GitHub, deixando tudo pronto para nossa avaliação. Preparem-se para o fechamento do Bloco 02!
+    </div>
+  </div>
+
+</div>
+
+<nav id="nav">
+  <button id="btn-prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+  <span id="slide-counter">1 / 18</span>
+  <button id="btn-next" onclick="changeSlide(1)">Próximo →</button>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === total - 1;
+    document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function changeSlide(dir) { showSlide(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'  || e.key === 'PageUp')   changeSlide(-1);
+  });
+
+  // Touch swipe
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+  document.addEventListener('touchend', e => {
+    let touchEndX = e.changedTouches[0].screenX;
+    if (touchEndX < touchStartX - 50) changeSlide(1);
+    if (touchEndX > touchStartX + 50) changeSlide(-1);
+  });
+
+  // Init
+  showSlide(0);
+</script>
+</body>
+</html>

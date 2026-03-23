@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masterclass: Acessibilidade Web (a11y)</title>
+    <style>
+        :root {
+            --primary: #001a33;
+            --secondary: #0056b3;
+            --accent: #e6f2ff;
+            --text: #2c3e50;
+            --white: #ffffff;
+            --code-bg: #1e1e1e;
+            --practice-bg: #f0f7ff;
+            --practice-border: #0056b3;
+            --highlight: #ffcc00;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--primary);
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: var(--white);
+            padding: 60px 100px;
+            box-sizing: border-box;
+            animation: fadeIn 0.4s ease-out;
+            overflow-y: auto;
+        }
+
+        .slide.active { 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        h1 { font-size: 3rem; color: var(--primary); margin-bottom: 20px; border-left: 20px solid var(--secondary); padding-left: 25px; line-height: 1.1; }
+        h2 { font-size: 2.2rem; color: var(--secondary); margin-top: 10px; }
+        p, li { font-size: 1.5rem; line-height: 1.4; color: var(--text); }
+        
+        pre { 
+            background: var(--code-bg); 
+            color: #72f1b8; 
+            padding: 20px; 
+            border-radius: 12px; 
+            font-size: 1.2rem;
+            margin: 15px 0;
+            border-left: 10px solid var(--secondary);
+            overflow-x: auto;
+        }
+
+        .practice-box {
+            background: var(--practice-bg);
+            border-left: 8px solid var(--practice-border);
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .practice-box b { color: var(--secondary); text-transform: uppercase; font-size: 1rem; display: block; margin-bottom: 5px; }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        button {
+            padding: 12px 25px;
+            background: var(--primary);
+            color: white;
+            border: 2px solid var(--white);
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover { background: var(--secondary); transform: scale(1.05); }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 8px;
+            background: var(--secondary);
+            transition: width 0.3s;
+            z-index: 101;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            color: var(--primary);
+            background: var(--accent);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+<div class="slide-container" id="container"></div>
+<div class="slide-counter" id="counter">1 / 40</div>
+
+<div class="controls">
+    <button onclick="prev()">⬅ Anterior</button>
+    <button onclick="next()">Próximo ➡</button>
+</div>
+
+<script>
+    const slidesData = [
+        { t: "Acessibilidade Web (a11y)", c: "<h2>Construindo uma Internet para Todos</h2><p>Acessibilidade não é um 'recurso extra', é um direito fundamental. Nesta aula, aprenderemos a criar interfaces que funcionam para qualquer pessoa, independente de suas capacidades físicas ou técnicas.</p>" },
+        { t: "O que é Web Accessibility?", c: "<p>É a prática de garantir que não haja barreiras que impeçam a interação ou o acesso a sites por pessoas com deficiências físicas, sensoriais, cognitivas ou situacionais.</p>" },
+        { t: "Os 4 Pilares do P.O.U.R.", c: "<ul><li><b>Percebível:</b> Informação disponível aos sentidos.</li><li><b>Operável:</b> Interface navegável.</li><li><b>Compreensível:</b> Conteúdo claro.</li><li><b>Robusto:</b> Funciona em diversas tecnologias (leitores de tela).</li></ul>" },
+        { t: "Atividade I: Pesquisa em Dupla", c: "<h2>O Ecossistema da Acessibilidade</h2><p>Em duplas, pesquisem e listem:</p><ul><li>3 tipos de tecnologias assistivas além de leitores de tela.</li><li>O que significa a sigla 'a11y'?</li><li>Qual a multa prevista na LBI (Lei Brasileira de Inclusão) para sites inacessíveis?</li></ul>" },
+        { t: "WCAG 2.1: O Guia Definitivo", c: "<p>Web Content Accessibility Guidelines. É o padrão internacional de recomendações desenvolvido pelo W3C para tornar o conteúdo da web acessível.</p>" },
+        { t: "Níveis de Conformidade WCAG", c: "<ul><li><b>A:</b> Requisitos básicos (essencial).</li><li><b>AA:</b> O padrão de mercado (ideal para a maioria dos sites).</li><li><b>AAA:</b> Nível máximo (especializado).</li></ul>" },
+        { t: "Contraste de Cores no CSS", c: "<p>O texto deve ser legível contra o fundo. O nível AA exige uma proporção de 4.5:1 para texto normal.</p><pre>/* Exemplo de bom contraste */\nbody {\n  color: #2c3e50;\n  background-color: #ffffff;\n}</pre><div class='practice-box'><b>Uso Prático:</b> Evite cinza claro sobre branco; use ferramentas como o Adobe Color para validar.</div>" },
+        { t: "Semântica HTML: O Coração da a11y", c: "<p>Use as tags para o que elas servem. Um <code>&lt;button&gt;</code> avisa ao leitor de tela que é clicável; uma <code>&lt;div&gt;</code> não.</p>" },
+        { t: "Estrutura de Cabeçalhos (H1-H6)", c: "<p>Navegação por hierarquia. Nunca pule níveis (ex: pular do H2 para o H4) apenas por estética visual.</p><div class='practice-box'><b>Uso Prático:</b> Leitores de tela usam a tecla 'H' para saltar entre títulos e entender a estrutura.</div>" },
+        { t: "Atributos ARIA: O que são?", c: "<p>Accessible Rich Internet Applications. Atributos que preenchem lacunas onde o HTML semântico não consegue descrever o comportamento do elemento.</p>" },
+        { t: "A Regra de Ouro do ARIA", c: "<p>'Se você puder usar um elemento HTML nativo com a semântica correta, não use ARIA'.</p>" },
+        { t: "aria-label", c: "<p>Fornece um rótulo de texto para elementos que não possuem texto visível (como botões de ícone).</p><pre>&lt;button aria-label='Fechar Menu'&gt;X&lt;/button&gt;</pre><div class='practice-box'><b>Uso Prático:</b> Essencial para botões de redes sociais que usam apenas ícones de fonte.</div>" },
+        { t: "aria-hidden", c: "<p>Esconde elementos decorativos ou redundantes de tecnologias assistivas.</p><pre>&lt;i class='fa-heart' aria-hidden='true'&gt;&lt;/i&gt;</pre>" },
+        { t: "aria-expanded", c: "<p>Indica se um menu ou acordeão está aberto ou fechado.</p><pre>&lt;button aria-expanded='false'&gt;Ver mais&lt;/button&gt;</pre>" },
+        { t: "Navegação por Teclado", c: "<p>Muitos usuários usam apenas a tecla 'Tab'. Sua interface precisa suportar isso sem o uso do mouse.</p>" },
+        { t: "O Estado de :focus", c: "<p>Nunca remova o <code>outline: none</code> sem fornecer uma alternativa visual clara.</p><pre>a:focus {\n  outline: 3px solid var(--secondary);\n  outline-offset: 4px;\n}</pre><div class='practice-box'><b>Uso Prático:</b> O foco é o 'cursor do mouse' para quem navega via teclado.</div>" },
+        { t: "Ordem do Tab (tabindex)", c: "<p>O fluxo natural do HTML define a ordem do Tab. Evite valores positivos em <code>tabindex</code>.</p>" },
+        { t: "Skip Links (Links de Salto)", c: "<p>Permite que usuários de teclado pulem o menu de navegação e vão direto para o conteúdo.</p><pre>&lt;a href='#main' class='skip-link'&gt;Pular para o conteúdo&lt;/a&gt;</pre>" },
+        { t: "Alt em Imagens: Muito além da descrição", c: "<p>O atributo <code>alt</code> deve descrever a <b>intenção</b> da imagem, não apenas o que há nela.</p>" },
+        { t: "Imagens Informativas vs Decorativas", c: "<ul><li><b>Informativa:</b> Precisa de alt descritivo.</li><li><b>Decorativa:</b> Deve ter <code>alt=''</code> vazio para ser ignorada.</li></ul>" },
+        { t: "Exemplo de Alt Correto", c: "<pre>&lt;img src='grafico.png' alt='Gráfico de barras mostrando aumento de 20% nas vendas em 2025'&gt;</pre><div class='practice-box'><b>Uso Prático:</b> Se a imagem falhar ao carregar, o texto alt aparecerá no lugar.</div>" },
+        { t: "Formulários Acessíveis", c: "<p>Sempre use <code>&lt;label&gt;</code> associado ao <code>&lt;input&gt;</code> via atributo <code>for</code>.</p><pre>&lt;label for='email'&gt;E-mail:&lt;/label&gt;\n&lt;input id='email' type='email'&gt;</pre>" },
+        { t: "Placeholders não são Labels", c: "<p>Placeholders desaparecem quando o usuário digita, o que é péssimo para a memória cognitiva e acessibilidade.</p>" },
+        { t: "Mensagens de Erro Dinâmicas", c: "<p>Use <code>aria-live</code> para anunciar mudanças no conteúdo sem recarregar a página (ex: alertas de erro).</p><pre>&lt;div aria-live='assertive'&gt;E-mail inválido&lt;/div&gt;</pre>" },
+        { t: "Auditoria com Lighthouse", c: "<p>Ferramenta nativa do Chrome DevTools que gera relatórios automáticos de performance e acessibilidade.</p>" },
+        { t: "Como rodar o Lighthouse", c: "<ol><li>F12 (DevTools).</li><li>Aba 'Lighthouse'.</li><li>Marcar 'Accessibility'.</li><li>Clicar em 'Analyze page load'.</li></ol>" },
+        { t: "Interpretando Resultados", c: "<p>O Lighthouse dá uma nota de 0 a 100. Mas atenção: uma nota 100 não garante acessibilidade total, apenas que você passou nos testes automáticos.</p>" },
+        { t: "Erros Comuns no Lighthouse", c: "<ul><li>Botões sem nome acessível.</li><li>IDs duplicados (quebram o foco).</li><li>Falta de atributo lang no <code>&lt;html&gt;</code>.</li></ul>" },
+        { t: "Atividade II: Auditoria nos Sites Senai SC", c: "<h2>Abra os seguintes sites do Sesi/Senai abaixo:</h2><pre>https://sesisc.org.br - https://sc.senai.br - https://estudante.sesisenai.org.br - https://ava.sesisenai.org.br</pre><p> e rode o <code>Lighthouse</code>(F12 do Chrome) e o site <code>accessmonitor.acessibilidade.gov.pt</code>. Identifique 3 falhas de acessibilidade - para cegos ou surdos - e explique como você as corrigiria usando código.</p><p>DICA: teste também mais duas <code>URLs</code> específicas de cada site.</p><p>Ex.: <code>https://estudante.sesisenai.org.br/documentos</code></p><p>Faremos um relatório coletivo em sala a ser entregue ao SENAI SC apontando os principais pontos de melhoria.</p>" },
+        { t: "Checklist de Acessibilidade", c: "<ul><li>[ ] Imagens têm alt?</li><li>[ ] Contraste é suficiente?</li><li>[ ] Navegação por teclado funciona?</li><li>[ ] Formulários têm labels?</li></ul>" },
+        { t: "Tamanho de Fonte e Responsividade", c: "<p>Use unidades relativas (rem/em) para que o usuário possa aumentar o zoom do navegador sem quebrar o layout.</p><pre>p { font-size: 1.1rem; }</pre><div class='practice-box'><b>Uso Prático:</b> Se o usuário mudar a fonte padrão do sistema, seu site se adapta automaticamente.</div>" },
+        { t: "Redução de Movimento", c: "<p>Usuários com vestibulopatias podem passar mal com animações excessivas.</p><pre>@media (prefers-reduced-motion: reduce) {\n  * { animation: none !important; }\n}</pre>" },
+        { t: "Z-index e Modais", c: "<p>Ao abrir um modal, o foco deve ser 'preso' dentro dele (Focus Trap) para que o usuário de teclado não volte para o fundo da página.</p>" },
+        { t: "Ferramentas de Simulação", c: "<p>Use extensões como 'NoCoffee' ou 'Web Disability Simulator' para entender como pessoas com baixa visão enxergam seu site.</p>" },
+        { t: "Acessibilidade Cognitiva", c: "<p>Evite blocos gigantes de texto, use listas, e mantenha uma linguagem simples. Facilite a leitura!</p>" },
+        { t: "O Papel do Desenvolvedor", c: "<p>Nós somos os guardiões da experiência. Se não codificamos com acessibilidade, estamos excluindo pessoas deliberadamente.</p>" },
+        { t: "Code Review: Foco em a11y", c: "<p>Ao revisar o código de um colega, pergunte: 'Eu consigo usar essa nova funcionalidade sem o mouse?'.</p>" },
+        { t: "Atividade III: O Grande Reparo", c: "<h2>Desafio de Implementação</h2><p>1. Crie um Card de perfil com imagem e botão.<br>2. Implemente o atributo <code>alt</code> correto.<br>3. Adicione um estado de <code>:focus</code> personalizado e visível no botão.<br>4. Garanta que o contraste entre o texto e o fundo do card siga o nível AA.</p>" },
+        { t: "Checklist de Entrega Final", c: "<ul><li>O código passou no validador de HTML?</li><li>O foco é visível em todos os elementos clicáveis?</li><li>As imagens decorativas foram ocultadas?</li><li>A hierarquia de títulos está correta?</li></ul>" },
+        { t: "Conclusão", c: "<h2>Inclusão é Processo</h2><p>Acessibilidade é uma jornada, não um destino final. Continue testando com usuários reais e ferramentas assistivas. Vamos construir uma web melhor!</p>" }
+    ];
+
+    let current = 0;
+    const container = document.getElementById('container');
+    const counterDisplay = document.getElementById('counter');
+    const progress = document.getElementById('progress');
+
+    function render() {
+        container.innerHTML = '';
+        slidesData.forEach((s, i) => {
+            const div = document.createElement('div');
+            div.className = `slide ${i === current ? 'active' : ''}`;
+            div.innerHTML = `<h1>${s.t}</h1>${s.c}`;
+            container.appendChild(div);
+        });
+        counterDisplay.innerText = `${current + 1} / ${slidesData.length}`;
+        progress.style.width = `${((current + 1) / slidesData.length) * 100}%`;
+    }
+
+    function next() { if(current < slidesData.length - 1) { current++; render(); } }
+    function prev() { if(current > 0) { current--; render(); } }
+
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowRight' || e.key === ' ') next();
+        if(e.key === 'ArrowLeft') prev();
+    });
+
+    render();
+</script>
+</body>
+</html>
