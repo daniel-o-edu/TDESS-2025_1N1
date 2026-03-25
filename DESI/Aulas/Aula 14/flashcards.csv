@@ -1,0 +1,80 @@
+Qual é o objetivo principal da ferramenta Canvas de Proposta de Valor?,"Alinhar a solução idealizada às dores, ganhos e tarefas do público-alvo."
+"No contexto de Engenharia de Software, o que são Requisitos Funcionais (RF)?",Definem as funções e comportamentos que o sistema deve executar para transformar entradas em saídas.
+O que caracterizam os Requisitos Não Funcionais (RNF)?,"Atributos de qualidade, desempenho, segurança ou restrições gerais do sistema."
+Qual é a estrutura padrão de uma User Story (História de Usuário)?,"Como [ator], quero [funcionalidade] para que [benefício/valor]."
+Para que servem os 'Critérios de Aceitação' em uma User Story?,Validar se a funcionalidade foi implementada corretamente e atende aos requisitos do usuário.
+"No Diagrama de Casos de Uso da UML, o que representa um 'Ator'?",Papéis desempenhados por pessoas ou dispositivos externos que interagem com o sistema.
+Qual é a função do relacionamento «include» em um Diagrama de Casos de Uso?,Incorporar atividades duplicadas que são obrigatoriamente executadas por outros casos de uso.
+Quais são os três componentes básicos de uma classe no Diagrama de Classes UML?,"Nome, Atributos (estado) e Operações/Métodos (comportamento)."
+Como se diferencia a Composição da Agregação em UML?,"Na composição, a existência da parte depende do objeto pai, enquanto na agregação as partes são independentes."
+O que representa a 'Generalização' em um Diagrama de Classes?,"O conceito de herança, onde subclasses derivam atributos e métodos de uma superclasse."
+Qual é o propósito da prototipação de baixa fidelidade (wireframes)?,Validar conceitos de interface e usabilidade de forma rápida e econômica antes da codificação.
+Quais são as três tecnologias que compõem a stack clássica ensinada para o projeto?,"PHP (server-side), MySQL (banco de dados) e JavaScript (client-side)."
+Por que se utiliza o software XAMPP no desenvolvimento local de sistemas?,"Para emular um servidor web local contendo Apache, MySQL e interpretador PHP."
+"No Git, qual é a função do comando 'git commit'?",Criar um ponto de salvamento (checkpoint) com uma mensagem descritiva das alterações realizadas.
+O que deve ser incluído no arquivo .gitignore de um projeto?,Arquivos e pastas desnecessários ou sensíveis que não devem ser enviados para o repositório remoto.
+Qual é a função da tag <!DOCTYPE html> no início de um documento?,"Declarar o modo de renderização para o navegador, garantindo o uso dos padrões modernos do HTML5."
+Diferencie o conteúdo das tags <head> e <body> no HTML.,"O <head> contém metadados e configurações invisíveis, enquanto o <body> contém o conteúdo visível da página."
+Qual é a vantagem de utilizar HTML5 Semântico em vez de tags genéricas como <div>?,Melhorar a acessibilidade para leitores de tela e otimizar o indexamento para motores de busca (SEO).
+Para que serve a tag semântica <main>?,"Delimitar o conteúdo principal e exclusivo de uma página, devendo haver apenas uma por documento."
+Qual tag HTML é utilizada especificamente para blocos de links de navegação principal?,<nav>
+"No CSS, qual é a regra da 'Cascata'?","Se duas regras de mesmo peso conflitarem, a regra declarada por último no código será aplicada."
+Qual seletor CSS possui maior especificidade: uma Classe (.exemplo) ou um ID (#exemplo)?,O seletor de ID (#exemplo).
+Quais são as quatro camadas do Box Model (Modelo de Caixa) do CSS?,"Conteúdo (Content), Preenchimento (Padding), Borda (Border) e Margem (Margin)."
+Diferencie as propriedades 'margin' e 'padding' no CSS.,"O padding é o espaçamento interno (dentro da borda), enquanto a margin é o espaçamento externo (fora da borda)."
+Onde são declaradas as Variáveis CSS globais para facilitar a manutenção do design?,Dentro da pseudo-classe :root.
+O que acontece ao aplicar 'display: flex' a um elemento pai?,Todos os seus filhos diretos tornam-se itens flexíveis (flex items) organizados em eixos.
+"No Flexbox, qual propriedade controla a distribuição de espaço no eixo principal (main axis)?",justify-content
+Qual propriedade do Flexbox é usada para alinhar itens no eixo transversal (cross axis)?,align-items
+O que faz a propriedade 'flex-direction: column' no Flexbox?,"Altera a orientação do eixo principal para a vertical, empilhando os itens um abaixo do outro."
+"No Flexbox, qual é a utilidade da propriedade 'flex: 1' em um item?",Indica que o item deve crescer para ocupar todo o espaço livre disponível no contêiner.
+Qual é a principal diferença conceitual entre Flexbox e CSS Grid?,"O Flexbox é unidimensional (linha ou coluna), enquanto o CSS Grid é bidimensional (linha e coluna simultaneamente)."
+O que representa a unidade fracionária (fr) no CSS Grid?,Uma fração do espaço livre disponível dentro do contêiner grid.
+Para que serve a propriedade 'grid-template-areas'?,Permite criar layouts nomeando áreas específicas da grade de forma visual (como um mapa).
+O que a propriedade 'gap' resolve em layouts Grid ou Flexbox?,"Adiciona espaçamento apenas entre os elementos, sem criar espaços extras nas bordas externas do contêiner."
+Qual é o objetivo da abordagem 'Mobile-First' no design responsivo?,Desenvolver a interface focando primeiro em telas menores e adicionar complexidade para telas maiores progressivamente.
+O que são Breakpoints no CSS?,Valores de largura de tela específicos onde o layout é reorganizado através de Media Queries.
+Qual é a sintaxe básica de uma Media Query para telas maiores que 768px?,@media (min-width: 768px) { /* estilos */ }
+"Por que a tag <meta name=""viewport""> é obrigatória para a responsividade?",Instrui o navegador móvel a ajustar a largura da página de acordo com a largura real do dispositivo.
+O que é uma CDN (Content Delivery Network) no contexto do Bootstrap?,Servidores remotos que hospedam os arquivos do framework para inclusão rápida via link no HTML.
+Como funciona o sistema de Grid do Bootstrap?,Baseia-se em uma malha de 12 colunas divisíveis que se adaptam conforme o tamanho da tela.
+Quais classes do Bootstrap são necessárias para criar uma linha e uma coluna que ocupe metade da largura?,As classes .row para a linha e .col-6 para a coluna.
+"No Bootstrap, o que significam os sufixos como '-md' ou '-lg' em classes de grid?",Eles indicam o breakpoint a partir do qual aquela regra de coluna deve ser aplicada.
+Qual é a vantagem de utilizar componentes prontos (como Modais ou Navbars) de um framework?,Acelerar o desenvolvimento e garantir a padronização e usabilidade testada da interface.
+"No HTML5, por que é importante usar tipos de input específicos como 'email' ou 'tel'?",Melhorar a usabilidade ao abrir teclados virtuais otimizados em dispositivos móveis e fornecer validação nativa.
+Como se vincula corretamente uma tag <label> a um <input>?,Atribuindo ao atributo 'for' da label o mesmo valor do 'id' do input.
+Qual é a proporção de contraste mínima recomendada pela WCAG 2.1 para textos normais?,Uma proporção de 4.5:1 entre a cor do texto e a cor do fundo.
+Para que serve o atributo 'required' em um campo de formulário?,Impedir o envio do formulário pelo navegador caso o campo esteja vazio.
+Quais são os quatro princípios fundamentais da acessibilidade digital (POUR)?,"Perceptível, Operável, Compreensível e Robusto."
+O que exige o 'Nível A' de conformidade da WCAG?,Requisitos básicos essenciais sem os quais o site se torna impossível de usar para certos grupos de pessoas com deficiência.
+Qual é a função do atributo 'alt' em tags de imagem?,Fornecer uma descrição textual da imagem para leitores de tela e como alternativa caso a imagem não carregue.
+O que define o acrônimo WAI-ARIA?,Web Accessibility Initiative - Accessible Rich Internet Applications.
+Quando se deve utilizar o atributo 'aria-label'?,Para fornecer um rótulo textual a elementos interativos que não possuem texto visível (como botões com ícones).
+"Qual é a função do atributo 'aria-hidden=""true""'?","Esconder elementos puramente decorativos de tecnologias assistivas, mantendo-os visíveis na tela."
+O que é a ferramenta Lighthouse do Chrome DevTools?,"Uma ferramenta automatizada que gera relatórios sobre acessibilidade, desempenho, SEO e melhores práticas."
+Por que é proibido remover o foco visual (outline: none) no CSS sem um substituto?,Pois impede que usuários que navegam via teclado identifiquem qual elemento está selecionado no momento.
+"No CSS Grid, como o navegador interpreta o valor 'grid-template-columns: 1fr 2fr'?",O espaço é dividido em 3 partes: a primeira coluna ocupa 1/3 e a segunda ocupa 2/3 da largura disponível.
+Qual é a 'Regra de Ouro' no uso de atributos ARIA?,Sempre preferir tags HTML5 semânticas nativas e usar ARIA apenas para preencher lacunas de semântica.
+"No Git, o que o comando 'git push' executa?",Envia os commits realizados localmente para o repositório remoto no servidor (como o GitHub).
+O que caracteriza um site 'Operável' segundo a WCAG?,"A interface e a navegação devem ser funcionais, permitindo, por exemplo, o uso completo via teclado."
+Como as Media Queries auxiliam no SEO?,Motores de busca priorizam sites responsivos que oferecem boa experiência em dispositivos móveis.
+"Qual tag HTML é utilizada para representar um conteúdo independente e autossuficiente, como um post?",<article>
+O que define a especificidade de um seletor de Classe no CSS?,"É uma pontuação média que sobrescreve seletores de tag, mas perde para seletores de ID."
+Para que serve o atributo 'placeholder' em um input?,Exibir uma dica visual temporária dentro do campo que desaparece ao iniciar a digitação.
+Qual é a função da propriedade 'grid-area' em um item filho?,Posicionar o item dentro de uma área nomeada definida no contêiner pai pelo 'grid-template-areas'.
+"No Bootstrap, qual classe centraliza e limita a largura do conteúdo horizontalmente?",.container
+O que é o fenômeno de 'Margin Collapse' no CSS?,Quando as margens verticais de dois elementos adjacentes se combinam em uma única margem maior em vez de somarem.
+Qual é o principal uso da tag <header> no HTML5?,"Definir o cabeçalho de uma página ou seção, contendo geralmente logotipos, títulos e navegação."
+O que significa o termo 'Mobile-First' na codificação CSS?,Escrever o CSS base fora de media queries focado no celular e usar min-width para expandir para telas maiores.
+Qual é o valor padrão da propriedade 'flex-direction'?,row (linha horizontal)
+Diferencie Nível AA de Nível AAA na WCAG.,"O Nível AA é o requisito legal e corporativo padrão, enquanto o AAA é o nível máximo de excelência e inclusão especializada."
+"Como o atributo 'tabindex=""0""' afeta um elemento não interativo?","Ele inclui o elemento na ordem natural de tabulação do teclado, tornando-o acessível por foco."
+Para que serve a pseudo-classe ':focus-visible'?,Aplica estilos de foco apenas quando o navegador detecta que o usuário está navegando via teclado.
+O que deve ser feito com imagens puramente decorativas para acessibilidade?,"Atribuir um atributo alt vazio (alt="""") para que o leitor de tela a ignore."
+"No Bootstrap, qual a função da classe 'btn-primary'?","Aplica a cor principal da marca ao botão, geralmente definida no :root como --bs-primary."
+O que é um 'Focus Trap' (armadilha de foco) em janelas modais?,Uma técnica de programação que impede o foco do teclado de sair do modal enquanto ele estiver aberto.
+Qual é a principal função da Engenharia de Requisitos?,"Construir uma ponte entre a concepção do projeto e sua construção real, entendendo o que o cliente deseja."
+O que representa a multiplicidade '1..*' em um relacionamento UML?,Indica que um objeto de uma classe pode estar associado a um ou muitos objetos de outra classe.
+"Qual a diferença entre usar 'display: none' e 'aria-hidden=""true""'?",O display: none remove o elemento da tela e do leitor de tela; o aria-hidden mantém o elemento na tela mas o esconde do leitor.
+Para que serve o atributo 'pattern' em um input HTML5?,Permite definir uma Expressão Regular para validar o formato específico do dado inserido (ex: CPF).
+Qual é a função do atributo 'name' em um campo de formulário?,Identificar a variável que será enviada e processada pelo servidor (backend).
