@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 15 - Fundamentos JS e Funções</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0d2a4a;
+    --ink-light: #1e4976;
+    --accent: #1565c0;
+    --accent2: #1976d2;
+    --accent3: #0288d1;
+    --bg: #e8f0fe;
+    --surface: #ffffff;
+    --border: #b3cde8;
+    --code-bg: #eaf2fb;
+    --tag-bg: #dceefb;
+    --tag-border: #1976d2;
+    --slide-max: 100%;
+    --slide-title-max: 90%;
+  }
+
+  html, body {
+    font-family: 'Roboto', sans-serif;
+    background: #c5d8f0;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── IMAGENS DE FUNDO ── */
+  .slide-cover {
+    background-image: url('https://i.ibb.co/fzwwYWW6/img-frente01.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.82);
+    border-radius: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-cover > * { position: relative; z-index: 1; }
+
+  .slide-section {
+    background-image: url('https://i.ibb.co/1tBjw9p9/img-tit01.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.80);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-section > * { position: relative; z-index: 1; }
+
+  .slide-common {
+    background-image: url('https://i.ibb.co/m1J6vPd/img-frente02.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-common::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.88);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-common > * { position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  #nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    height: 52px;
+    box-shadow: 0 -2px 12px rgba(13,42,74,.28);
+  }
+  #nav button {
+    background: none; border: none;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 24px;
+    height: 52px;
+    transition: background .15s;
+  }
+  #nav button:hover { background: rgba(255,255,255,.12); }
+  #nav button:disabled { opacity: .35; cursor: default; }
+  #slide-counter {
+    color: rgba(255,255,255,.65);
+    font-size: .85rem;
+    min-width: 80px;
+    text-align: center;
+    font-family: 'Source Code Pro', monospace;
+  }
+
+  /* ── PROGRESS ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 101;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--accent2);
+    transition: width .3s ease;
+  }
+
+  /* ── SLIDE WRAPPER ── */
+  #stage {
+    min-height: 100vh;
+    padding: 0 0 52px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── SLIDES GENÉRICOS ── */
+  .slide {
+    display: none;
+    width: var(--slide-max);
+    max-width: var(--slide-max);
+    min-height: calc(100vh - 52px);
+    background: var(--surface);
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 4px 32px rgba(13,42,74,.12);
+    padding: 7vh 8vw;
+    animation: fadeIn .3s ease;
+    margin: 0 auto;
+  }
+  .slide.active { display: block; }
+
+  .slide.slide-section,
+  .slide.slide-cover {
+    width: var(--slide-title-max);
+    max-width: var(--slide-title-max);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .slide-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .slide h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .slide h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--accent2);
+    padding-left: 14px;
+  }
+  .slide h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    font-weight: 700;
+    color: var(--ink-light);
+    margin: 20px 0 10px;
+  }
+  .slide p {
+    font-size: clamp(1.5rem, 2vw, 1.5rem);
+    line-height: 1.75;
+    color: var(--ink-light);
+    margin-bottom: 14px;
+  }
+  .slide ul, .slide ol {
+    padding-left: 22px;
+    margin-bottom: 14px;
+  }
+  .slide li {
+    font-size: clamp(1.5rem, 2vw, 1.2rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+  }
+  .slide li strong { color: var(--ink); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 24px 0;
+  }
+
+  /* ── COVER ── */
+  .cover-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .cover-meta span {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: .8rem;
+    padding: 4px 12px;
+    color: var(--ink-light);
+  }
+  .cover-desc {
+    font-size: clamp(1rem, 2.2vw, 1.15rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    border-left: 3px solid var(--border);
+    padding-left: 18px;
+    margin: 24px 0;
+  }
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .topic-chip {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 3px;
+    padding: 10px 14px;
+    font-size: .95rem;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent2);
+    border-radius: 3px;
+    padding: 18px 20px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: clamp(.78rem, 1.6vw, .88rem);
+    line-height: 1.65;
+    color: var(--ink);
+    overflow-x: auto;
+    margin: 16px 0;
+    white-space: pre;
+  }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: clamp(1.7rem, 2vw, 1.5rem);
+    line-height: 1.7;
+  }
+  .callout.blue {
+    background: #dceefb;
+    border-left: 4px solid var(--accent2);
+    color: var(--ink);
+  }
+  .callout.green {
+    background: #e1f5e8;
+    border-left: 4px solid #2e7d32;
+    color: #1a3a28;
+  }
+  .callout.red {
+    background: #e3f0fb;
+    border-left: 4px solid var(--accent);
+    color: var(--ink);
+  }
+  .callout.yellow {
+    background: #e8f4fd;
+    border-left: 4px solid var(--accent3);
+    color: var(--ink);
+  }
+  .callout .callout-title {
+    font-weight: 700;
+    font-family: 'Roboto', sans-serif;
+    font-size: .78rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: .75;
+  }
+
+  /* ── TWO COLUMN ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin: 16px 0;
+  }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  .col-card {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 18px;
+  }
+  .col-card h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(1.5rem, 1.8vw, 1.5rem);
+  }
+  thead th {
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: .85rem;
+    letter-spacing: .04em;
+  }
+  tbody tr:nth-child(even) { background: var(--code-bg); }
+  tbody tr:hover { background: #d0e8f8; }
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-light);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  tbody td strong { color: var(--ink); }
+
+  /* ── FAQ ── */
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .faq-q {
+    background: var(--code-bg);
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: clamp(2.2rem, 2vw, 1.5rem);
+    color: var(--ink);
+    border-left: 4px solid var(--accent2);
+  }
+  .faq-a {
+    padding: 12px 18px;
+    font-size: clamp(2.5rem, 1.9vw, 1.5rem);
+    color: var(--ink-light);
+    line-height: 1.7;
+    background: var(--surface);
+  }
+
+  /* ── NUMBERED STEPS ── */
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    background: var(--accent2);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: .9rem;
+    font-family: 'Source Code Pro', monospace;
+    margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-body p { margin: 0; }
+
+  /* ── SECTION HEADER SLIDES ── */
+  .section-header {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .section-num {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 3rem;
+    font-weight: 600;
+    color: #b3cde8;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .section-header h2 {
+    border: none;
+    padding: 0;
+    text-align: center;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--ink);
+  }
+  .section-header p {
+    max-width: 560px;
+    margin: 16px auto 0;
+    text-align: center;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .slide { padding: 28px 22px 36px; width: 97%; max-width: 97%; }
+    .slide.slide-section, .slide.slide-cover { width: 97%; max-width: 97%; }
+    #nav button { padding: 0 14px; font-size: .9rem; }
+  }
+  @media (max-width: 400px) {
+    .slide { padding: 20px 14px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"><div id="progress-bar"></div></div>
+
+<div id="stage">
+
+  <div class="slide slide-cover active">
+    <div class="slide-label">Fundamentos</div>
+    <h1>Aula 15 - Fundamentos JS e Funções</h1>
+    <p class="cover-desc">Descrição: Introdução ao desenvolvimento client-side com JavaScript. Abordaremos a declaração de variáveis, escopo, tipos de dados, operadores lógicos e aritméticos, além de construir funções utilitárias reutilizáveis para manipulação e validação de dados em aplicações web.</p>
+    <hr class="divider">
+    <h3>Tópicos desta aula</h3>
+    <div class="topics-grid">
+      <div class="topic-chip">Variáveis e Escopo</div>
+      <div class="topic-chip">Tipos de Dados</div>
+      <div class="topic-chip">Operadores</div>
+      <div class="topic-chip">Funções Utilitárias</div>
+      <div class="topic-chip">Clean Code</div>
+    </div>
+    <div class="cover-meta">
+      <span>Aula 15</span>
+      <span>JavaScript</span>
+      <span>Frontend</span>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Abertura</div>
+    <h2>Cenário Real</h2>
+    <p>A web moderna é dinâmica. Quando você acessa uma loja virtual e preenche os dados do seu cartão de crédito, o sistema não espera você clicar em "Comprar" e enviar tudo para o servidor (backend) para só então avisar que faltou um número no cartão.</p>
+    <p>Ele faz isso instantaneamente, direto no seu navegador. O responsável por essa mágica, economizando tempo do usuário e processamento no servidor, é o JavaScript (JS).</p>
+    <p>Hoje, daremos o primeiro passo para dar vida às nossas interfaces estáticas.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Abertura</div>
+    <h2>Reflexão</h2>
+    <div class="callout yellow">
+      <div class="callout-title">Pergunta</div>
+      Vocês já preencheram um formulário que avisou que a senha estava fraca ou que o e-mail era inválido antes mesmo de vocês clicarem em "Enviar"? Como vocês acham que o navegador consegue analisar essa informação tão rápido sem precisar recarregar a página?
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <h2>Onde guardamos os dados: Variáveis, Tipos e Escopo</h2>
+      <p>A base do armazenamento de informações no JavaScript.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Variáveis, Tipos e Escopo</div>
+    <h2>A. Conceito: Tipos Comuns</h2>
+    <p>Em JavaScript, lidamos com diversos tipos comuns de dados:</p>
+    <ul>
+      <li><strong>String</strong> (textos),</li>
+      <li><strong>Number</strong> (números),</li>
+      <li><strong>Boolean</strong> (verdadeiro/falso),</li>
+    </ul>
+    <p>além de valores vazios como <strong>null</strong> (representa a ausência intencional de qualquer valor de objeto) e <strong>undefined</strong> (indica que algo existe mas ainda não recebeu nenhum valor).</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Variáveis, Tipos e Escopo</div>
+    <h2>A. Conceito: Dados Complexos e Declaração</h2>
+    <p>Para organizar dados complexos, usamos estruturas como:</p>
+    <ul>
+      <li><strong>Array</strong> (listas) e</li>
+      <li><strong>Object</strong> (coleções de pares chave-valor).</li>
+    </ul>
+    <p>Para armazenar esses dados na memória, precisamos declará-los usando palavras-chave específicas. O JavaScript moderno nos oferece <strong>let</strong> e <strong>const</strong> para declaração de variáveis, substituindo o antigo <strong>var</strong>.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Variáveis, Tipos e Escopo</div>
+    <h2>A. Conceito: Escopo e Segurança</h2>
+    <p>A diferença principal entre eles é o escopo, ou seja, onde a variável "existe" e pode ser acessada.</p>
+    <div class="two-col">
+      <div class="col-card">
+        <h4>let e const</h4>
+        <p>Variáveis criadas com let e const possuem escopo de bloco (existem apenas dentro das chaves {} onde foram criadas).</p>
+      </div>
+      <div class="col-card">
+        <h4>var</h4>
+        <p>O var possui escopo de função ou global, o que frequentemente causa vazamento de dados e bugs difíceis de rastrear em sistemas maiores.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Variáveis, Tipos e Escopo</div>
+    <h2>A. Conceito: Mutabilidade</h2>
+    <p>A escolha entre let e const define a mutabilidade da referência:</p>
+    <ul>
+      <li>Nós usamos <strong>const</strong> quando o valor (ou a referência do objeto/array) não deve ser reatribuído durante a execução do script.</li>
+      <li>Nós usamos <strong>let</strong> quando sabemos que o valor vai mudar, como em um contador dentro de um laço de repetição.</li>
+    </ul>
+    <div class="callout blue">
+      <div class="callout-title">Boas Práticas</div>
+      É uma boa prática de segurança e clareza iniciar tudo como const e só mudar para let se for estritamente necessário.
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Variáveis, Tipos e Escopo</div>
+    <h2>B. Explicação didática: Caixas Organizadoras</h2>
+    <p>Imaginem as variáveis como caixas organizadoras. O tipo de dado é o que vai dentro: uma String é um bilhete de papel, um Number é uma calculadora, um Array é uma pasta com várias divisórias e um Object é uma maleta cheia de ferramentas rotuladas.</p>
+    <p>O escopo é onde você deixa essa caixa. O let e o const são caixas que ficam trancadas dentro da sala onde você as colocou (escopo de bloco).</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Variáveis, Tipos e Escopo</div>
+    <h2>B. Explicação didática: Cofres e Ruas</h2>
+    <p>Ninguém do corredor consegue mexer. O const é um cofre: depois que você guarda algo lá dentro, não pode trocar por outra coisa.</p>
+    <p>Já o var é como deixar a caixa no meio da rua: qualquer um que passar pode abrir, mudar o que tem dentro e bagunçar a sua vida.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Variáveis, Tipos e Escopo</div>
+    <h2>C. Visualizando</h2>
+    <p>Um diagrama de círculos concêntricos: o círculo maior representa o escopo global. Dentro dele, círculos médios representam escopos de função, e dentro deles, círculos menores representam escopos de bloco (if, for).</p>
+    <p>Setas mostram que o var ignora a barreira do círculo menor e "vaza" para fora, enquanto let e const ficam contidos e seguros dentro do seu círculo original.</p>
+    <p>{ver img01.png}</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Variáveis, Tipos e Escopo</div>
+    <h2>D. Exemplo de Código</h2>
+    <div class="code-block">JavaScript
+// Declarando dados primitivos e estruturais
+const nomeProduto = "Cadeira Gamer"; // String
+let precoProduto = 850.50; // Number
+const emEstoque = true; // Boolean
+const categorias = ["Móveis", "Escritório", "Gamer"]; // Array
+const especificacoes = { cor: "Preta", peso: 15 }; // Object
+
+// Entendendo o Escopo e Mutabilidade
+if (emEstoque) {
+  let desconto = 50; // Variável de bloco
+  var taxa = 10; // Variável "vazada"
+  precoProduto = precoProduto - desconto; // let permite reatribuição
+  // nomeProduto = "Mesa"; // ERRO! const não permite reatribuição
+  console.log(`Preço com desconto: ${precoProduto}`);
+}
+// console.log(desconto); // ERRO! 'desconto' não existe fora do bloco if
+console.log(taxa); // Funciona (imprime 10), mas é má prática pois 'var' vazou do bloco!</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Variáveis, Tipos e Escopo</div>
+    <h2>E. Explicação linha por linha</h2>
+    <ul>
+      <li><strong>Linhas 2-6:</strong> Inicializamos nossos dados simulando um produto de e-commerce. Usamos const para o que não muda (nome, categorias) e let para o que pode mudar (preço).</li>
+      <li><strong>Linha 9:</strong> Verificamos se está em estoque (um valor booleano puro).</li>
+      <li><strong>Linha 10-11:</strong> Criamos desconto com let (seguro, vive só no if) e taxa com var (inseguro).</li>
+      <li><strong>Linha 12:</strong> Atualizamos o valor de precoProduto. Como foi declarado com let, isso é perfeitamente válido.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Variáveis, Tipos e Escopo</div>
+    <h2>E. Explicação linha por linha (Cont.)</h2>
+    <ul>
+      <li><strong>Linha 13:</strong> Comentada porque se tentarmos mudar nome Produto (que é const), o JS lança um erro parando o programa.</li>
+      <li><strong>Linha 17-18:</strong> Tentamos acessar as variáveis fora do bloco if. O desconto dá erro (o que é correto e esperado), mas a taxa existe, provando o perigo do var.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>Manipulando informações: Operadores</h2>
+      <p>Como criar lógica, comparar e manipular nossos dados.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Operadores</div>
+    <h2>A. Conceito: Aritméticos e Atribuição</h2>
+    <p>Para criar lógica, precisamos comparar e manipular nossos dados utilizando operadores.</p>
+    <ul>
+      <li>Temos os <strong>aritméticos</strong> (+, -, *, /, %) para cálculos matemáticos.</li>
+      <li>Temos os de <strong>atribuição</strong> (=, +=, -=) para guardar valores nas variáveis.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Operadores</div>
+    <h2>A. Conceito: Comparação Estrita</h2>
+    <p>Os operadores de comparação (>, <, >=, <=, ===, !==) servem para testar valores e sempre nos retornam um Boolean (true ou false).</p>
+    <p>Uma característica vital do JavaScript é a comparação estrita. Nós sempre utilizamos três sinais de igual (===) em vez de dois (==). O operador == compara apenas o valor, fazendo coerções de tipo perigosas (por exemplo, transformar a string "5" no número 5 escondido).</p>
+    <p>O operador === compara o valor e o tipo do dado, garantindo que "5" == 5 seja false, evitando bugs lógicos severos.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Operadores</div>
+    <h2>A. Conceito: Lógicos</h2>
+    <p>Por fim, utilizamos operadores lógicos (&& para E/AND, || para OU/OR, ! para NÃO/NOT) para combinar múltiplas comparações em uma única instrução de decisão.</p>
+    <p>Com eles, nós conseguimos estruturar validações complexas, como checar se um campo de formulário não está vazio E se tem a quantidade mínima de caracteres.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Operadores</div>
+    <h2>B. Explicação didática: A Fábrica</h2>
+    <p>Pensem nos operadores como os juízes e os trabalhadores de uma fábrica.</p>
+    <ul>
+      <li>Os <strong>aritméticos</strong> são os trabalhadores de força bruta: eles cortam, somam, dividem os materiais.</li>
+      <li>Os <strong>de comparação</strong> são os juízes na esteira de qualidade: eles olham para duas peças e dizem "Sim, são iguais" ou "Não, essa é maior que aquela".</li>
+      <li>Os <strong>lógicos</strong> são os gerentes: eles dizem "A peça só passa se for da cor vermelha E (&&) tiver mais de 2kg".</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Operadores</div>
+    <h2>B. Explicação didática: Inspetores</h2>
+    <div class="two-col">
+      <div class="col-card">
+        <h4>Operador ==</h4>
+        <p>Sobre == vs ===: == é aquele inspetor míope. Ele vê uma maçã de plástico e uma maçã real e diz que são iguais porque têm o mesmo formato.</p>
+      </div>
+      <div class="col-card">
+        <h4>Operador ===</h4>
+        <p>=== é o inspetor rigoroso: ele vê que o formato é igual, mas o material (o tipo do dado) é diferente, então ele reprova!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Operadores</div>
+    <h2>C. Visualizando</h2>
+    <p>Um fluxograma simples onde duas caixas de entrada contendo o texto "10" e o número 10 passam por um funil chamado == saindo uma luz verde (true), e passam por um funil === saindo uma luz vermelha indicando false com o aviso "Tipos diferentes detectados!".</p>
+    <p>{ver img02.png}</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Operadores</div>
+    <h2>D. Exemplo de Código</h2>
+    <div class="code-block">JavaScript
+let quantidadeCarrinho = 3;
+const precoUnitario = 150.00;
+
+// Operadores aritméticos e de atribuição combinada
+let total = quantidadeCarrinho * precoUnitario;
+total += 20; // Adiciona o frete (total = total + 20)
+
+// Operadores de comparação e lógicos
+const limiteEstoque = 10;
+const clienteVIP = true;
+
+// O cliente pode comprar SE: pedir menos ou igual ao estoque E for VIP OU o valor for baixo
+const compraAprovada = (quantidadeCarrinho <= limiteEstoque) && (clienteVIP || total < 100);
+
+// Demonstração da comparação estrita
+const idRecebido = "500";
+const idNoBanco = 500;
+const ehOMesmoProduto = (idRecebido === idNoBanco); // Retorna false!
+
+console.log(`Compra Aprovada? ${compraAprovada}`);
+console.log(`Ids são idênticos? ${ehOMesmoProduto}`);</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Operadores</div>
+    <h2>E. Explicação linha por linha</h2>
+    <ul>
+      <li><strong>Linhas 5-6:</strong> operador * multiplica os valores. Na linha 6, usamos o operador de atribuição += como um atalho elegante para somar o frete ao valor que já estava em total.</li>
+      <li><strong>Linha 13:</strong> Combinamos operadores lógicos. Os parênteses dão precedência. Avaliamos primeiro se o cliente é VIP ou se o total é baixo (||). Depois usamos o && para garantir que a primeira condição (ter estoque) seja obrigatoriamente verdadeira.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Operadores</div>
+    <h2>E. Explicação linha por linha (Cont.)</h2>
+    <ul>
+      <li><strong>Linhas 16-18:</strong> Mostramos a diferença de tipos. Apesar do conteúdo legível ser 500, um é texto, o outro é número.</li>
+      <li>Usando ===, nos protegemos de cruzar dados errados, retornando false.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2>Reutilizando a Lógica: Funções Utilitárias (utils.js)</h2>
+      <p>Encapsulando tarefas para organizar nosso código.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Utilitárias</div>
+    <h2>A. Conceito: Funções e Encapsulamento</h2>
+    <p>Funções são blocos de código encapsulados que executam uma tarefa específica. Em sistemas reais, nós evitamos escrever a mesma lógica de cálculo ou validação várias vezes pelo código.</p>
+    <p>Ao invés disso, nós extraímos essa lógica para funções dedicadas. Quando agrupamos funções que resolvem problemas gerais (como formatar moeda, validar um e-mail, gerar uma data), nós criamos bibliotecas utilitárias, frequentemente armazenadas em um arquivo chamado utils.js.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Utilitárias</div>
+    <h2>A. Conceito: O Arquivo utils.js</h2>
+    <p>O arquivo utils.js (abreviação de utilities ou utilitários) é um padrão de projeto extremamente comum em desenvolvimento de software, especialmente no JavaScript.</p>
+    <p>Ele não é uma funcionalidade nativa da linguagem, mas sim uma convenção arquitetural. Basicamente, o utils.js serve como uma "caixa de ferramentas" onde você agrupa funções genéricas, independentes e reutilizáveis que são úteis em várias partes do seu projeto, mas que não pertencem a nenhuma lógica de negócio específica.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Utilitárias</div>
+    <h2>1. O que costuma ter dentro de um utils.js?</h2>
+    <p>As funções aqui geralmente seguem o princípio de "funções puras" (o mesmo input sempre gera o mesmo output, sem efeitos colaterais).</p>
+    <p>Exemplos comuns incluem:</p>
+    <ul>
+      <li><strong>Formatação:</strong> Funções para formatar datas (ex: formatarData(data)), moedas (ex: formatarMoeda(valor)) ou strings (ex: capitalize(texto)).</li>
+      <li><strong>Validação:</strong> Verificações de formato de e-mail, CPF, ou checagem de tipos (ex: isEmpty(obj)).</li>
+      <li><strong>Manipulação de Arrays/Objetos:</strong> Funções auxiliares para buscar itens em listas complexas ou mesclar objetos.</li>
+      <li><strong>Conversões:</strong> Transformar unidades de medida, converter objetos para JSON, etc.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Utilitárias</div>
+    <h2>2. Por que usar um arquivo de utilitários?</h2>
+    <ul>
+      <li><strong>DRY (Don't Repeat Yourself):</strong> Evita que você escreva a mesma lógica de formatação de data em dez arquivos diferentes.</li>
+      <li><strong>Manutenibilidade:</strong> Se a regra de formatação de um telefone mudar, você altera em um único lugar (utils.js) e todo o sistema é atualizado.</li>
+      <li><strong>Organização:</strong> Mantém a lógica de negócio principal limpa, retirando dela os "detalhes técnicos" repetitivos.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Utilitárias</div>
+    <h2>3. Exemplo Prático</h2>
+    <p>Imagine um projeto com um arquivo utils.js:</p>
+    <div class="code-block">JavaScript
+// utils.js
+export const formatarMoeda = (valor) => {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+};
+
+export const estaVazio = (valor) => {
+  return valor === null || valor === undefined || valor === '';
+};</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Utilitárias</div>
+    <h2>3. Exemplo Prático (Uso)</h2>
+    <p>Agora, em qualquer outro arquivo do projeto, você importa essas ferramentas:</p>
+    <div class="code-block">JavaScript
+// produto.js
+import { formatarMoeda } from './utils.js';
+
+const preco = 50;
+console.log(formatarMoeda(preco)); // R$ 50,00</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Utilitárias</div>
+    <h2>4. Boas Práticas</h2>
+    <p>Para que o utils.js não se torne um "lixão" de código desorganizado, siga estas dicas:</p>
+    <ul>
+      <li><strong>1. Não coloque lógica de negócio:</strong> Se a função só serve para o componente Login, ela não deve estar no utils.js. Ela pertence ao próprio componente ou a um serviço de autenticação.</li>
+      <li><strong>2. Mantenha pequenas:</strong> Se o seu utils.js ficar grande demais, divida-o em arquivos temáticos (ex: dateUtils.js, stringUtils.js, validationUtils.js).</li>
+      <li><strong>3. Documente:</strong> Como essas funções são genéricas, é vital que elas tenham comentários explicando o que recebem e o que devolvem.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Utilitárias</div>
+    <h2>B. Visualizando</h2>
+    <p>Um diagrama de blocos simples: À esquerda, caixas de entrada "Inputs" (ex: número 1500.5). Setas apontam para uma caixa central chamada "Processamento: formatarMoeda()". Da caixa central, uma seta sai para a direita, chamada "Output / Return", contendo o valor "R$ 1.500,50".</p>
+    <p>{ver img03.png}</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Utilitárias</div>
+    <h2>C. Exemplo de Código</h2>
+    <div class="code-block">JavaScript
+// Arquivo: utils.js
+
+// Função para calcular o total do carrinho com desconto
+function calcularTotal(preco, quantidade, descontoPercentual) {
+  if (quantidade <= 0) {
+    return 0; // Se não tem item, encerra e retorna 0 imediatamente
+  }
+  const subtotal = preco * quantidade;
+  const valorDesconto = subtotal * (descontoPercentual / 100);
+  const totalFinal = subtotal - valorDesconto;
+  return totalFinal; // Devolve o valor processado
+}
+
+// Função para validar se um campo obrigatório foi preenchido corretamente
+function validarCampoVazio(texto) {
+  // Retira espaços em branco das pontas e checa o tamanho
+  const textoLimpo = texto.trim();
+  if (textoLimpo.length === 0) {
+    return false; // Campo está vazio ou só tem espaços
+  }
+  return true; // Campo é válido
+}</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Utilitárias</div>
+    <h2>C. Exemplo de Código (Testando)</h2>
+    <div class="code-block">JavaScript
+// Testando nossas funções (isso seria feito em outro arquivo no projeto real)
+const valorCarrinho = calcularTotal(200, 3, 10);
+console.log(`O valor a pagar é: ${valorCarrinho}`);
+
+const usuarioValido = validarCampoVazio("   "); // Apenas espaços
+console.log(`O nome é válido? ${usuarioValido}`);</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Utilitárias</div>
+    <h2>D. Explicação linha por linha</h2>
+    <ul>
+      <li><strong>Linhas 4-14:</strong> Declaramos a função calcularTotal que espera 3 parâmetros.</li>
+      <li><strong>Linhas 5-7:</strong> O conceito de Early Return (retorno antecipado). Se a quantidade for inválida, a função devolve 0 e para a execução ali mesmo.</li>
+      <li><strong>Linhas 9-11:</strong> Executamos a regra de negócio matemática de forma clara e legível.</li>
+      <li><strong>Linha 13:</strong> O comando return pega a variável totalFinal e a "cospe" para fora da função.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Utilitárias</div>
+    <h2>D. Explicação linha por linha (Cont.)</h2>
+    <ul>
+      <li><strong>Linhas 17-25:</strong> Função que limpa os espaços invisíveis usando o método nativo .trim() e avalia o tamanho da string.</li>
+      <li><strong>Linhas 28-32:</strong> Simulamos o uso dessas funções. O retorno da função é armazenado nas constantes valorCarrinho e usuarioValido para uso posterior.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <h2>E. Dinâmica: A Arte do Early Return</h2>
+      <p>Legibilidade de código, carga cognitiva e manutenibilidade.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Dinâmica</div>
+    <h2>A Arte do Early Return</h2>
+    <p><strong>Objetivo:</strong> Desenvolver o olhar crítico sobre legibilidade de código, carga cognitiva e manutenibilidade.</p>
+    <p>Vocês devem entender que um código não serve apenas para o computador, mas principalmente para outros humanos (ou para o seu "eu" do futuro).</p>
+    <p><strong>Cenário:</strong> Você recebeu um código legado de um sistema de e-commerce que calcula descontos. Ele funciona, mas é difícil de manter. Sua tarefa é analisar as duas propostas de implementação e decidir qual delas deve ser usada no projeto.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Dinâmica</div>
+    <h2>"Opção Pirâmide" (If/Else Aninhado)</h2>
+    <p>Foca em cercar o problema com camadas.</p>
+    <div class="code-block">JavaScript
+function calcularDesconto(usuario, produto, cupom) {
+  let desconto = 0;
+  if (usuario.estaAtivo) {
+    if (produto.quantidade > 0) {
+      if (cupom.isValid) {
+        desconto = 0.15;
+      } else {
+        desconto = 0.05;
+      }
+    } else {
+      console.log("Erro: Produto esgotado");
+      desconto = 0;
+    }
+  } else {
+    console.log("Erro: Usuário inativo");
+    desconto = 0;
+  }
+  return desconto;
+}</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Dinâmica</div>
+    <h2>"Opção Direta" (Early Return / Guard Clauses)</h2>
+    <p>Foca em limpar o caminho e sair rápido.</p>
+    <div class="code-block">JavaScript
+function calcularDesconto(usuario, produto, cupom) {
+  // Cláusulas de Guarda: Saída antecipada
+  if (!usuario.estaAtivo) return 0;
+  if (produto.quantidade <= 0) return 0;
+
+  // Lógica do Caminho Feliz
+  if (cupom.isValid) return 0.15;
+  return 0.05;
+}</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Dinâmica</div>
+    <h2>Instruções para a Turma</h2>
+    <ul>
+      <li><strong>1. Observação:</strong> Leiam os dois blocos para discussão dentro das equipes.</li>
+      <li><strong>2. Debater para pensar:</strong> Respondam às três perguntas abaixo e defendam a escolha técnica.</li>
+      <ul>
+        <li>Pergunta 1: Qual código é mais fácil de explicar em voz alta para um colega?</li>
+        <li>Pergunta 2: Se precisarmos adicionar uma nova regra agora (ex: if (usuario.isBlackFriday)), qual código fica mais fácil de modificar sem quebrar o que já existe?</li>
+        <li>Pergunta 3: Por que a "Opção Pirâmide" pode ser considerada perigosa em projetos grandes?</li>
+      </ul>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Dinâmica</div>
+    <h2>Entrega da Refatoração</h2>
+    <p><strong>3. Entrega: O Relatório de Refatoração.</strong></p>
+    <p>Cada equipe deve entregar um pequeno texto contendo:</p>
+    <ul>
+      <li><strong>A Escolha Técnica:</strong> Declarar qual opção (A ou B) será adotada como padrão no projeto.</li>
+      <li><strong>Justificativa "Clean Code" (Mínimo 3 pontos):</strong> Listar três razões técnicas para a escolha. Exemplo: "A Opção B reduz a profundidade do código (indentação)."</li>
+      <li><strong>O Teste de Stress:</strong> Descrever em um parágrafo o que acontece no código escolhido se uma nova condição for adicionada: "E se o usuário for VIP e ganhar 20% de desconto?".</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <h2>FAQ - Dúvidas Reais</h2>
+      <p>Esclarecendo os pontos cruciais do JavaScript.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Reais</h2>
+    <div class="faq-item">
+      <div class="faq-q">1. Por que nós sempre usamos === em vez de == em JavaScript?</div>
+      <div class="faq-a"><strong>Resposta:</strong> Porque o JavaScript tenta "ajudar" convertendo tipos secretamente se você usar ==. A string "0" vira o número 0. === obriga que o valor E o tipo sejam idênticos, impedindo bugs silenciosos no sistema.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Reais</h2>
+    <div class="faq-item">
+      <div class="faq-q">2. Posso voltar a usar var se eu preferir?</div>
+      <div class="faq-a"><strong>Resposta:</strong> Profissionalmente, não. O var sofre de vazamento de escopo e de hoisting confuso. O mercado adotou let e const para garantir que as variáveis existam apenas onde deveriam existir (dentro do seu bloco).</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Reais</h2>
+    <div class="faq-item">
+      <div class="faq-q">3. Qual a diferença entre undefined e null?</div>
+      <div class="faq-a"><strong>Resposta:</strong> undefined significa que a variável foi criada, mas o próprio JavaScript diz "não faço ideia do que tem aqui ainda". null é um valor proposital que o desenvolvedor atribui para dizer "esta variável está intencionalmente vazia no momento".</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Reais</h2>
+    <div class="faq-item">
+      <div class="faq-q">4. Se eu criar um const Array ou Object, não posso mais mexer nele?</div>
+      <div class="faq-a"><strong>Resposta:</strong> Você não pode reatribuir a variável inteira (ex: meuArray = []), mas você pode modificar o conteúdo interno dela, adicionando e removendo itens (meuArray.push('novo item')). O const bloqueia a referência de memória, não os elementos filhos.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Reais</h2>
+    <div class="faq-item">
+      <div class="faq-q">5. Se a função não tiver a palavra return, o que acontece com o resultado?</div>
+      <div class="faq-a"><strong>Resposta:</strong> Ele se perde! A função fará os cálculos internamente, mas na hora de entregar a resposta para o sistema, ela entregará um valor undefined. É o erro mais comum para quem está começando.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <h2>Exercícios de Fixação</h2>
+      <p>Colocando em prática a construção de utilitários.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios</div>
+    <h2>Regras e Primeiros Passos</h2>
+    <div class="callout green">
+      <div class="callout-title">Entrega Final</div>
+      Um único arquivo chamado utils.js contendo todas as funções desenvolvidas abaixo, com seus respectivos nomes documentados.
+    </div>
+    <ul>
+      <li><strong>1. Minhas Primeiras Variáveis</strong><br> Descrição: Declare 3 variáveis: nomeProduto (imutável), quantidadeEstoque (mutável) e produtoAtivo (imutável). Atribua valores lógicos a elas correspondentes aos seus tipos adequados.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios</div>
+    <h2>Funções de Formatação e Condicionais</h2>
+    <ul>
+      <li><strong>2. Saudação ao Cliente</strong><br> Descrição: Crie uma função chamada saudarCliente(nome) que recebe uma string e retorna a frase: "Olá, [nome]! Bem-vindo à nossa loja."</li>
+      <li><strong>3. Formatar para Moeda</strong><br> Descrição: Crie uma função chamada formatarMoedaBRL(valor) que recebe um número (ex: 15.5) e retorna ele como string usando o padrão brasileiro (ex: "R$ 15.50" - dica: pesquise sobre o método .toFixed()).</li>
+      <li><strong>4. Desconto de Funcionário</strong><br> Descrição: Crie uma função calcularDesconto(precoOriginal, isFuncionario). Se o booleano for true, retorne o preço com 30% de desconto. Caso contrário, retorne o preço normal.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios</div>
+    <h2>Estruturas e Validações</h2>
+    <ul>
+      <li><strong>5. Montando o Produto</strong><br> Descrição: Crie um objeto produto utilizando const que contenha as propriedades: id, nome, preco e categorias (um array de strings).</li>
+      <li><strong>6. Validador de Senha Forte</strong><br> Descrição: Crie uma função validarSenha(senha). Ela deve retornar true apenas se a senha tiver 8 caracteres ou mais, e não puder ser a palavra exata "12345678" ou "senha".</li>
+      <li><strong>7. Calculadora Total do Carrinho</strong><br> Descrição: Crie uma função fecharCarrinho(valorProduto, quantidade, valorFrete). Se o total dos produtos (valorProduto * quantidade) for maior que 200, o frete vira 0. Retorne o valor total final da compra.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios</div>
+    <h2>Validações Avançadas e Integração</h2>
+    <ul>
+      <li><strong>8. Validador de CPF (Tamanho)</strong><br> Descrição: Crie uma função validarTamanhoCPF(cpf) que recebe uma string. Remova espaços em branco das pontas. Retorne true se a string resultante tiver exatamente 11 caracteres numéricos.</li>
+      <li><strong>9. Checagem de Campo Obrigatório</strong><br> Descrição: Modifique nossa função validarCampoVazio da aula. Agora, além de checar se está vazio, ela deve retornar false se o campo for null ou undefined.</li>
+      <li><strong>10. Resumo da Compra</strong><br> Descrição: Crie uma função gerarResumo(nomeCliente, totalCompra). Essa função deve chamar internamente a sua função formatarMoedaBRL para formatar o total e retornar a string: "Cliente: [nome], Total a Pagar: [valor_formatado]".</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">07</div>
+      <h2>Fechamento</h2>
+      <p>Conexão com a Situação de Aprendizagem e os próximos passos.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Fechamento</div>
+    <h2>Conexão com a Situação de Aprendizagem</h2>
+    <p>As funções utilitárias que começamos a escrever hoje no utils.js (como validar se um campo está vazio ou calcular totais) não são apenas exercícios. Elas compõem o motor lógico do frontend da nossa Situação de Aprendizagem.</p>
+    <p>Antes do formulário de Login ou de Cadastro de Produtos bater lá no servidor PHP que construiremos depois, esse arquivo utils.js será responsável por blindar a interface, garantindo integridade de dados, segurança e usabilidade para o cliente final, conforme exigido pelos requisitos de Qualidade (QA) do nosso projeto.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Fechamento</div>
+    <h2>Na Próxima Aula</h2>
+    <p>Hoje aprendemos a criar a "inteligência" matemática e lógica do sistema. Mas como nós fazemos para capturar o que o usuário digitou na tela e jogar para dentro dessas funções?</p>
+    <p>Na Aula 16, vamos abordar as Condicionais (if/else, switch) que permitem que o código tome decisões e execute blocos específicos baseados em condições lógicas e os Laços de repetição (for, while) que automatizam a execução de uma tarefa várias vezes enquanto uma condição for verdadeira.</p>
+  </div>
+
+</div>
+
+<nav id="nav">
+  <button id="btn-prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+  <span id="slide-counter">1 / 58</span>
+  <button id="btn-next" onclick="changeSlide(1)">Próximo →</button>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === total - 1;
+    document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function changeSlide(dir) { showSlide(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'  || e.key === 'PageUp')   changeSlide(-1);
+  });
+
+  // Touch swipe
+  let touchX = 0;
+  document.addEventListener('touchstart', e => touchX = e.changedTouches[0].screenX);
+  document.addEventListener('touchend', e => {
+    let delta = e.changedTouches[0].screenX - touchX;
+    if (delta < -50) changeSlide(1);
+    if (delta > 50)  changeSlide(-1);
+  });
+</script>
+
+</body>
+</html>
