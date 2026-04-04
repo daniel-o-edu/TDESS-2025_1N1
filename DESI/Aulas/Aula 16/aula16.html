@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 16 - Estruturas de Controle: Condicionais e Laços de Repetição</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0d2a4a;
+    --ink-light: #1e4976;
+    --accent: #1565c0;
+    --accent2: #1976d2;
+    --accent3: #0288d1;
+    --bg: #e8f0fe;
+    --surface: #ffffff;
+    --border: #b3cde8;
+    --code-bg: #eaf2fb;
+    --tag-bg: #dceefb;
+    --tag-border: #1976d2;
+    --slide-max: 100%;
+    --slide-title-max: 90%;
+  }
+
+  html, body {
+    font-family: 'Roboto', sans-serif;
+    background: #c5d8f0;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── IMAGENS DE FUNDO ── */
+  .slide-cover {
+    background-image: url('https://i.ibb.co/fzwwYWW6/img-frente01.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.82);
+    border-radius: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-cover > * { position: relative; z-index: 1; }
+
+  .slide-section {
+    background-image: url('https://i.ibb.co/1tBjw9p9/img-tit01.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.80);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-section > * { position: relative; z-index: 1; }
+
+  .slide-common {
+    background-image: url('https://i.ibb.co/m1J6vPd/img-frente02.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-common::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.88);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-common > * { position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  #nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    height: 52px;
+    box-shadow: 0 -2px 12px rgba(13,42,74,.28);
+  }
+  #nav button {
+    background: none; border: none;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 24px;
+    height: 52px;
+    transition: background .15s;
+  }
+  #nav button:hover { background: rgba(255,255,255,.12); }
+  #nav button:disabled { opacity: .35; cursor: default; }
+  #slide-counter {
+    color: rgba(255,255,255,.65);
+    font-size: .85rem;
+    min-width: 80px;
+    text-align: center;
+    font-family: 'Source Code Pro', monospace;
+  }
+
+  /* ── PROGRESS ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 101;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--accent2);
+    transition: width .3s ease;
+  }
+
+  /* ── SLIDE WRAPPER ── */
+  #stage {
+    min-height: 100vh;
+    padding: 0 0 52px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── SLIDES GENÉRICOS ── */
+  .slide {
+    display: none;
+    width: var(--slide-max);
+    max-width: var(--slide-max);
+    min-height: calc(100vh - 52px);
+    background: var(--surface);
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 4px 32px rgba(13,42,74,.12);
+    padding: 7vh 8vw;
+    animation: fadeIn .3s ease;
+    margin: 0 auto;
+  }
+  .slide.active { display: block; }
+
+  .slide.slide-section,
+  .slide.slide-cover {
+    width: var(--slide-title-max);
+    max-width: var(--slide-title-max);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .slide-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .slide h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .slide h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--accent2);
+    padding-left: 14px;
+  }
+  .slide h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    font-weight: 700;
+    color: var(--ink-light);
+    margin: 20px 0 10px;
+  }
+  .slide p {
+    font-size: clamp(1.5rem, 2vw, 1.5rem);
+    line-height: 1.75;
+    color: var(--ink-light);
+    margin-bottom: 14px;
+  }
+  .slide ul, .slide ol {
+    padding-left: 22px;
+    margin-bottom: 14px;
+  }
+  .slide li {
+    font-size: clamp(1.5rem, 2vw, 1.2rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+  }
+  .slide li strong { color: var(--ink); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 24px 0;
+  }
+
+  /* ── COVER ── */
+  .cover-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .cover-meta span {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: .8rem;
+    padding: 4px 12px;
+    color: var(--ink-light);
+  }
+  .cover-desc {
+    font-size: clamp(1rem, 2.2vw, 1.15rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    border-left: 3px solid var(--border);
+    padding-left: 18px;
+    margin: 24px 0;
+  }
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .topic-chip {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 3px;
+    padding: 10px 14px;
+    font-size: .95rem;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent2);
+    border-radius: 3px;
+    padding: 18px 20px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: clamp(.78rem, 1.6vw, .88rem);
+    line-height: 1.65;
+    color: var(--ink);
+    overflow-x: auto;
+    margin: 16px 0;
+    white-space: pre;
+  }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: clamp(1.7rem, 2vw, 1.5rem);
+    line-height: 1.7;
+  }
+  .callout.blue {
+    background: #dceefb;
+    border-left: 4px solid var(--accent2);
+    color: var(--ink);
+  }
+  .callout.green {
+    background: #e1f5e8;
+    border-left: 4px solid #2e7d32;
+    color: #1a3a28;
+  }
+  .callout.red {
+    background: #e3f0fb;
+    border-left: 4px solid var(--accent);
+    color: var(--ink);
+  }
+  .callout.yellow {
+    background: #e8f4fd;
+    border-left: 4px solid var(--accent3);
+    color: var(--ink);
+  }
+  .callout .callout-title {
+    font-weight: 700;
+    font-family: 'Roboto', sans-serif;
+    font-size: .78rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: .75;
+  }
+
+  /* ── TWO COLUMN ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin: 16px 0;
+  }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  .col-card {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 18px;
+  }
+  .col-card h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(1.5rem, 1.8vw, 1.5rem);
+  }
+  thead th {
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: .85rem;
+    letter-spacing: .04em;
+  }
+  tbody tr:nth-child(even) { background: var(--code-bg); }
+  tbody tr:hover { background: #d0e8f8; }
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-light);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  tbody td strong { color: var(--ink); }
+
+  /* ── FAQ ── */
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .faq-q {
+    background: var(--code-bg);
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: clamp(2.2rem, 2vw, 1.5rem);
+    color: var(--ink);
+    border-left: 4px solid var(--accent2);
+  }
+  .faq-a {
+    padding: 12px 18px;
+    font-size: clamp(2.5rem, 1.9vw, 1.5rem);
+    color: var(--ink-light);
+    line-height: 1.7;
+    background: var(--surface);
+  }
+
+  /* ── SECTION HEADER SLIDES ── */
+  .section-header {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .section-num {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 3rem;
+    font-weight: 600;
+    color: #b3cde8;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .section-header h2 {
+    border: none;
+    padding: 0;
+    text-align: center;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--ink);
+  }
+  .section-header p {
+    max-width: 560px;
+    margin: 16px auto 0;
+    text-align: center;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .slide { padding: 28px 22px 36px; width: 97%; max-width: 97%; }
+    .slide.slide-section, .slide.slide-cover { width: 97%; max-width: 97%; }
+    #nav button { padding: 0 14px; font-size: .9rem; }
+  }
+  @media (max-width: 400px) {
+    .slide { padding: 20px 14px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"><div id="progress-bar"></div></div>
+
+<div id="stage">
+
+  <div class="slide slide-cover active">
+    <div class="slide-label">Front-end</div>
+    <h1>Aula 16 - Estruturas de Controle: Condicionais e Laços de Repetição</h1>
+    <p class="cover-desc">Descrição: Aprofundamento nas estruturas de controle de fluxo lógico do JavaScript. Condicionais complexas utilizando switch para roteamento de decisões. Automatização de tarefas repetitivas através da implementação de laços de repetição for e while. Aplicação prática em algoritmos de varredura e processamento de dados para o Front-end.</p>
+    <hr class="divider">
+    <h3>Tópicos desta aula</h3>
+    <div class="topics-grid">
+      <div class="topic-chip">Condicionais if/else</div>
+      <div class="topic-chip">Operador Ternário</div>
+      <div class="topic-chip">Roteamento com switch</div>
+      <div class="topic-chip">Laços for e while</div>
+      <div class="topic-chip">Break e Continue</div>
+    </div>
+    <div class="cover-meta">
+      <span>Aula 16</span>
+      <span>JavaScript</span>
+      <span>Estruturas de Controle</span>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Abertura</div>
+    <h2>Cenário Real</h2>
+    <p>Pensem na nossa Situação de Aprendizagem (SA): em breve, teremos que exibir a lista de usuários cadastrados no nosso Dashboard, consumindo dados do banco.</p>
+    <p>Imaginem ter que escrever manualmente a tag &lt;tr&gt; no HTML para cada um dos 5.000 clientes da empresa. Isso é humanamente impossível e tecnicamente inviável.</p>
+    <p>Hoje, criaremos o "cérebro" da nossa página, dando a ela a habilidade de analisar milhares de dados, tomar decisões instantâneas e trabalhar por nós sem que precisemos copiar e colar código repetido.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Abertura</div>
+    <h2>Pergunta</h2>
+    <div class="callout yellow">
+      <div class="callout-title">Desafio de Reflexão</div>
+      Como fazemos o computador trabalhar por nós, processando regras complexas e repetindo uma tarefa milhares de vezes em milissegundos, consumindo pouca banda e economizando os recursos do nosso servidor?
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <h2>Tomada de Decisão com Condicionais</h2>
+      <p>(if/else e Ternário)</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Tomada de Decisão</div>
+    <h2>A. Conceito</h2>
+    <p>A instrução if é a estrutura fundamental que permite ao JavaScript tomar decisões.</p>
+    <p>Ela avalia uma expressão entre parênteses e, se o resultado for considerado verdadeiro (truthy), executa o bloco de código associado.</p>
+    <p>No JavaScript, a avaliação converte automaticamente valores: itens como undefined, null, 0 e "" (string vazia) são tratados como falsos (falsy), enquanto qualquer outra coisa (incluindo arrays) é verdadeira.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Tomada de Decisão</div>
+    <h2>A. Conceito (Continuação)</h2>
+    <p>Complementando isso, a cláusula else define uma alternativa a ser executada quando a expressão falha, permitindo criar um desvio claro do fluxo do sistema.</p>
+    <p>Quando precisamos lidar com múltiplas ramificações lógicas simples, utilizamos o padrão else if, encadeando validações sem prejudicar a leitura do código.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Tomada de Decisão</div>
+    <h2>Operador Ternário</h2>
+    <p>Além disso, a linguagem oferece o operador condicional ternário (?:), que atua como um atalho sintático extremamente elegante para a estrutura if/else tradicional quando nosso único objetivo é retornar ou atribuir um valor.</p>
+    <p>Esta abordagem diminui o número de linhas no arquivo, facilitando a manutenção e agilizando a nossa leitura, algo essencial na dinâmica do trabalho em equipe.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Tomada de Decisão</div>
+    <h2>B. Visualizando</h2>
+    <div class="callout blue">
+      <div class="callout-title">Analogia do Fluxograma</div>
+      Imaginem um fluxograma de uma portaria eletrônica. Há um bloco central de decisão em formato de losango: "O usuário enviou a senha?".
+      <br><br>
+      Se a seta apontar para SIM (truthy), a cancela abre (bloco de código do if). Se apontar para NÃO (falsy), o sistema emite um alerta (bloco de código do else).
+      <br><br>
+      O operador ternário seria a versão "Via Expressa" desse pedágio. {ver img01.png}
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exemplo de Código</div>
+    <h2>C. Implementação (if/else)</h2>
+    <div class="code-block">
+// Validando dados de um usuário na interface (truthy/falsy)
+let nomeUsuario = ""; // Falsy por ser string vazia
+if (nomeUsuario) {
+  console.log("Bem-vindo, " + nomeUsuario);
+} else {
+  console.log("Erro: Preencha seu nome de usuário.");
+}</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exemplo de Código</div>
+    <h2>C. Implementação (Ternário)</h2>
+    <div class="code-block">
+// Operador Ternário para definir status de um cardápio
+let estoque = 5;
+let statusProduto = (estoque > 0) ? "Disponível": "Esgotado";
+console.log("Status do Item: " + statusProduto);</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Explicação Detalhada</div>
+    <h2>D. Explicação linha por linha</h2>
+    <ul>
+      <li><strong>let nomeUsuario = "";:</strong> Declaramos uma variável e a inicializamos com uma string vazia (considerada falsy em JS).</li>
+      <li><strong>if (nomeUsuario) {:</strong> O JavaScript tenta converter a string em booleano. Como é vazia, resulta em falso e o código pula o bloco.</li>
+      <li><strong>} else {:</strong> Captura a falha na condição anterior.</li>
+      <li><strong>console.log(...):</strong> Exibe a mensagem de erro alertando o preenchimento.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Explicação Detalhada</div>
+    <h2>D. Explicação do Ternário</h2>
+    <ul>
+      <li><strong>let statusProduto = ...:</strong> Inicia a declaração de status aplicando o ternário.</li>
+      <li><strong>(estoque > 0):</strong> É a nossa condição de teste.</li>
+      <li><strong>? "Disponível":</strong> Valor atribuído caso o teste acima seja verdadeiro.</li>
+      <li><strong>: "Esgotado";:</strong> Valor atribuído caso o teste seja falso.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Prática</div>
+    <h2>E. Exercícios Rápidos</h2>
+    <ul>
+      <li><strong>1.</strong> Crie um if que verifique se a variável idade é maior ou igual a 18 e imprima "Maior de idade".</li>
+      <li><strong>2.</strong> Altere o exercício 1 adicionando um else para imprimir "Menor de idade".</li>
+      <li><strong>3.</strong> Use o else if para imprimir "Idoso" se a idade for maior ou igual a 60.</li>
+      <li><strong>4.</strong> Teste a validação truthy: passe o número 0 em um if. O que acontece?</li>
+      <li><strong>5.</strong> Reescreva o exercício 1 e 2 em uma única linha utilizando o operador ternário.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>Roteamento de Múltiplos Caminhos</h2>
+      <p>(switch)</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Roteamento (Switch)</div>
+    <h2>A. Conceito</h2>
+    <p>A instrução switch é utilizada especificamente quando todas as nossas ramificações lógicas dependem da avaliação de uma única expressão contra vários valores diferentes.</p>
+    <p>Em vez de criar um bloco gigante e confuso cheio de else if (que torna a auditoria de código difícil), o switch calcula o valor da expressão apenas uma vez e procura um rótulo case correspondente.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Roteamento (Switch)</div>
+    <h2>A. Conceito: Detalhes Técnicos</h2>
+    <p>Uma característica técnica essencial é que a comparação utiliza obrigatoriamente o operador de identidade estrita (===), ou seja, não há conversão automática de tipo durante a validação.</p>
+    <p>Dentro da estrutura de roteamento do switch, a palavra-chave break desempenha um papel crítico para a estabilidade do sistema. As cláusulas case especificam apenas o ponto de partida da execução.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Roteamento (Switch)</div>
+    <h2>A. Conceito: Break e Default</h2>
+    <p>Se nós esquecermos o break, a execução continuará rodando ("vazará") para os casos seguintes, independentemente de coincidirem ou não.</p>
+    <p>Para lidar com valores inesperados, utilizamos a cláusula default, garantindo que sempre haverá uma saída segura para o fluxo.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Roteamento (Switch)</div>
+    <h2>B. Visualizando</h2>
+    <div class="callout blue">
+      <div class="callout-title">Analogia do PABX</div>
+      Pensem num painel telefônico de uma central de atendimento (PABX). A ligação entra (expressão switch) e o sistema procura exatamente o ramal digitado (case 1, case 2).
+      <br><br>
+      Assim que o telefone do setor toca e é atendido, a conexão precisa ser cortada com a central (break), senão a ligação vai tocar nos outros ramais abaixo sequencialmente, virando uma confusão.
+      <br><br>
+      O default é a secretária eletrônica geral para quem digita um ramal inexistente. {ver img02.png}
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exemplo de Código</div>
+    <h2>C. Exemplo (Switch)</h2>
+    <div class="code-block">
+// Roteamento de acessos no nosso futuro Dashboard
+let nivelAcesso = 2; // 1: User, 2: Editor, 3: Admin
+switch (nivelAcesso) {
+  case 1:
+    console.log("Tela: Visualização de Dados");
+    break;
+  case 2:
+    console.log("Tela: Edição de Clientes Liberada");
+    break;
+  case 3:
+    console.log("Tela: Painel de Controle Total");
+    break;
+  default:
+    console.log("Erro: Nível de acesso desconhecido. Refaça o login.");
+}</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Explicação Detalhada</div>
+    <h2>D. Explicação linha por linha</h2>
+    <ul>
+      <li><strong>let nivelAcesso = 2;:</strong> Simulamos o retorno de um tipo de usuário vindo do banco de dados.</li>
+      <li><strong>switch (nivelAcesso) {:</strong> Inicia o painel, avaliando qual é o valor numérico exato da variável.</li>
+      <li><strong>case 1::</strong> Pergunta "nivelAcesso == 1?". Não é, então ignora.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Explicação Detalhada</div>
+    <h2>D. Explicação (Continuação)</h2>
+    <ul>
+      <li><strong>case 2::</strong> Pergunta "nivelAcesso == 2?". É verdade! O fluxo entra aqui.</li>
+      <li><strong>console.log(...):</strong> Imprime que a edição foi liberada.</li>
+      <li><strong>break;:</strong> Fundamental. Interrompe o switch para impedir que o código caia no case 3 por acidente.</li>
+      <li><strong>default::</strong> É o "else" do switch. O que fazer se o valor for 4, 5, "dois", etc.</li>
+      <li><strong>console.log(...):</strong> Mensagem de segurança por fallback.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Prática</div>
+    <h2>E. Exercícios Rápidos</h2>
+    <ul>
+      <li><strong>1.</strong> Crie um switch que valide a variável diaDaSemana (1 a 7) e imprima o nome do dia.</li>
+      <li><strong>2.</strong> Remova intencionalmente o break de um case do exercício 1 e rode o código. O que aconteceu?</li>
+      <li><strong>3.</strong> O que acontece se a variável diaDaSemana receber a string "1" no lugar do número 1?</li>
+      <li><strong>4.</strong> Adicione um default para informar "Dia inválido" se passar o número 8.</li>
+      <li><strong>5.</strong> Pesquise rapidamente na IA: É possível colocar mais de um case executando a mesma linha de código (agrupamento)? Teste isso no seu VS Code.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2>Automatização com Laços de Repetição</h2>
+      <p>(for e while)</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Laços de Repetição</div>
+    <h2>A. Conceito</h2>
+    <p>Os laços de repetição (Loops) são o motor de trabalho da automação no JavaScript, sendo capazes de repetir um bloco de código incontáveis vezes enquanto uma determinada condição for avaliada como verdadeira.</p>
+    <p>O laço for é a ferramenta perfeita para cenários onde já conhecemos previamente o limite do processamento (ex: o tamanho de um array de clientes), pois consolida a criação da variável de controle, a condição e o incremento na mesma linha.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Laços de Repetição</div>
+    <h2>A. Conceito: While e Cuidados</h2>
+    <p>Já a estrutura while é ideal quando a repetição depende de uma regra de negócio que não tem um fim previsível, como esperar um processo de servidor terminar.</p>
+    <p>Para mantermos a eficiência da aplicação e a ética profissional (entregando performance), devemos ser rigorosos com a condição de parada. O mau uso de laços gera "loops infinitos" que travam o navegador do cliente.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Laços de Repetição</div>
+    <h2>A. Conceito: Break e Continue</h2>
+    <p>Para refinar esse controle de fluxo, utilizamos break para sair totalmente do laço, e continue (com ou sem Rótulos/Labels) para pular uma iteração específica que não queremos processar, poupando processamento e mantendo as diretrizes de código limpo.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Laços de Repetição</div>
+    <h2>B. Visualizando</h2>
+    <div class="callout blue">
+      <div class="callout-title">Analogia da Esteira</div>
+      Pense em uma esteira de fábrica de sapatos. O laço for é o braço robótico que pinta os sapatos.
+      <br><br>
+      A configuração dele diz: "comece na caixa 0 (let i = 0), continue operando se houver menos de 100 caixas (i < 100), após pintar, passe para a próxima (i++)".
+      <br><br>
+      Se passar pela esteira um sapato com defeito, o robô recebe um aviso de continue: ele não pinta aquele sapato defeituoso, mas volta para a posição inicial para esperar o próximo imediatamente. {ver img03.png}
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exemplo de Código</div>
+    <h2>C. Implementação (For)</h2>
+    <div class="code-block">
+// Varrendo 5 registros fictícios para construir a lista do Front-end
+let clientes = ["Ana", "Bruno", "Carlos", "Diana", "Eduardo"];
+for (let i = 0; i < clientes.length; i++) {
+  // Regra de negócio: pular clientes cujo nome inicia com 'C'
+  if (clientes[i].startsWith("C")) {
+    console.log('Puxa, o(a) ${clientes[i]} está com cadastro bloqueado. Pulando... );
+    continue;
+  }
+  // Processamento pesado (simulação)
+  console.log( Montando <tr> para: ${clientes[i]} );
+}</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Explicação Detalhada</div>
+    <h2>D. Explicação linha por linha</h2>
+    <ul>
+      <li><strong>let clientes = [...]:</strong> Array contendo nossa lista.</li>
+      <li><strong>for (let i = 0;:</strong> Passo 1 - Inicialização. Começamos a contar do índice 0 (primeiro item).</li>
+      <li><strong>i < clientes.length;:</strong> Passo 2 - Condição. Enquanto i for menor que 5 (tamanho do array), continue rodando.</li>
+      <li><strong>i++) {:</strong> Passo 3 - Incremento. Ao final de cada ciclo, aumente o i em 1.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Explicação Detalhada</div>
+    <h2>D. Explicação do Laço (Cont.)</h2>
+    <ul>
+      <li><strong>if (clientes[i].startsWith("C")) {:</strong> Valida se a string na posição i começa com "C".</li>
+      <li><strong>continue;:</strong> Se começar com C, aborta a iteração atual (pulou o Carlos) e volta ao topo do for somando mais 1 no i.</li>
+      <li><strong>console.log(...):</strong> Só vai imprimir as pessoas que não ativaram o continue.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Prática</div>
+    <h2>E. Exercícios Rápidos</h2>
+    <ul>
+      <li><strong>1.</strong> Crie um for que conte de 1 a 10 imprimindo os números.</li>
+      <li><strong>2.</strong> Modifique o exercício 1 para contar regressivamente de 10 até 1.</li>
+      <li><strong>3.</strong> Crie um while que duplique o valor de uma variável saldo = 10 até que passe de 100.</li>
+      <li><strong>4.</strong> Utilize break para parar um loop for de 1 a 20 assim que ele bater no número 13.</li>
+      <li><strong>5.</strong> Crie um array de produtos e use um laço para imprimir o nome de cada um deles.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <h2>FAQ - Dúvidas Reais</h2>
+      <p>Perguntas do mundo corporativo sobre controle de fluxo.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Pergunta 1</h2>
+    <div class="faq-item">
+      <div class="faq-q">"Por que no switch precisamos de três iguais (===) na cabeça da gente e o if aceita dois iguais (==)?"</div>
+      <div class="faq-a"><strong>Resposta:</strong> Porque o switch foi projetado para verificação de Identidade Estrita, evitando falsos positivos que causam bugs difíceis de rastrear. O uso de == (com coerção de tipos) no mercado já é desencorajado por boas práticas (Clean Code), então o JavaScript nos força a ser precisos no switch.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Pergunta 2</h2>
+    <div class="faq-item">
+      <div class="faq-q">"Se eu posso fazer tudo com while, por que o for existe?"</div>
+      <div class="faq-a"><strong>Resposta:</strong> Organização. O for agrupa inicialização, verificação e incremento em uma única linha. Fazer isso no while exige escrever mais linhas e aumenta a chance de você esquecer de somar o contador, travando a aplicação com um loop infinito.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Pergunta 3</h2>
+    <div class="faq-item">
+      <div class="faq-q">"Eu posso colocar um if dentro de um for?"</div>
+      <div class="faq-a"><strong>Resposta:</strong> Sempre! Isso é o que chamamos de aninhamento. Você varre os dados com o laço de repetição e, para cada item, usa condicionais para aplicar regras de negócios específicas (como no nosso exemplo do "Carlos").</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Pergunta 4</h2>
+    <div class="faq-item">
+      <div class="faq-q">"Usei o ChatGPT para achar um erro e ele sugeriu a função eval(), devo usar?"</div>
+      <div class="faq-a"><strong>Resposta:</strong> Não! O uso de eval() é desencorajado por impedir otimizações do motor JavaScript e introduzir vulnerabilidades de segurança. O bom profissional de TI avalia o código sugerido pelas IAs, garantindo a robustez do software, em vez de aplicar atalhos que comprometem a segurança (Soft Skill: Pensamento Crítico).</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Pergunta 5</h2>
+    <div class="faq-item">
+      <div class="faq-q">"Como o operador ternário ajuda na performance de Front-end?"</div>
+      <div class="faq-a"><strong>Resposta:</strong> Por sua característica lógica de "curto-circuito". Apenas um dos dois caminhos possíveis (antes ou depois dos dois pontos) é de fato processado pelo interpretador, o que poupa milissegundos essenciais ao lidar com a renderização visual do DOM na web móvel.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <h2>Exercícios de Fixação</h2>
+      <p>Desafios práticos para a consolidação dos conceitos ensinados.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Desafios 1 e 2</h2>
+    <ul>
+      <li><strong>1. Desafio: Radar de Velocidade</strong><br>
+      Descrição: Crie um sistema em JS que defina uma variável velocidade. Se a velocidade for maior que 80, o console deve alertar "Multado!". Se não, "Dentro do limite".<br>
+      Entrega: Script simples usando if/else.</li>
+      <li><strong>2. Desafio: Contagem de Estoque</strong><br>
+      Descrição: Faça um loop while que tenha um total de 5 caixas. O laço deve decrementar uma a uma até que zere, mostrando "Faltam X caixas".<br>
+      Entrega: Script rodando sem gerar loop infinito.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Desafio 3</h2>
+    <ul>
+      <li><strong>3. Desafio: Validador de Tipos</strong><br>
+      Descrição: Defina uma variável com qualquer valor (número, string, array, nulo). Crie um switch baseado no typeof dessa variável que informe ao usuário se o tipo é "Texto", "Numérico", "Objeto" ou "Desconhecido".<br>
+      Entrega: Código funcional cobrindo no mínimo 3 retornos no switch e um default.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Desafios 4 e 5</h2>
+    <ul>
+      <li><strong>4. Desafio: Caixa Eletrônico (Ternário)</strong><br>
+      Descrição: Crie variáveis de saldo e saque Desejado. Use um operador ternário que valide se há fundos. Retorne uma string "Saque Autorizado" ou "Saldo Insuficiente".<br>
+      Entrega: Funcionalidade em 1 linha de código de validação, armazenada na variável de resposta.</li>
+      <li><strong>5. Desafio: Pular os Pares</strong><br>
+      Descrição: Crie um laço for de 1 a 20. Use a palavra-chave continue associada a um if para ignorar todos os números pares e imprimir apenas os números ímpares no console.<br>
+      Entrega: Código contendo o loop, o operador de módulo (%) e o uso correto do continue.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Desafios 6 e 7</h2>
+    <ul>
+      <li><strong>6. Desafio: O Menu do Dashboard</strong><br>
+      Descrição: Crie uma variável que recebe um pedido do usuário: "Relatorios", "Clientes", "Configuracoes" ou outro valor. Use um switch que, ao entrar na opção certa, faça um for simulando a geração de dados (Ex: Gerando 3 relatórios, e imprimindo "Relatorio 1, Relatorio 2...").<br>
+      Entrega: Código integrando um for aninhado dentro dos cases de um switch.</li>
+      <li><strong>7. Desafio: Limpador de Array de Dados (Truthy/Falsy)</strong><br>
+      Descrição: Você recebeu da API a seguinte lista suja: ["João", "", null, "Maria", 0, "José"]. Crie um for que varra a lista. Faça um teste de conversão booleana na variável e passe os valores válidos para uma nova lista chamada usuarios Validos.<br>
+      Entrega: Um array contendo apenas os dados genuínos retornados.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Desafios 8 e 9</h2>
+    <ul>
+      <li><strong>8. Desafio: Loop Seguro e Auditoria com IA</strong><br>
+      Descrição: Escreva um código intencionalmente quebrado contendo um Loop Infinito (ex: um while(true) sem break). Entregue esse código para uma IA (como Gemini ou ChatGPT) e peça para ela explicar por que seu navegador travaria.<br>
+      Entrega: Um arquivo de texto documentando o código falho e o resumo da explicação que você obteve da IA, exercitando a depuração assistida de forma ética.</li>
+      <li><strong>9. Desafio: Escape de Matriz (Uso de Labels)</strong><br>
+      Descrição: Baseado nas orientações do livro de David Flanagan, nós podemos usar Labels para saltar de laços múltiplos. Crie um laço dentro de outro (para percorrer uma tabela X,Y). Quando os laços acharem uma variável corrompido = true, dê um break na Label externa, parando tudo completamente.<br>
+      Entrega: Algoritmo implementado com sintaxe de Rótulos (Label) validado.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Desafio 10</h2>
+    <ul>
+      <li><strong>10. Desafio: Fatiamento de Usuários do Sistema</strong><br>
+      Descrição: O sistema requisita que não sejam cadastrados nomes com menos de 3 caracteres. Você tem a lista: ["Oi", "Ana", "Lu", "Carlos", "Ze", "Edu"]. Crie um código que percorra a lista, extraia quem está irregular e pare o script imediatamente (usando break) se o sistema tentar avaliar o 4º erro, informando "Lote muito defeituoso. Suspenso".<br>
+      Entrega: Lógica aplicada demonstrando domínio profundo sobre as condições de avanço e interrupção de fluxo.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conclusão</div>
+    <h2>Conexão com a Situação de Aprendizagem</h2>
+    <p>Tudo o que fizemos hoje reflete a exigência real da nossa SA: o Dashboard interativo.</p>
+    <p>Toda vez que um administrador do nosso projeto clicar em "Filtrar clientes ativos", não precisaremos ir até o servidor e sobrecarregá-lo recarregando a página (processo custoso).</p>
+    <p>O JavaScript, no próprio computador do usuário, usará os laços for e as condicionais switch e if que treinamos hoje para varrer milhares de dados JSON em milissegundos, tomar as decisões com base na regra de negócio local, otimizando o sistema, economizando banda e gerando alta qualidade de usabilidade.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Próximos Passos</div>
+    <h2>Próxima Aula</h2>
+    <p>Na Aula 17 abordaremos os fundamentos das Arrow Functions e da programação funcional, focando na manipulação eficiente de dados através de métodos como map, filter, reduce, spread e destructuring.</p>
+    <p>Aprenderemos sobre escopo de variáveis e a importância das funções puras para transformar informações sem gerar efeitos colaterais, vocês irão aplicar os conceitos em uma atividade prática, criando e validando utilitários de dados diretamente no console.</p>
+  </div>
+
+</div>
+
+<nav id="nav">
+  <button id="btn-prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+  <span id="slide-counter">1 / 51</span>
+  <button id="btn-next" onclick="changeSlide(1)">Próximo →</button>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === total - 1;
+    document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function changeSlide(dir) { showSlide(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'  || e.key === 'PageUp')   changeSlide(-1);
+  });
+
+  let touchX = 0;
+  document.addEventListener('touchstart', e => touchX = e.changedTouches[0].screenX);
+  document.addEventListener('touchend', e => {
+    let diffX = e.changedTouches[0].screenX - touchX;
+    if (diffX < -50) changeSlide(1);
+    if (diffX > 50) changeSlide(-1);
+  });
+</script>
+</body>
+</html>
