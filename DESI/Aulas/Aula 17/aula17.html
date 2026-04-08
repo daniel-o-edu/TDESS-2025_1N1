@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 17 - Funções e Arrow Functions, Organização Funcional e Utilitários de Dados</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0d2a4a;
+    --ink-light: #1e4976;
+    --accent: #1565c0;
+    --accent2: #1976d2;
+    --accent3: #0288d1;
+    --bg: #e8f0fe;
+    --surface: #ffffff;
+    --border: #b3cde8;
+    --code-bg: #eaf2fb;
+    --tag-bg: #dceefb;
+    --tag-border: #1976d2;
+    --slide-max: 100%;
+    --slide-title-max: 90%;
+  }
+
+  html, body {
+    font-family: 'Roboto', sans-serif;
+    background: #c5d8f0;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── IMAGENS DE FUNDO ── */
+  .slide-cover {
+    background-image: url('https://i.ibb.co/fzwwYWW6/img-frente01.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.82);
+    border-radius: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-cover > * { position: relative; z-index: 1; }
+
+  .slide-section {
+    background-image: url('https://i.ibb.co/1tBjw9p9/img-tit01.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.80);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-section > * { position: relative; z-index: 1; }
+
+  .slide-common {
+    background-image: url('https://i.ibb.co/m1J6vPd/img-frente02.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .slide-common::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.88);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide-common > * { position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  #nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    height: 52px;
+    box-shadow: 0 -2px 12px rgba(13,42,74,.28);
+  }
+  #nav button {
+    background: none; border: none;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 24px;
+    height: 52px;
+    transition: background .15s;
+  }
+  #nav button:hover { background: rgba(255,255,255,.12); }
+  #nav button:disabled { opacity: .35; cursor: default; }
+  #slide-counter {
+    color: rgba(255,255,255,.65);
+    font-size: .85rem;
+    min-width: 80px;
+    text-align: center;
+    font-family: 'Source Code Pro', monospace;
+  }
+
+  /* ── PROGRESS ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 101;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--accent2);
+    transition: width .3s ease;
+  }
+
+  /* ── SLIDE WRAPPER ── */
+  #stage {
+    min-height: 100vh;
+    padding: 0 0 52px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── SLIDES GENÉRICOS ── */
+  .slide {
+    display: none;
+    width: var(--slide-max);
+    max-width: var(--slide-max);
+    min-height: calc(100vh - 52px);
+    background: var(--surface);
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 4px 32px rgba(13,42,74,.12);
+    padding: 7vh 8vw;
+    animation: fadeIn .3s ease;
+    margin: 0 auto;
+  }
+  .slide.active { display: block; }
+
+  .slide.slide-section,
+  .slide.slide-cover {
+    width: var(--slide-title-max);
+    max-width: var(--slide-title-max);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .slide-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .slide h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .slide h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--accent2);
+    padding-left: 14px;
+  }
+  .slide h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    font-weight: 700;
+    color: var(--ink-light);
+    margin: 20px 0 10px;
+  }
+  .slide p {
+    font-size: clamp(1.5rem, 2vw, 1.5rem);
+    line-height: 1.75;
+    color: var(--ink-light);
+    margin-bottom: 14px;
+  }
+  .slide ul, .slide ol {
+    padding-left: 22px;
+    margin-bottom: 14px;
+  }
+  .slide li {
+    font-size: clamp(1.5rem, 2vw, 1.2rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+  }
+  .slide li strong { color: var(--ink); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 24px 0;
+  }
+
+  /* ── COVER ── */
+  .cover-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .cover-meta span {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: .8rem;
+    padding: 4px 12px;
+    color: var(--ink-light);
+  }
+  .cover-desc {
+    font-size: clamp(1rem, 2.2vw, 1.15rem);
+    line-height: 1.7;
+    color: var(--ink-light);
+    border-left: 3px solid var(--border);
+    padding-left: 18px;
+    margin: 24px 0;
+  }
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .topic-chip {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 3px;
+    padding: 10px 14px;
+    font-size: .95rem;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent2);
+    border-radius: 3px;
+    padding: 18px 20px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: clamp(.78rem, 1.6vw, .88rem);
+    line-height: 1.65;
+    color: var(--ink);
+    overflow-x: auto;
+    margin: 16px 0;
+    white-space: pre;
+  }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 3px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: clamp(1.7rem, 2vw, 1.5rem);
+    line-height: 1.7;
+  }
+  .callout.blue {
+    background: #dceefb;
+    border-left: 4px solid var(--accent2);
+    color: var(--ink);
+  }
+  .callout.green {
+    background: #e1f5e8;
+    border-left: 4px solid #2e7d32;
+    color: #1a3a28;
+  }
+  .callout.red {
+    background: #e3f0fb;
+    border-left: 4px solid var(--accent);
+    color: var(--ink);
+  }
+  .callout.yellow {
+    background: #e8f4fd;
+    border-left: 4px solid var(--accent3);
+    color: var(--ink);
+  }
+  .callout .callout-title {
+    font-weight: 700;
+    font-family: 'Roboto', sans-serif;
+    font-size: .78rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: .75;
+  }
+
+  /* ── TWO COLUMN ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin: 16px 0;
+  }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  .col-card {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 18px;
+  }
+  .col-card h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(1.5rem, 1.8vw, 1.5rem);
+  }
+  thead th {
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: .85rem;
+    letter-spacing: .04em;
+  }
+  tbody tr:nth-child(even) { background: var(--code-bg); }
+  tbody tr:hover { background: #d0e8f8; }
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-light);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  tbody td strong { color: var(--ink); }
+
+  /* ── FAQ ── */
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .faq-q {
+    background: var(--code-bg);
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: clamp(4rem, 2vw, 1.5rem);
+    color: var(--ink);
+    border-left: 4px solid var(--accent2);
+  }
+  .faq-a {
+    padding: 12px 18px;
+    font-size: clamp(3rem, 1.9vw, 1.5rem);
+    color: var(--ink-light);
+    line-height: 1.7;
+    background: var(--surface);
+  }
+
+  /* ── NUMBERED STEPS ── */
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    background: var(--accent2);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: .9rem;
+    font-family: 'Source Code Pro', monospace;
+    margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-body p { margin: 0; }
+
+  /* ── SECTION HEADER SLIDES ── */
+  .section-header {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .section-num {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 3rem;
+    font-weight: 600;
+    color: #b3cde8;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .section-header h2 {
+    border: none;
+    padding: 0;
+    text-align: center;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--ink);
+  }
+  .section-header p {
+    max-width: 560px;
+    margin: 16px auto 0;
+    text-align: center;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .slide { padding: 28px 22px 36px; width: 97%; max-width: 97%; }
+    .slide.slide-section, .slide.slide-cover { width: 97%; max-width: 97%; }
+    #nav button { padding: 0 14px; font-size: .9rem; }
+  }
+  @media (max-width: 400px) {
+    .slide { padding: 20px 14px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"><div id="progress-bar"></div></div>
+
+<div id="stage">
+
+  <div class="slide slide-cover active">
+    <div class="slide-label">Aula 17</div>
+    <h1>Funções e Arrow Functions, Organização Funcional e Utilitários de Dados</h1>
+    <p class="cover-desc">Descrição: Abordagem imersiva sobre o poder das funções no JavaScript moderno. A aula explora as diferenças entre funções tradicionais e Arrow Functions, além de fundamentar a manipulação declarativa de coleções de dados com map, filter, reduce, spread e destructuring. O foco final é o desenvolvimento de funções puras e a organização de código para criar lógicas previsíveis, seguras e modulares, aplicando o escopo correto de variáveis.</p>
+    <hr class="divider">
+    <h3>Tópicos desta aula</h3>
+    <div class="topics-grid">
+      <div class="topic-chip">Arrow Functions</div>
+      <div class="topic-chip">map, filter, reduce</div>
+      <div class="topic-chip">Spread e Destructuring</div>
+      <div class="topic-chip">Funções Puras</div>
+      <div class="topic-chip">Utilitários de Dados</div>
+    </div>
+    <div class="cover-meta">
+      <span>Aula 17</span>
+      <span>JavaScript Moderno</span>
+      <span>ES6+</span>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Abertura</div>
+    <h2>Cenário Real:</h2>
+    <p>No desenvolvimento industrial de software, lidamos constantemente com fluxos intensos de dados: dezenas de milhares de usuários ativos, registros de sensores industriais e transações financeiras em tempo real.</p>
+    <p>Imagine que somos desenvolvedores na "Conecta Varejo", uma startup de e-commerce em rápido crescimento.</p>
+    <p>O backend nos envia uma lista de produtos em um formato bruto e nós precisamos, no frontend, exibir um resumo das promoções ativas, formatando preços e aplicando descontos.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Abertura</div>
+    <h2>Cenário Real (Continuação):</h2>
+    <p>Na abordagem tradicional (imperativa), criaríamos laços for gigantescos, criando variáveis temporárias e um código frágil.</p>
+    <p>Hoje, vamos aprender a programar de forma declarativa e funcional: declarando o que queremos que aconteça, em vez de ditar como o computador deve executar cada passo minucioso.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Abertura</div>
+    <h2>Pergunta:</h2>
+    <div class="callout yellow">
+      <div class="callout-title">Reflexão</div>
+      Você já desenvolveu um laço de repetição que modificou os dados de uma lista original por engano, gerando um "bug" difícil de rastrear em outra parte do sistema? Como podemos transformar esses dados de maneira segura e previsível sem corromper nossa fonte da verdade?
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <h2>A Evolução: Funções Tradicionais vs. Arrow Functions</h2>
+      <p>Compreendendo o escopo e a sintaxe moderna.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">A Evolução</div>
+    <h2>A. Conceito:</h2>
+    <p>Uma função é um bloco de código JavaScript definido uma única vez, mas que pode ser executado repetidamente.</p>
+    <p>Em JS, as funções são tratadas como objetos (valores de primeira classe) que podem ser atribuídos a variáveis ou passados como argumentos.</p>
+    <p>O grande desafio das funções tradicionais reside no contexto da palavra-chave this, que faz referência ao contexto da chamada da função.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">A Evolução</div>
+    <h2>A. Conceito: (Continuação)</h2>
+    <p>Para simplificar esse comportamento em casos de passagem de funções (como métodos de iteração) e prover uma conveniência sintática, as arrow functions foram introduzidas.</p>
+    <p>Elas são precursoras das "funções abreviadas", resolvendo o problema do this, adotando um escopo léxico (herdam o this do bloco onde foram escritas).</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">A Evolução</div>
+    <h2>B. Visualizando:</h2>
+    <div class="callout blue">
+      <div class="callout-title">Analogia</div>
+      <p>Imagine um crachá de visitante da empresa.</p>
+      <p>Na função tradicional, seu "crachá" (o this) ganha as permissões do departamento onde você está no momento em que é chamado.</p>
+      <p>Na Arrow Function, seu crachá (o this) tem as permissões fixas do departamento de origem (escopo léxico) de onde você foi criado, independentemente de onde a função seja executada depois.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">A Evolução</div>
+    <h2>B. Visualizando:</h2>
+    <div class="callout blue">
+        <img src="img01.png" style="max-width: 90%; height:auto;">
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">A Evolução</div>
+    <h2>C. Exemplo de Código:</h2>
+    <div class="code-block">JavaScript
+// 1. Função Tradicional
+function aplicarDescontoTradicional(preco, desconto) {
+  return preco - (preco * desconto);
+}
+
+// 2. Arrow Function (Sintaxe curta e direta)
+const aplicarDescontoArrow = (preco, desconto) => preco - (preco * desconto);
+
+console.log(aplicarDescontoTradicional(100, 0.2)); // 80
+console.log(aplicarDescontoArrow(100, 0.2)); // 80</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">A Evolução</div>
+    <h2>D. Explicação linha por linha:</h2>
+    <ul>
+      <li><strong>function aplicarDescontoTradicional(preco, desconto):</strong> Declara a função no modelo convencional com seus parâmetros. O return é explícito.</li>
+      <li><strong>const aplicarDescontoArrow:</strong> Atribuímos nossa função a uma constante (evitando que seja sobrescrita).</li>
+      <li><strong>= (preco, desconto) =>:</strong> Substitui a palavra function. O => (arrow) indica o corpo da função.</li>
+      <li><strong>preco - (preco * desconto):</strong> Por ter apenas uma linha de instrução, o return fica implícito. O código fica enxuto e conciso.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">A Evolução</div>
+    <h2>E. Exercícios:</h2>
+    <ol>
+      <li><strong>Converta</strong> a função function somar(a, b) { return a + b; } para uma Arrow Function.</li>
+      <li><strong>Crie uma Arrow Function</strong> que receba um nome e retorne "Olá, " + nome.</li>
+      <li><strong>Crie uma Arrow Function</strong> sem parâmetros que retorne a data atual (new Date()).</li>
+      <li><strong>Explique em uma frase</strong> por que usar const ao declarar uma Arrow Function.</li>
+      <li><strong>Identifique</strong> o erro: const quadrado = x => { x * x }. (Dica: falta o return dentro das chaves).</li>
+    </ol>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>Higher-Order Functions: map, filter, reduce</h2>
+      <p>Os pilares da manipulação moderna de dados.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Higher-Order Functions</div>
+    <h2>A. Conceito:</h2>
+    <p>Estes são os pilares da manipulação moderna de dados.</p>
+    <p>Eles recebem outras funções como argumentos para processar coleções (arrays) de forma declarativa e pura, evitando estruturas imperativas manuais.</p>
+    <p>O map transforma todos os elementos do array, gerando um novo do mesmo tamanho;</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Higher-Order Functions</div>
+    <h2>A. Conceito: (Continuação)</h2>
+    <p>o filter cria um novo array filtrando os dados a partir de uma condição (true ou false);</p>
+    <p>já o reduce condensa os dados de todo o array a um único valor (como uma soma total de carrinho de compras).</p>
+    <p>O grande poder está em encadear esses métodos para criar verdadeiros "pipelines" de transformação de dados.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Higher-Order Functions</div>
+    <h2>B. Visualizando:</h2>
+    <div class="callout blue">
+      <div class="callout-title">A Fazenda de Laranjas</div>
+      <p>Pense em uma fazenda de laranjas.</p>
+      <ul>
+        <li><strong>filter:</strong> A máquina que separa apenas as laranjas grandes das pequenas.</li>
+        <li><strong>map:</strong> A máquina que espreme cada laranja grande e gera um copo de suco para cada uma.</li>
+        <li><strong>reduce:</strong> O tanque que soma/coleta todo o suco de todos os copos em um único reservatório gigante.</li>
+      </ul>
+      </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Higher-Order Functions</div>
+    <h2>B. Visualizando:</h2>
+    <div class="callout blue">
+      <img src="img02.png" style="max-width: 90%; height:auto;">
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Higher-Order Functions</div>
+    <h2>C. Exemplo de Código:</h2>
+    <div class="code-block">JavaScript
+const produtos = [
+  { id: 1, nome: 'Monitor Gamer', preco: 1800, emPromocao: true, desconto: 0.10 },
+  { id: 2, nome: 'Teclado RGB', preco: 300, emPromocao: false, desconto: 0 },
+  { id: 3, nome: 'Mouse', preco: 150, emPromocao: true, desconto: 0.20 }
+]; 
+
+// Pipeline declarativo encadeado
+const totalDescontos = produtos
+  .filter(produto => produto.emPromocao === true)
+  .map(produto => produto.preco * (1 - produto.desconto))
+  .reduce((acumulador, precoFinal) => acumulador + precoFinal, 0);
+
+console.log(totalDescontos); // (1800 * 0.90) + (150 * 0.80) = 1620 + 120 = 1740</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Higher-Order Functions</div>
+    <h2>D. Explicação linha por linha:</h2>
+    <ul>
+      <li><strong>const produtos = [...]:</strong> Criamos o array de objetos que simula nossa resposta do backend.</li>
+      <li><strong>.filter(...):</strong> Analisamos cada objeto. Se emPromocao for true, ele é aprovado e passa para a próxima etapa. O teclado é ignorado.</li>
+      <li><strong>.map(...):</strong> Recebemos a nova lista (apenas com Monitor e Mouse). Retornamos apenas o cálculo matemático do preço com o desconto. O formato passa de objeto para número.</li>
+      <li><strong>.reduce(...):</strong> Recebe os valores já mapeados. O acumulador inicia em 0. A cada laço, soma o valor anterior ao precoFinal do item atual.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Higher-Order Functions</div>
+    <h2>E. Exercícios:</h2>
+    <ol>
+      <li>Use map para <strong>criar um array</strong> com o dobro dos valores de [1, 2, 3, 4].</li>
+      <li>Use filter para <strong>encontrar</strong> apenas os números pares no array [10, 15, 20, 25].</li>
+      <li>Use reduce para <strong>encontrar</strong> o produto (multiplicação total) de [2, 3, 4].</li>
+      <li><strong>Encadeie</strong> um filter e um map para achar o comprimento de nomes de pessoas maiores de idade.</li>
+      <li><strong>Qual é o papel</strong> do número 0 no final da função reduce do nosso exemplo principal?</li>
+    </ol>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2>Spread Operator e Destructuring (Desestruturação)</h2>
+      <p>Manipulação eficiente e imutabilidade.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Spread e Destructuring</div>
+    <h2>A. Conceito:</h2>
+    <p>A desestruturação permite que extraiamos dados complexos de objetos ou arrays e os atribuamos a variáveis distintas de forma rápida e legível.</p>
+    <p>Já o Spread Operator (...) é essencial para expandir o conteúdo de objetos/arrays.</p>
+    <p>Na programação funcional, a regra de ouro é a "imutabilidade", ou seja, nunca alterar a fonte original.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Spread e Destructuring</div>
+    <h2>A. Conceito: (Continuação)</h2>
+    <p>Utilizamos o operador de espalhamento (Spread) para clonar nossos arrays e objetos e, a partir dos clones, inserir ou atualizar novas informações sem causar efeitos colaterais ao restante do software.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Spread e Destructuring</div>
+    <h2>B. Visualizando:</h2>
+      <div class="col-card">
+     <p><strong>Desestruturação</strong> </p>
+     <p>É como abrir uma mala de viagem etiquetada (objeto) e tirar diretamente a camisa e a calca, sem precisar vasculhar a mala todas as vezes (mala.camisa, mala.calca).</p>
+     </div>
+   </div>
+   
+  <div class="slide slide-common">
+    <div class="slide-label">Spread e Destructuring</div>
+    <h2>B. Visualizando:</h2>
+      <div class="col-card">
+     <p><strong>Desestruturação</strong> </p>
+      <img src="img03.png" style="max-width: 90%; height:auto;">     
+     </div>
+   </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Spread e Destructuring</div>
+    <h2>B. Visualizando:</h2>
+      <div class="col-card">
+      <p><strong>O Spread (...)</strong></p>
+      <p>é equivalente a pegar todos os papéis de uma pasta e "espalhá-los" em cima de uma nova mesa, permitindo que você adicione papéis novos antes de guardar tudo em uma pasta nova, preservando a velha.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Spread e Destructuring</div>
+    <h2>B. Visualizando:</h2>
+      <div class="col-card">
+      <p><strong>O Spread (...)</strong></p>
+            <img src="img04.png" style="max-width: 90%; height:auto;">
+   </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Spread e Destructuring</div>
+    <h2>C. Exemplo de Código:</h2>
+    <div class="code-block">JavaScript
+const usuarioDB = { id: 101, nome: 'Ana', cargo: 'Dev Frontend', ativo: true };
+
+// Desestruturação (Destructuring)
+const { nome, cargo } = usuarioDB;
+console.log(`Colaboradora: ${nome}, Vaga: ${cargo}`);
+
+// Spread Operator (Imutabilidade)
+const usuarioAtualizado = {
+  ...usuarioDB, // Espalha todas as chaves anteriores aqui
+  cargo: 'Dev Fullstack', // Sobrescreve o cargo
+  ultimaAtualizacao: '2026-04-08' // Adiciona novo campo
+};
+
+console.log(usuarioDB.cargo); // Dev Frontend (O original NÃO foi tocado!)</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Spread e Destructuring</div>
+    <h2>D. Explicação linha por linha:</h2>
+    <ul>
+      <li><strong>const { nome, cargo } = usuarioDB;:</strong> O JavaScript entra no objeto usuarioDB, localiza as chaves com os mesmos nomes e as transforma em variáveis utilizáveis.</li>
+      <li><strong>const usuarioAtualizado = { ...usuarioDB, ... }:</strong> Criamos um NOVO endereço na memória. O ...usuarioDB clona todos os atributos do objeto original para este novo.</li>
+      <li><strong>cargo: 'Dev Fullstack':</strong> Como foi colocado após o spread, ele substitui a propriedade cargo originada do clone. O objeto velho não sofre interferência.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Spread e Destructuring</div>
+    <h2>E. Exercícios:</h2>
+    <ol>
+      <li><strong>Desestruture</strong> os primeiros dois itens do array const notas = [8, 9, 10].</li>
+      <li><strong>Extraia</strong> o id e atribua a ele o alias codigo usando desestruturação de objeto.</li>
+      <li><strong>Clone</strong> o array const a = [1,2] e adicione o 3 usando o Spread Operator.</li>
+      <li><strong>Junte</strong> obj1 = {a: 1} e obj2 = {b: 2} em um único objeto usando o Spread.</li>
+      <li><strong>Por que usar</strong> usuarioAtualizado.cargo = 'Fullstack' sem clonar antes seria uma violação das boas práticas funcionais?</li>
+    </ol>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <h2>Funções Puras e Escopo de Variáveis</h2>
+      <p>Previsibilidade e segurança na execução de código.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Puras e Escopo</div>
+    <h2>A. Conceito:</h2>
+    <p>O escopo define onde uma variável "existe" dentro do código (léxico, bloco, função).</p>
+    <p>A transição do var para let e const evitou diversos bugs globais na linguagem, garantindo que variáveis existam apenas dentro do bloco em que foram declaradas.</p>
+    <p>A Programação Funcional adota a "Função Pura": aquela que, ao receber o mesmo input, retorna sempre o mesmo output sem modificar variáveis externas (efeitos colaterais nulos).</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Puras e Escopo</div>
+    <h2>A. Conceito: (Continuação)</h2>
+    <p>Isso significa que sua função jamais deve buscar variáveis no escopo global e nunca deve alterar a coleção original passada para ela;</p>
+    <p>ela processa e devolve um artefato inteiramente novo.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Puras e Escopo</div>
+    <h2>B. Visualizando:</h2>
+      <div class="col-card">
+      <div class="callout-title">A Balança Digital</div>
+      <p>Uma Função Pura é como uma balança digital.</p>
+      <p>Toda vez que você colocar o peso de 1kg lá, ela mostrará 1kg.</p>
+      <p>Ela não depende do clima lá fora, não consulta a cor da parede e, mais importante, o ato de pesar não transforma magicamente seu peso de 1kg em 2kg.</p>
+      <p>O resultado é perfeitamente isolado e previsível.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Puras e Escopo</div>
+    <h2>B. Visualizando:</h2>
+      <div class="col-card">
+            <img src="img05.png" style="max-width: 90%; height:auto;">
+   </div>
+  </div>
+
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Puras e Escopo</div>
+    <h2>C. Exemplo de Código:</h2>
+    <div class="code-block">JavaScript
+// Ruim: Função Impura (Modifica variáveis externas, sofre efeito colateral)
+let impostoGeral = 0.1;
+const calcularPrecoImpuro = (precoBase) => {
+  return precoBase + (precoBase * impostoGeral);
+};
+
+// Bom: Função Pura (Entradas geram saídas, sem olhar para fora)
+const calcularPrecoPuro = (precoBase, impostoParametro) => {
+  return precoBase + (precoBase * impostoParametro);
+};
+
+console.log(calcularPrecoPuro(100, 0.1)); // Sempre 110, infinitamente testável.</div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Puras e Escopo</div>
+    <h2>D. Explicação linha por linha:</h2>
+    <ul>
+      <li><strong>let impostoGeral:</strong> Uma variável externa, suscetível a mudanças acidentais em outras partes do código.</li>
+      <li><strong>calcularPrecoImpuro:</strong> Como depende de impostoGeral, o resultado dessa função pode ser diferente a cada execução. Dificílima de debugar.</li>
+      <li><strong>calcularPrecoPuro:</strong> Não depende do meio exterior. Os parâmetros isolam o processamento. Ele será injetado limpo e retornará um dado novo limpo.</li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Funções Puras e Escopo</div>
+    <h2>E. Exercícios:</h2>
+    <ol>
+      <li>A função const gerarId = () => Math.random() é <strong>pura</strong> ou <strong>impura</strong>? <strong>Por quê</strong>?</li>
+      <li><strong>Explique</strong> a diferença de usar let dentro de um if contra usar var.</li>
+      <li><strong>Transforme</strong> uma função que usa um const taxa = 5 global numa função pura com parâmetros.</li>
+      <li><strong>Por que</strong> funções puras são mais fáceis de aplicar em testes unitários automatizados?</li>
+      <li><strong>Qual</strong> a relação de métodos como o map e funções puras?</li>
+    </ol>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <h2>FAQ - Dúvidas Reais do Dia a Dia</h2>
+      <p>Perguntas frequentes sobre o conteúdo da aula.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Reais</h2>
+    <div class="faq-item">
+      <div class="faq-q">Eu posso usar arrow functions para tudo no desenvolvimento de sistemas?</div>
+      <div class="faq-a"><strong>Resposta:</strong> Nem sempre! Como Arrow Functions não possuem seu próprio contexto do this, elas não são adequadas para serem usadas como métodos de classes/objetos onde o contexto é importante para acessar propriedades internas desse objeto.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Reais</h2>
+    <div class="faq-item">
+      <div class="faq-q">Qual a diferença entre usar o map ou um forEach?</div>
+      <div class="faq-a"><strong>Resposta:</strong> O forEach realiza uma iteração para causar um efeito colateral (ex: logar algo na tela) e retorna undefined. O map, alinhado à programação funcional, extrai um array totalmente novo como resultado da iteração.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Reais</h2>
+    <div class="faq-item">
+      <div class="faq-q">O reduce é só para somar números?</div>
+      <div class="faq-a"><strong>Resposta:</strong> Não! Ele pode "reduzir" um array para qualquer único tipo de valor. Você pode reduzir uma lista de transações em um único objeto de relatório organizado por categorias.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Reais</h2>
+    <div class="faq-item">
+      <div class="faq-q">Usar muito o operador de spread (...) prejudica a performance do sistema?</div>
+      <div class="faq-a"><strong>Resposta:</strong> Para coleções de tamanho razoável no dia a dia da indústria web, o impacto é nulo. Porém, em fluxos de milhares de registros por segundo, cópias profundas aninhadas de objetos imensos podem requerer estratégias específicas de memória em vez de apenas spreads infinitos.</div>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">FAQ</div>
+    <h2>Dúvidas Reais</h2>
+    <div class="faq-item">
+      <div class="faq-q">No mercado de trabalho, eles checam se meu código é "puro" e "declarativo"?</div>
+      <div class="faq-a"><strong>Resposta:</strong> Sim! Em processos seletivos para times robustos, criar soluções com map/filter/reduce demonstra maturidade, preocupação em evitar "side effects" e aderência à cultura de Testes Automatizados e Código Limpo (Clean Code).</div>
+    </div>
+  </div>
+
+  <div class="slide slide-section">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <h2>Exercícios de Fixação</h2>
+      <p>Colocando em prática a manipulação funcional.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Instruções Iniciais</h2>
+    <div class="callout red">
+      <div class="callout-title">Atenção à IA Ética</div>
+      Para estas atividades práticas, utilize ferramentas como o Gemini APENAS para gerar uma base de dados JSON (ex: Gere 20 produtos fictícios com nome, preco e ativo). A codificação lógica deve ser feita por você e seu colega!
+    </div>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Filter e Map</h2>
+    <ul>
+      <li><strong>1. Limpador de Estoque</strong><br>
+        <strong>Descrição:</strong> Dado um array de objetos de produtos { nome, quantidade }, crie uma rotina usando o método filter para retornar um array apenas com os itens que possuem a quantidade maior do que zero.<br>
+        <strong>Entrega:</strong> Script contendo o Array inicial, a implementação da função com filter e um console.log demonstrando os itens filtrados em tela.
+      </li>
+      <li><strong>2. Inflação Aplicada</strong><br>
+        <strong>Descrição:</strong> Receba um array de números representando preços. Crie uma Arrow Function usando map que devolva o array com todos os valores ajustados em +5%.<br>
+        <strong>Entrega:</strong> Script da função criada, executada sobre o array original e console.log com os preços inflacionados.
+      </li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Destructuring e Reduce</h2>
+    <ul>
+      <li><strong>3. Desempacotador de Usuários</strong><br>
+        <strong>Descrição:</strong> Você recebeu da API a estrutura const cliente = { perfil: { nome: 'Luiz', idade: 25 }, contato: { email: 'l@email.com', fone: '999' } }. Use desestruturação profunda (destructuring) para extrair nome e email para o console sem mencionar perfil e contato.<br>
+        <strong>Entrega:</strong> Script do código contendo objeto e a const de desestruturação limpa e otimizada.
+      </li>
+      <li><strong>4. Faturamento do Dia</strong><br>
+        <strong>Descrição:</strong> Você tem a base [{venda: 1, valor: 45.5}, {venda: 2, valor: 120.0}]. Empregue o reduce para obter o faturamento total da loja no dia.<br>
+        <strong>Entrega:</strong> Função com método reduce funcionando e o retorno isolado do valor total.
+      </li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Spread e Encadeamento</h2>
+    <ul>
+      <li><strong>5. O Clone Seguro</strong><br>
+        <strong>Descrição:</strong> O backend enviou o usuario = { id: 1, plano: 'Basic' }. O cliente clicou em "Fazer Upgrade". Use o Spread Operator para gerar o usuarioPremium com plano 'Pro' e incluindo um novo campo upgradeDate: new Date(), mantendo o id intacto e o objeto de base imutável.<br>
+        <strong>Entrega:</strong> Script do código com o uso de ... provando via log que usuario e usuarioPremium são independentes.
+      </li>
+      <li><strong>6. Relatório de E-commerce Múltiplo</strong><br>
+        <strong>Descrição:</strong> Combinando filter, map e reduce. Dado um array de vendas (com status "APROVADO" ou "CANCELADO" e um sub-array de produtos), isole apenas as vendas "APROVADAS", calcule o subtotal de cada uma e, ao final, calcule o Faturamento Total final dessa massa de dados.<br>
+        <strong>Entrega:</strong> Script com o encadeamento dos três High-Order functions que solte apenas uma linha com o valor faturado da empresa.
+      </li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Agrupamento e Refatoração</h2>
+    <ul>
+      <li><strong>7. Sanitizar e Agrupar Dados</strong><br>
+        <strong>Descrição:</strong> Receba um array sujo de nomes misturados com nulls e strings vazias. Filtre os invádos. Depois, use reduce pra contar as ocorrências de cada nome e retorne um objeto. Ex:{ 'Ana': 2, 'João': 1 }.<br>
+        <strong>Entrega:</strong> Código funcional comprovando a eliminação do lixo e a tabulação/agrupamento correto num objeto novo.
+      </li>
+      <li><strong>8. Refatoração Imperativa para Declarativa</strong><br>
+        <strong>Descrição:</strong> Escreva um laço for gigantesco com contadores que pegue uma lista de alunos e retorne nomes em maíusculo apenas de quem tirou nota > 7. Em seguida, refatore totalmente o código deletando o for e implementando filter e map.<br>
+        <strong>Entrega:</strong> Os dois blocos de código (o ruim e o bom) evidenciando as diferenças.
+      </li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Exercícios de Fixação</div>
+    <h2>Funções Puras e Utils</h2>
+    <ul>
+      <li><strong>9. Função Pura de Carrinho de Compras</strong><br>
+        <strong>Descrição:</strong> Desenvolva a função adicionarAoCarrinho(carrinhoAtual, itemNovo). É expressamente proibido usar o .push(), pois ele é mutável e fere a função pura. Descubra como usar o spread para anexar o item de forma segura.<br>
+        <strong>Entrega:</strong> O código da função mostrando a ausência de modificação em carrinhoAtual.
+      </li>
+      <li><strong>10. Utilitários de Dados Genéricos (Atividade em Dupla)</strong><br>
+        <strong>Descrição:</strong> Criem juntos um arquivo utils.js. Nele devem estar exportadas 4 Arrow Functions puras genéricas: 1) obterApenasAtivos(arr), 2) formatarPrecos(arr), 3) somarCampo(arr, campo), 4) clonarComData(obj).<br>
+        <strong>Entrega:</strong> Script com a padronização e importação desses utilitários num arquivo central testando suas utilidades em bases de dados randômicas.
+      </li>
+    </ul>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conclusão</div>
+    <h2>Como você usará hoje na Situação de Aprendizagem:</h2>
+    <p>No final da SA, o Projeto Principal exige o desenvolvimento da interação do front-end e integrações com o Banco de Dados.</p>
+    <p>Durante as "Sprints" e as rotinas diárias da aplicação web, quando você buscar os registros do banco em JSON, será mandatório usar o que aprendemos hoje (map, filter e funções puras) para renderizar esses dados na tela sem "quebrar" ou sobrecarregar a integridade da aplicação, respeitando as exigências de usabilidade, robustez e boas práticas arquiteturais.</p>
+  </div>
+
+  <div class="slide slide-common">
+    <div class="slide-label">Conclusão</div>
+    <h2>Conexão com a Próxima Aula:</h2>
+    <p>Hoje dominamos a manipulação declarativa de coleções através da interatividade do Client-Side e das Higher-Order Functions.</p>
+    <p>Na nossa próxima aula 18 exploraremos a manipulação dinâmica do DOM através de seletores fundamentais e métodos de alteração de estado, como classList e innerHTML, para transformar o HTML estático em uma interface viva.</p>
+    <p>A exposição foca na aplicação prática de eventos, demonstrando como as ações do usuário podem atualizar a UI e modificar estilos de forma instantânea.</p>
+    <p>Como resultado final, desenvolveremos uma funcionalidade de Tema Claro/Escuro, utilizando a lógica de toggle para alternar classes CSS e personalizar a experiência visual.</p>
+  </div>
+
+</div>
+
+<nav id="nav">
+  <button id="btn-prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+  <span id="slide-counter">1 / 48</span>
+  <button id="btn-next" onclick="changeSlide(1)">Próximo →</button>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    slides[current].classList.add('active');
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === total - 1;
+    document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function changeSlide(dir) { showSlide(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'  || e.key === 'PageUp')   changeSlide(-1);
+  });
+
+  // Touch swipe
+  let touchX = 0;
+  document.addEventListener('touchstart', e => touchX = e.changedTouches[0].screenX);
+  document.addEventListener('touchend', e => {
+    if (e.changedTouches[0].screenX < touchX - 50) changeSlide(1);
+    if (e.changedTouches[0].screenX > touchX + 50) changeSlide(-1);
+  });
+  
+  // Init
+  showSlide(0);
+</script>
+
+</body>
+</html>
