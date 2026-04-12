@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 19 - Manipulação do DOM - II</title>
+<style>
+  body {
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa; 
+    color: #212529;
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh;
+    overflow: hidden;
+  }
+  .slide-container {
+    width: 90vw;
+    height: 90vh;
+    margin: auto;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 40px; 
+    box-sizing: border-box; 
+    position: relative;
+  }
+  .slide {
+    display: none; 
+    width: 100%; 
+    max-width: 1200px; 
+    max-height: 85vh;
+    background: #ffffff; 
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+    padding: 50px;
+    font-size: 26px; 
+    line-height: 1.6; 
+    overflow-y: auto;
+  }
+  .slide.active { 
+    display: block; 
+    animation: fadeIn 0.4s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  h1, h2, h3 { 
+    color: #0d6efd; 
+    margin-top: 0; 
+  }
+  code, pre { 
+    background: #e9ecef; 
+    padding: 10px 15px; 
+    border-radius: 8px; 
+    font-family: 'Courier New', Courier, monospace; 
+    display: block; 
+    font-size: 22px;
+    overflow-x: auto;
+  }
+  .controls {
+    height: 90px; 
+    background: #ffffff; 
+    border-top: 1px solid #dee2e6;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 0 50px;
+  }
+  button {
+    background: #0d6efd; 
+    color: white; 
+    border: none; 
+    padding: 15px 30px;
+    font-size: 22px; 
+    border-radius: 8px; 
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button:hover {
+    background: #0b5ed7;
+  }
+  button:disabled { 
+    background: #adb5bd; 
+    cursor: not-allowed; 
+  }
+  .progress { 
+    font-size: 22px; 
+    font-weight: bold; 
+    color: #495057;
+  }
+</style>
+</head>
+<body>
+  <div class="slide-container" id="slides">
+    
+    <div class="slide active">
+      <h1>Aula 19 - Manipulação do DOM - II</h1> 
+      <p><br>Descrição:</br> Exposição de createElement, appendChild e removeChild. Prática de renderização de listas dinâmicas a partir de um array. Criação de função genérica renderList(items, container) e atividade em grupo focada em hierarquia do DOM com a construção de uma tabela dinâmica de produtos.</p>
+    </div>
+
+    <div class="slide">
+      <h2>Cenário Real</h2>
+      <p>Pense na interface da Netflix, do Mercado Livre ou no feed do Instagram. Quando rolamos a página ou pesquisamos por "notebooks", os resultados aparecem na tela sem que a página inteira recarregue. Nos bastidores, a aplicação está recebendo dados (geralmente em formato JSON) e construindo o visual em tempo real.</p>
+    </div>
+
+    <div class="slide">
+      <p>Se os desenvolvedores dessas plataformas tivessem que escrever o HTML estático de cada produto manualmente, a manutenção seria impossível e a escalabilidade, nula. No mercado atual, dominado por Single Page Applications (SPAs) e consumo de APIs, a habilidade de ler um conjunto de dados brutos e transformá-los dinamicamente em elementos visuais na tela é o coração do desenvolvimento Front-end.</p>
+      <p>Hoje, deixamos de ser apenas "escritores de HTML" para nos tornarmos arquitetos de interfaces dinâmicas.</p>
+    </div>
+
+    <div class="slide">
+      <h2>Pergunta:</h2> 
+      <p>"Se você precisasse exibir uma lista de 500 produtos em uma página, e fizesse isso escrevendo as tags &lt;li&gt; manualmente no HTML, qual seria o maior risco técnico e financeiro para a empresa caso a classe CSS de todos os itens ou a regra de desconto mudasse de repente?"</p>
+    </div>
+
+    <div class="slide">
+      <h2>Criando e Inserindo Elementos (createElement e appendChild)</h2> 
+      <h3>A. CONCEITO</h3> 
+      <p>Essa analogia da <b>Árvore de Família</b> explicada na aula anterior é uma das melhores formas de entender o que acontece nos bastidores do navegador. Para explicar como isso funciona na prática, vamos dividir o "nascimento" desse elemento em três etapas fundamentais. Imagine que estamos em um canteiro de obras digital:</p>
+    </div>
+
+    <div class="slide">
+      <h3>1. O Nascimento no "Limbo" (createElement)</h3> 
+      <p>Quando você executa <code>document.createElement('li')</code>o JavaScript reserva um espaço na memória RAM.</p>
+      <ul>
+        <li><b>Na prática:</b> O objeto existe, ele tem propriedades, mas ele não tem endereço.</li>
+        <li><b>O estado:</b> Se você olhar para a página do navegador, nada mudou. O elemento está "flutuando" na memória, como um bebê que nasceu em outra cidade e ainda não foi registrado na árvore genealógica da família que mora no HTML.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h3>2. A Configuração (Personalidade)</h3> 
+      <p>Antes de apresentar o novo filho à família, você precisa dizer quem ele é. É aqui que definimos o textContent, adicionamos classes (classList.add) ou definimos IDs.</p>
+      <pre><code>JavaScript
+const novoFilho = document.createElement('li'); // Nascimento
+novoFilho.textContent = 'Item 1'; // Nome e Identidade
+novoFilho.style.color = 'blue'; // Aparência</code></pre>
+      <p>Nesse ponto, o elemento já está "pronto", mas ainda é invisível para o usuário final porque ele não está conectado ao &lt;body&gt; (o avô).</p>
+    </div>
+
+    <div class="slide">
+      <h3>3. A Adoção Oficial (appendChild)</h3> 
+      <p>Esta é a etapa crucial. O método appendChild() é o aperto de mão entre o que está na memória e o que aparece na tela.</p>
+      <ul>
+      <li><b>O Pai:</b> Você seleciona um elemento que já está na árvore (ex: ul id="lista").</li>
+      <li><b>A Ação:</b> Ao fazer pai.appendChild(novoFilho), você está criando um vínculo físico (um ponteiro) na árvore do DOM.</li>
+      <li><b>O Resultado:</b> No exato milissegundo em que esse vínculo é criado, o motor de renderização do navegador (Reflow/Repaint) percebe a mudança e desenha o item na tela.</li>
+    </div>
+
+    <div class="slide">
+      <h3>Por que isso é o "Padrão Ouro"? (Segurança)</h3>
+      <ul>
+      <li><b>innerHTML:</b> É como derrubar uma parede da casa e reconstruí-la inteira só para colocar um quadro novo. Além de lento, se houver um "vírus" (script malicioso) no texto, ele será executado.</li>
+      <li><b>createElement + appendChild:</b> Você está manipulando objetos, não textos. O navegador entende que textContent é apenas texto puro. Mesmo que alguém tente injetar um &lt;script&gt;, o navegador o tratará como simples palavras, protegendo sua aplicação de ataques XSS (Cross-Site Scripting).</p>
+    </div>
+
+    <div class="slide">
+      <h3>Resumo do fluxo:</h3> 
+      <ol>
+        <li>Cria (está na RAM)</li>
+        <li>Configura (define o que ele é)</li>
+        <li>Anexa (aparece na tela).</li>
+      </ol>
+      <p>Ficou clara a diferença entre o elemento existir na memória e existir na página? O comando de criação acontece exclusivamente no lado do cliente (no navegador do usuário) e o momento exato depende de como você configurou o seu código JavaScript.</p>
+    </div>
+
+    <div class="slide">
+      <p>Para ser bem didático, vamos separar o "Onde" do "Quando":</p>
+      <h3>Onde ele é enviado?</h3> 
+      <p>O comando não viaja para a internet. Ele é enviado para a Engine de JavaScript do navegador (como o V8 no Chrome ou o SpiderMonkey no Firefox).</p>
+      <ul>
+      <li><b>O Palco:</b> Tudo acontece dentro da memória RAM do computador ou celular de quem está acessando o site.</li> 
+      <li><b>O Processo:</b> Quando o navegador lê a linha document.createElement(), ele não pede permissão ao servidor para criar o elemento. Ele simplesmente reserva um "lote" na memória local e diz: "Reservado para um novo &lt;li&gt;".</li>
+    </div>
+
+    <div class="slide">
+      <h3>Quando ele é enviado?</h3> 
+      <p>Existem três cenários comuns para esse "nascimento":</p>
+      <ul>
+        <li><b>Ao carregar a página:</b> Você quer que a lista já comece com itens que não estavam no HTML original. O comando é disparado assim que o script é lido.</li>
+        <li><b>Interação do Usuário (O mais comum):</b> Quando alguém clica em um botão "Adicionar Carrinho" ou "Enviar Comentário". O comando de criação é enviado no exato momento do clique.</li>
+        <li><b>Resposta de uma API:</b> O seu site pergunta ao servidor: "Quais são as notícias de hoje?". O servidor responde com dados (JSON). O JavaScript recebe esses dados e, só então, envia o comando de criação para cada notícia recebida.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h3>O Fluxo Visual da Execução</h3> 
+      <p>Imagine o console do navegador como o "centro de comando":</p>
+      <ol>
+        <li><b>Gatilho:</b> O usuário clica em um botão.</li>
+        <li><b>Comando de Criação:</b> O JS envia createElement para a RAM.</li>
+        <li><b>Comando de Configuração:</b> O JS envia as propriedades (nome, cor).</li>
+        <li><b>Comando de Anexação:</b> O JS envia o appendChild para a árvore do DOM.</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h3>Por que isso é importante?</h3> 
+      <p>Se o comando fosse enviado para o servidor toda vez que você criasse um elemento simples, a internet seria incrivelmente lenta. Como ele é enviado apenas para a memória local, o processo de criar um elemento e exibi-lo leva, geralmente, menos de 1 milissegundo.</p>
+      <p>Faz sentido pensar que o JavaScript é como um "mestre de obras" que já está dentro da casa (o navegador), pronto para agir sem precisar ligar para o arquiteto (o servidor) para cada tijolo novo?</p>
+    </div>
+
+    <div class="slide">
+      <h3>B. VISUALIZANDO</h3> 
+      <p>Imagine uma árvore de família.</p>
+      <ol>
+        <li>A árvore original tem um avô (&lt;body&gt;) e um pai (&lt;ul id="lista"&gt;).</li>
+        <li>O createElement('li') "nasce" como um filho em outra cidade (na memória RAM), sem conexão com a família.</li>
+        <li>Configuramos esse filho dando-lhe um nome (textContent = 'Item 1').</li>
+        <li>O appendChild(filho) atua como a certidão de adoção: ele pega a tag &lt;ul&gt; e diz: "este &lt;li&gt; agora é seu último filho". A partir desse milissegundo, o item aparece na tela do usuário.</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h3>B. VISUALIZANDO</h3> 
+      <img src="img01.png" style="max-width: 90%; height:auto;">
+    </div>
+
+    <div class="slide">
+      <h3>C. EXEMPLO DE CÓDIGO</h3> 
+      <pre><code>JavaScript
+// 1. Selecionamos o elemento pai que já existe no HTML
+const listaProdutos = document.querySelector('#lista-produtos');<br>
+// 2. Criamos um novo nó do tipo Element (uma tag &lt;li&gt; vazia na memória)
+const novoProduto = document.createElement('li');<br>
+// 3. Adicionamos conteúdo e classes de estilo ao novo nó (Segurança: textContent em vez de innerHTML)
+novoProduto.textContent = 'Monitor UltraWide 29';
+novoProduto.classList.add('item-produto');<br>
+// 4. Conectamos o novo nó à árvore do DOM (inserindo no final da lista)
+listaProdutos.appendChild(novoProduto);</code></pre>
+    </div>
+
+    <div class="slide">
+      <h3>D. EXPLICAÇÃO DO CÓDIGO</h3> 
+      <ul>
+        <li>Primeiro, capturamos o contêiner &lt;ul&gt; através do seu ID.</li> 
+        <li>Na linha 2, chamamos o "método de fábrica" createElement passando a string 'li'. Note que a tag não leva os sinais de menor/maior (&lt; &gt;).</li>
+        <li>Na linha 3, populamos o conteúdo do &lt;li&gt; usando textContent. Optamos por ele no lugar do innerHTML porque ele trata o texto de forma literal, garantindo que se houvesse alguma tag maliciosa (ex: &lt;script&gt;), ela seria lida como texto puro.</li>
+        <li>Finalmente, o appendChild anexa o nosso li perfeitamente configurado dentro do ul. Se não fizéssemos a linha 4, o monitor nunca apareceria na tela.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h3>E. ATENÇÃO / DICA / REFLITA</h3> 
+      <p><strong>Dica:</strong> O uso de IA Generativa (como o ChatGPT ou Gemini) pode acelerar a escrita de templates de inserção, mas atenção: IAs costumam sugerir o uso de innerHTML += "&lt;li&gt;...&lt;/li&gt;" por ser mais curto. Isso é uma <b>péssima prática de mercado</b>, pois recria todo o DOM interno a cada iteração, destruindo event listeners antigos e abrindo brechas de segurança (XSS). Use sempre a criação de nós (createElement).</p>
+    </div>
+
+    <div class="slide">
+      <h3>F. EXERCÍCIOS RÁPIDOS</h3> 
+      <ol>
+        <li>O que acontece com um elemento criado via createElement antes de usarmos appendChild?</li><br>
+        <li>Por que o textContent é mais seguro que o innerHTML ao inserir dados desconhecidos?</li><br>
+        <li>Escreva 2 linhas de código para criar um botão (&lt;button&gt;) e colocar o texto "Enviar" dentro dele.</li><br>
+        <li>O código document.createElement('DIV') (em maiúsculas) funciona? Teste e explique.</li><br>
+        <li>Se você fizer appendChild de um elemento que já está na tela para outro contêiner, o que acontece? Ele duplica ou move? (Dica: tente no console).</li><br>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h2>Removendo Elementos da Árvore (removeChild e remove)</h2> 
+      <h3>A. CONCEITO</h3> 
+      <p>Essa é a conclusão lógica do ciclo de vida que começamos a estudar. Se o appendChild é a "adoção", o remove é a "emancipação" ou a saída estratégica de cena. Aqui está a explicação de como isso funciona na prática:</p>
+    </div>
+
+    <div class="slide">
+      <h3>1. O Conceito de Desconexão</h3> 
+      <p>Quando você remove um elemento, você está cortando os fios que o ligam à Árvore do DOM.</p>
+      <ul>
+      <li><b>Na Interface (UI):</b> O elemento desaparece instantaneamente. O navegador recalcula o espaço (se você remover um item do meio de uma lista, os itens de baixo "sobem" para ocupar o buraco).</li>
+      <li><b>Nos Bastidores (RAM):</b> O elemento não é destruído imediatamente pelo computador. Ele volta para aquele "limbo" da memória onde nasceu. Se você tiver uma variável guardando ele, você pode até "readotá-lo" em outro lugar. Se não houver ninguém segurando ele, o Garbage Collector (Lixeiro do Navegador) o apaga de vez.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h3>2. A Evolução do Comando: Do Indireto ao Direto</h3> 
+      <h4>O Velho Jeito: removeChild()</h4> 
+      <p>Imagine que você quer expulsar um convidado de uma festa, mas, por uma regra estranha, você não pode falar com ele; você precisa achar o dono da casa e pedir para ele expulsar a pessoa.</p>
+      <ul>
+        <li><b>Código:</b> pai.removeChild(filho)</li>
+        <li><b>Problema:</b> Às vezes, o seu código sabe qual é o botão que foi clicado, mas não sabe quem é o "pai" dele. Você teria que fazer algo como botao.parentNode.removeChild(botao). Meio barulhento, né?</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h4>O Jeito Moderno: remove()</h4> 
+      <p>É a autonomia total. O elemento recebe a ordem e ele mesmo se retira da árvore.</p>
+      <ul>
+        <li><b>Código:</b> elemento.remove()</li>
+        <li><b>Vantagem:</b> É mais limpo, fácil de ler e direto ao ponto. É o padrão atual para quase todas as situações.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h3>3. Por que isso é vital? (Gerenciamento de Memória)</h3> 
+      <p>Já mencionamos os Memory Leaks (Vazamentos de Memória). Imagine que seu site é uma lista de tarefas. Se você "deleta" 100 tarefas da tela usando truques visuais (como esconder com CSS), mas não as remove do DOM, o navegador continua gastando energia e memória para processar esses itens invisíveis. Remover o nó garante que o navegador pare de se preocupar com aquele pedaço de código, mantendo o site leve e rápido, especialmente em celulares.</p>
+    </div>
+
+    <div class="slide">
+      <h3>Exemplo Prático: O Botão "Matador"</h3> 
+      <p>Uma das melhores formas de ver isso funcionando é criar um elemento que se deleta ao ser clicado:</p>
+      <pre><code>JavaScript
+const item = document.createElement('li');
+item.textContent = 'Clique em mim para eu sumir';<br>
+// Ao clicar, o próprio elemento executa o comando de saída
+item.addEventListener('click', () => {
+  item.remove();
+});<br>
+document.querySelector('ul').appendChild(item);</code></pre>
+    </div>
+
+    <div class="slide">
+      <h3>Resumo da "Morte" de um Elemento:</h3> 
+      <ol>
+        <li><b>Gatilho:</b> Uma ação ocorre (clique no "X" de fechar).</li>
+        <li><b>Comando:</b> O JS executa .remove().</li>
+        <li><b>Reflow:</b> O navegador redesenha a página sem aquele item.</li>
+        <li><b>Limpeza:</b> Se não houver referências, a memória RAM é liberada.</li>
+      </ol>
+      <p>Faz sentido como o ciclo se fecha? Agora você sabe criar, configurar, dar um endereço e, quando necessário, dar o "cartão vermelho" para um elemento!</p>
+    </div>
+
+    <div class="slide">
+      <h3>B. ATENÇÃO / DICA / REFLITA</h3> 
+      <ul>
+        <li><strong>Atenção!</strong> Remover um elemento da tela não o deletará da memória imediatamente se você ainda tiver uma variável apontando para ele no seu script. Isso cria vazamento de memória. Se não for usar o elemento novamente, certifique-se de que não há variáveis "segurando" sua referência.</li>
+      </ul>
+      </div>
+      
+    <div class="slide">
+      <h3>C. EXERCÍCIOS RÁPIDOS</h3> 
+      <ol>
+        <li>Qual a diferença conceitual entre removeChild e remove?</li><br>
+        <li>Se executarmos pai.removeChild(filho) e o "filho" não pertencer àquele "pai", o que ocorre no console?</li><br>
+        <li>Crie um script que selecione o primeiro &lt;li&gt; de uma página e o destrua usando .remove().</li><br>
+        <li>É possível guardar um elemento removido em uma variável e inseri-lo de volta em outro lugar depois?</li><br>
+        <li>Se uma tabela inteira (&lt;tbody&gt;) for removida, o que acontece com os &lt;tr&gt; e &lt;td&gt; dentro dela?</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h2>Renderização Dinâmica e Clean Code: A Função renderList</h2> 
+      <h3>A. CONCEITO</h3> 
+      <p>Essa é a transição do "codificador amador" para o Engenheiro de Software. O conceito aqui é transformar uma tarefa manual e repetitiva em uma máquina de automação. Imagine que você é um carpinteiro. Em vez de fabricar uma cadeira do zero toda vez (medir, cortar, lixar, montar), você constrói um molde (a função). Agora, sempre que alguém quer uma cadeira, você só joga a madeira no molde. Veja como isso funciona na prática, dividindo em três pilares:</p>
+    </div>
+
+    <div class="slide">
+      <h3>1. O Problema: Código "Hardcoded" (Engessado)</h3> 
+      <p>Quando você escreve um código preso a um ID específico (como #lista-produtos), você criou um especialista que só sabe fazer uma coisa. Se amanhã você precisar listar "Clientes", esse código é inútil. Você teria que copiar e colar, mudando apenas o nome das variáveis.</p>
+      <ul>
+        <li><b>Consequência:</b> Se você descobrir um erro na forma como cria os itens, terá que consertar em 10 lugares diferentes. Isso é a Dívida Técnica.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h3>2. A Solução: Desacoplamento e Abstração</h3> 
+      <p>A função renderList age como um serviço de entrega. Ela não quer saber o que está dentro da caixa (os dados) nem onde fica a casa (o contêiner). Ela apenas sabe como realizar a entrega.</p>
+      <p><b>Os Parâmetros como "Contratos":</b></p>
+      <ul>
+        <li><b>Dados (Array):</b> É o combustível. Pode ser uma lista de preços, nomes de frutas ou e-mails.</li>
+        <li><b>Contêiner (Pai):</b> É o endereço de destino. Pode ser uma &lt;ul&gt;, uma &lt;div&gt; ou um &lt;section&gt;.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h3>3. Na Prática: Antes vs. Depois</h3> 
+      <p>O jeito repetitivo (Amador):</p>
+      <pre><code>JavaScript
+// Código preso ao produto
+produtos.forEach( p => {
+  const li = document.createElement('li');
+  li.textContent = p.nome;
+  document.getElementById('lista-produtos').appendChild(li);
+});</code></pre>
+    </div>
+
+    <div class="slide">
+      <p>O jeito Reutilizável (Engenharia):</p>
+      <pre><code>JavaScript
+function renderList(dados, conteinerPai) {
+  // Limpamos o pai para evitar duplicatas (Reset)
+  conteinerPai.innerHTML = '';<br>
+  dados.forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = item;
+    conteinerPai.appendChild(li);
+  });
+}
+// Agora a mesma função serve para TUDO:
+renderList(meusProdutos, listaDeProdutosDOM);
+renderList(vendedores, listaDeVendedoresDOM);</code></pre>
+    </div>
+
+    <div class="slide">
+      <h3>Por que isso é o "Padrão Ouro"?</h3> 
+      <ol>
+        <li><b>Manutenção Simples:</b> Quer adicionar uma classe de estilo em todos os itens do site? Você muda apenas uma linha dentro da função renderList.</li>
+        <li><b>Escalabilidade:</b> Seu site pode crescer de 1 para 100 listas diferentes sem aumentar o tamanho do seu arquivo JavaScript significativamente.</li>
+        <li><b>Testabilidade:</b> É muito mais fácil testar se uma função genérica funciona do que testar 10 blocos de código espalhados.</li>
+      </ol>
+      <p><b>Em resumo:</b> Você deixa de escrever o que fazer em cada detalhe e passa a escrever como as coisas devem ser feitas de forma geral. Ficou claro como essa "fábrica de listas" economiza o seu tempo e o processamento do navegador?</p>
+    </div>
+
+    <div class="slide">
+      <h3>B. VISUALIZANDO</h3> 
+      <p><b>Fluxo do Código Acoplado (Ruim):</b></p>
+      <p>Array de Produtos -> Loop Específico -> Conectado a fogo em #lista-produtos. (Se pedir outra lista, tem que copiar/colar tudo).</p><br>
+      <p><b>Fluxo do Código Reutilizável (Bom):</b></p>
+      <p>Array X + Contêiner Y -> renderList(data, container) -> Injeta na Tela. (A mesma função serve para produtos, vendedores, notificações, menus...).</p>
+    </div>
+    
+    <div class="slide">
+      <h3>B. VISUALIZANDO</h3>
+      <img src="img02.png" style="max-width: 90%; height:auto;"> 
+    </div>
+
+    <div class="slide">
+      <h3>C. ATENÇÃO / DICA / REFLITA</h3> 
+      <p><b>Reflita:</b> Soft Skill de Comunicação Técnica. Como você explicaria para o seu Gerente de Projeto que atrasou a entrega em 1 hora porque precisou "refatorar" a função de listar elementos? A justificativa correta não é "porque o código está feio", mas sim "para diminuir o tempo de entrega das próximas 10 listas do projeto e evitar bugs de inconsistência visual".</p>
+    </div>
+
+    <div class="slide">
+      <h3>D. EXERCÍCIOS RÁPIDOS</h3> 
+      <ol>
+        <li>Por que é importante limpar o container (ex: container.innerHTML = '') no início da função renderList?</li><br>
+        <li>O que acontece se passarmos uma string em vez de um Array para o parâmetro items no .forEach?</li><br>
+        <li>Modifique a função acima para adicionar a classe CSS "list-item" a cada &lt;li&gt; criado.</li><br>
+        <li>Se tivéssemos um array ['Alice', 'Bob'] e um &lt;ul id="users"&gt;, como você chamaria a função renderList?</li><br>
+        <li>Qual princípio de Engenharia de Software estamos aplicando ao evitar a duplicação do forEach?</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h2>MÃO NA MASSA (utilizar o arquivo EXEaula19.html)</h2> 
+      <p>Para entender o código completo do nosso Sistema de Inventário, precisamos olhar para ele com a mentalidade de um Engenheiro de Software. Na nossa aula, vimos que manipular o DOM não é apenas sobre jogar elementos na tela, mas sim sobre sincronizar dados com a interface.</p>
+      <p>Vamos desconstruir o código passo a passo, conectando tudo o que aprendemos hoje: Mock Data, criação de elementos (createElement), aninhamento (appendChild) e deleção.</p>
+    </div>
+
+    <div class="slide">
+      <h3>O Cérebro do Sistema (O "Estado")</h3> 
+      <p>No topo do nosso script, temos a variável mais importante:<br> JavaScript</p>
+      <pre><code>let dadosProdutos = []</code></pre>
+      <p>Este Array é a "fonte da verdade". Na vida real, ele começaria preenchido com dados vindos de um Banco de Dados. Em nossa aplicação, tudo o que o usuário vê na tela é apenas um reflexo visual (um "espelho") do que está dentro desse Array.</p>
+    </div>
+
+    <div class="slide">
+      <h3>A Fábrica de Renderização (renderizarTabela)</h3> 
+      <p>Essa é a nossa função genérica. Ela é responsável por ler a "fonte da verdade" e traduzi-la em elementos visuais.</p>
+      <ul>
+        <li>A Limpeza (innerHTML = ''): A primeira coisa que a fábrica faz é varrer a tela. Se não fizermos isso, toda vez que adicionarmos um produto, a tabela inteira seria duplicada abaixo da antiga.</li>
+        <li>A Iteração (forEach): A fábrica percorre o Array item por item.</li>
+        <li>A Construção (createElement e innerHTML): Para cada item, criamos o "Pai" (a linha &lt;tr&gt;). Em vez de fazer um createElement para cada célulazinha de texto, usamos uma técnica mista: injetamos o HTML simples via Template Literals () para ganhar tempo.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <ul>
+      <li>O Botão Dinâmico: É aqui que a mágica acontece. O botão de "Remover" não existe no HTML original; ele é forjado na hora:</li>
+      </ul>
+      <p>JavaScript</p>
+      <pre><code>const btnDeletar = document.createElement('button');
+btnDeletar.onclick = () => {...}</code></pre>
+      <ul>
+      <li>A Adoção (appendChild): Por fim, o botão é colocado dentro do &lt;td&gt;, o &lt;td&gt; é colocado dentro do &lt;tr&gt;, e o &lt;tr&gt; é anexado ao &lt;tbody&gt;. A hierarquia complexa está montada!</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h3>O Fluxo de Entrada (adicionarProduto)</h3> 
+      <p>Quando o usuário clica em <b>"Salvar Produto"</b>, o código não cria o elemento na tela imediatamente. Ele segue um fluxo de trabalho rigoroso:</p>
+      <ol>
+        <li><b>Captura e Validação:</b> Ele lê os valores do &lt;input&gt; e verifica se o usuário não digitou bobeira (como um nome vazio).</li>
+        <li><b>Atualização do Estado:</b> Ele empacota esses dados em um novo "Objeto JSON" e faz um .push() (empurra) para dentro do nosso Array dadosProdutos.</li>
+        <li><b>Limpeza Visual:</b> Ele apaga o texto das caixas de input para o usuário poder digitar o próximo.</li>
+        <li><b>O Gatilho:</b> Ele chama a renderizarTabela(). A fábrica liga as máquinas novamente, lê o Array (que agora tem um item a mais) e desenha a tabela nova.</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h3>O Fluxo de Saída (Remoção)</h3> 
+      <p>Na aula, vimos o removeChild e o .remove(). Mas, em um sistema guiado por dados (Data-Driven), nós não apagamos o elemento HTML diretamente. Nós apagamos o dado!</p>
+      <p>Quando o usuário clica no botão "Remover" forjado pela nossa fábrica, acontece o seguinte:</p> 
+      <p>JavaScript</p>
+      <pre><code>dadosProdutos.splice(index, 1);
+renderizarTabela();</code></pre>
+      </div>
+      
+      <div class="slide">
+      <ol>
+        <li>O .splice() vai na nossa "fonte da verdade" (o Array) e arranca o objeto de lá.</li>
+        <li>Em seguida, chamamos a renderizarTabela(). Como a fábrica sempre limpa a tela e desenha apenas o que está no Array, o produto removido simplesmente não é desenhado na nova rodada.</li>
+      </ol>
+      <h3>O resultado visual é que ele "sumiu".</h3>
+    </div>
+
+    <div class="slide">
+      <p><b>Resumo da Ópera:</b> O HTML fornece a casca. O JavaScript fornece a inteligência. Nós nunca mexemos na interface diretamente quando queremos adicionar ou deletar; nós alteramos o Array e pedimos para a função de renderização atualizar a tela. Esse é o coração da manipulação moderna do DOM!</p>
+      <h3>Dica de Ouro para o Grupo:</h3> 
+      <p>Abram o <b>Console do Desenvolvedor (F12)</b>, vão na aba <b>Elements</b> e cliquem nas setinhas para expandir o &lt;tbody&gt;. Vocês verão exatamente a estrutura que o JavaScript "fabricou". Se deletarem um item do Array e chamarem a função novamente, verão a mágica da atualização dinâmica acontecer!</p>
+    </div>
+
+    <div class="slide">
+      <h2>FAQ</h2> 
+      <p><b>Pergunta:</b> Qual a diferença entre appendChild e append? Qual devo usar?</p>
+      <p><b>Resposta:</b> O appendChild insere apenas um único objeto do tipo Node (nó) e retorna o próprio nó inserido. O append (mais moderno) aceita múltiplos nós ou até mesmo strings diretas (ex: pai.append(div, "Texto solto")), mas não tem valor de retorno. Em ambientes puristas e com grande exigência de compatibilidade e controle rigoroso, appendChild é mais seguro. Para agilidade moderna, append é amplamente utilizado.</p>
+    </div>
+
+    <div class="slide">
+      <h2>FAQ</h2> 
+      <p><b>Pergunta:</b> Fazer muitos appendChild dentro de um loop de 10.000 itens trava a página?</p>
+      <p><b>Resposta:</b> Sim! Toda vez que você altera o DOM visível, o navegador aciona um processo chamado Reflow e Repaint, o que é muito custoso em processamento. Para listas gigantes, usamos uma técnica avançada chamada DocumentFragment - uma "caixa invisível" onde anexamos os milhares de itens na memória primeiro e, no final, anexamos a caixa inteira ao DOM (1 único Reflow).</p>
+    </div>
+
+    <div class="slide">
+      <h2>FAQ</h2> 
+      <p><b>Pergunta:</b> Posso usar innerHTML com crases (Template Literals) para montar a tabela? Não é mais fácil?</p>
+      <p><b>Resposta:</b> É mais rápido de digitar, mas péssimo para a qualidade de software. O innerHTML destroi todo o contêiner para recriá-lo como texto. Isso mata eventos de clique (addEventListener) previamente ligados, causa recarregamento de imagens aninhadas e abre as portas do seu sistema para Cross-Site Scripting (XSS), a principal falha de segurança na web. Prefira sempre criar os nós.</p>
+    </div>
+
+    <div class="slide">
+      <h2>FAQ</h2> 
+      <p><b>Pergunta:</b> Se eu mudar um valor no meu Array de dados, a tabela atualiza sozinha?</p>
+      <p><b>Resposta:</b> No Vanilla JS, não. O array e o DOM são entidades separadas. Após alterar o dado no Array (ex: .push({novoDado})), você é obrigado a chamar a função renderList ou renderizarTabela novamente para sincronizar a tela com os dados atualizados. Bibliotecas como React nasceram justamente para automatizar essa reatividade.</p>
+      </div>
+    
+    <div class="slide">
+      <h2>FAQ</h2> 
+      <p><b>Pergunta:</b> Meu createElement está gerando a tag na tela, mas sem conteúdo, mesmo eu colocando node.value = 'Texto'. Por quê?</p>
+      <p><b>Resposta:</b> Depende da tag. Elementos estruturais (div, p, li, td) usam textContent (ou innerText) para o texto entre a abertura e fechamento da tag. Já elementos de formulário (como um &lt;input&gt;) usam a propriedade .value.</p>
+    </div>
+
+    <div class="slide">
+      <h2>RESUMINDO</h2> 
+      <p>Para garantir que nosso código tenha qualidade e manutenibilidade, fechamos esta aula com o seguinte checklist:</p>
+      <ul>
+        <li><b>Nó (Node):</b> Compreensão de que todo elemento em tela é um objeto tratado na memória do navegador.</li>
+        <li><b>createElement:</b> A fábrica do JavaScript puro para inicializar elementos de marcação na memória antes de exibí-los.</li>
+        <li><b>appendChild / remove:</b> A conexão e desconexão vitalícia dos elementos com a árvore do DOM visível.</li>
+        </ul>
+        </div>
+        
+        <div class="slide">
+        <h2>RESUMINDO:</h2>
+        <ul>
+        <li><b>Segurança vs Rapidez:</b> Adoção do textContent para inserção de dados sobre o vulnerável innerHTML.</li>
+        <li><b>Reusabilidade (Desacoplamento):</b> O conceito de criar funções genéricas (renderList) que dependem de parâmetros (dados e contêineres), eliminando repetição de código e facilitando manutenções futuras.</li>
+        <li><b>Hierarquia Estrita:</b> O respeito à arquitetura Pai-Filho do HTML ao montar componentes complexos via JS (como Tabela -> Linha -> Célula).</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h1 style="text-align: center;">EXERCÍCIOS DE FIXAÇÃO</h1> 
+      </div>
+      
+    <div class="slide">
+      <h3>Exercício 1 - Notificação Simples</h3> 
+      <p><b>Contexto:</b> O usuário acabou de adicionar um produto no nosso sistema de gestão. Precisamos dar um feedback visual rápido para ele.</p>
+      <p><b>Missão:</b> Crie um script dinâmico dentro da função adicionarProduto() que forja um elemento &lt;div&gt;, aplica uma classe CSS alert-success, adiciona o texto "Produto cadastrado com sucesso!" usando a propriedade correta e anexa ao contêiner principal da página usando appendChild.</p> 
+      <p><b>Entrega:</b> Trecho de código JavaScript funcional.</p>
+    </div>
+
+    <div class="slide">
+      <h3>Exercício 2 - O Gerente Mandou Apagar</h3> 
+      <p><b>Contexto:</b> Se o usuário digitar um preço inválido, nosso sistema mostra um alerta de erro na tela com o id #erro-validacao. Quando ele corrigir, o erro deve sumir.</p>
+      <p><b>Missão:</b> Selecione este elemento #erro-validacao via JS e elimine-o definitivamente do DOM utilizando a API nativa. Se certifique de fazer a validação para que não dê erro se o alerta já não estiver lá.</p>
+      <p><b>Entrega:</b> Código JS (Máximo de 3 linhas).</p>
+    </div>
+
+    <div class="slide">
+      <h3>Exercício 3 - Categorias Dinâmicas</h3> 
+      <p><b>Contexto:</b> Nosso backend em PHP enviou um JSON com as categorias dos produtos para colocarmos no formulário de cadastro.</p>
+      <p><b>Missão:</b> Dado o array const categorias = [{id: 1, nome: 'Eletrônicos'}, {id: 2, nome: 'Móveis'}], crie uma função genérica que recebe essas categorias e itera sobre elas construindo tags &lt;option&gt;, configurando as propriedades value (com o ID) e textContent (com o nome). Em seguida, as anexe dentro de um &lt;select id="categoria"&gt;.</p>
+      <p><b>Entrega:</b> Função de iteração completa criadora de múltiplos atributos DOM.</p>
+    </div>
+
+    <div class="slide">
+      <h3>Exercício 4 - Refatoração de Acoplamento</h3> 
+      <p><b>Contexto:</b> Seu colega Dev Júnior tentou adicionar um rodapé com o total de itens no final da tabela e fez uma função engessada: function gerarRodape() { document.querySelector('.container').innerHTML += "&lt;div class='rodape'&gt;Total atualizado&lt;/div&gt;" }.</p>
+      <p><b>Missão:</b> Refatore o código desse colega. Remova o acoplamento e, principalmente, remova a falha de injeção trocando innerHTML += por criação de nós nativa (createElement).</p>
+      <p><b>Entrega:</b> Função refatorada com boas práticas (Clean Code).</p>
+    </div>
+
+    <div class="slide">
+      <h3>Exercício 5 - Adicionar e Sincronizar (Limpar Estoque)</h3> 
+      <p><b>Contexto:</b> O cliente pediu um botão de pânico para zerar o inventário inteiro de uma vez.</p>
+      <p><b>Missão:</b> Programe uma função limparEstoque() que esvazia completamente o array dadosProdutos (nosso estado) e IMEDIATAMENTE chama a sua função renderizarTabela() feita anteriormente para atualizar a interface.</p>
+      <p><b>Entrega:</b> Lógica que demonstra o Gerenciamento de Estado simples no JS.</p>
+    </div>
+
+    <div class="slide">
+      <h3>Exercício 6 - Ações na Tabela Dinâmica</h3> 
+      <p><b>Contexto:</b> A tabela de produtos agradou o cliente, mas agora ele quer uma nova ação direto por lá.</p>
+      <p><b>Missão:</b> Modifique a função renderizarTabela. Ao lado do botão "Remover" que já existe na quarta coluna, crie um novo botão (button). Coloque o texto "Editar" neste botão e anexe-o na mesma célula (td).</p>
+      <p><b>Entrega:</b> A nova função renderizarTabela incluindo o novo nó sendo processado hierarquicamente.</p>
+    </div>
+
+    <div class="slide">
+      <h3>Exercício 7 - Fechamento por Escopo (Closure) no Botão</h3> 
+      <p><b>Contexto:</b> Continuação do exercício anterior. Precisamos garantir que o sistema avise qual produto está sendo manipulado.</p>
+      <p><b>Missão:</b> Adicione um evento de clique (addEventListener ou .onclick) ao botão "Editar" que você gerou lá dentro do loop do forEach. Quando clicado, o botão deve capturar o escopo e dar um alert() exibindo exatamente o produto.nome daquela respectiva linha mãe.</p>
+      <p><b>Entrega:</b> O bloco de código que combina a criação do nó com a anexação imediata de um evento nele antes de ir pro DOM.</p>
+    </div>
+
+    <div class="slide">
+      <h3>Exercício 8 - Dropdown Dependente</h3>
+      <p><b>Contexto:</b> Seleção de Categoria e Subcategoria no formulário de cadastro.</p>
+      <p><b>Missão:</b> Você tem um objeto aninhado: const subcategorias = { "Eletrônicos": ["Notebook", "Mouse"], "Móveis": ["Cadeira Gamer"] }. Crie uma função que lê a chave selecionada no input de categoria e popula dinamicamente (usando nó &lt;option&gt;) a tag &lt;select id="subcategorias"&gt; apenas com os itens pertinentes àquela categoria, garantindo que você zere/limpe a lista antes de adicionar as novas subcategorias.</p>
+      <p><b>Entrega:</b> Lógica complexa combinando busca em objeto aninhado e re-renderização de DOM.</p>
+    </div>
+
+    <div class="slide">
+      <h3>Exercício 9 - Cards de Portfólio (Visualização em Grade)</h3>
+      <p><b>Contexto:</b> O cliente quer um botão para alternar a visualização da Tabela para um formato de "Catálogo Visual".</p>
+      <p><b>Missão:</b> Dado o nosso array dadosProdutos, crie dinamicamente uma estrutura mais profunda que a tabela. Você deve montar: &lt;div class='card-produto'&gt; contendo um &lt;h3&gt;Nome do Produto&lt;/h3&gt; que é irmão de um &lt;p&gt;Preço&lt;/p&gt;. Inserir tudo em uma &lt;section id="galeria"&gt;.</p>
+      <p><b>Entrega:</b> Script rigoroso demonstrando a habilidade de montar ramificações laterais sem errar de pai.</p>
+    </div>
+
+    <div class="slide">
+      <h3>Exercício 10 - Depuração com Console</h3>
+      <p><b>Contexto:</b> Um estagiário sugeriu que, na função renderizarTabela, ao invés de usar appendChild, o código deveria fazer tbody.innerHTML += "&lt;tr&gt;...&lt;/tr&gt;" dentro do forEach para poupar linhas.</p>
+      <p><b>Missão:</b> Explique do ponto de vista de Engenharia de Software por que remontar a tabela dessa forma abrupta a cada iteração destrói o conceito de sincronização , causa problemas de performance e por que é uma péssima prática de mercado.</p>
+      <p><b>Entrega:</b> Um parágrafo argumentativo de alto nível técnico (Soft Skill de Code Review).</p>
+    </div>
+
+    <div class="slide">
+      <h2>FECHAMENTO</h2>
+      <p><b>Conexão com a Situação de Aprendizagem (SA):</b> Esta aula é o esqueleto da interface do nosso projeto final. O sistema de CRUD (Criar, Ler, Atualizar e Deletar) que vocês vão desenvolver precisará listar os registros do banco de dados na tela, como a listagem de usuários e serviços. Em breve, a Linguagem PHP trará esses dados do banco para o Frontend, e a função genérica renderizarTabela e as iterações de manipulação do DOM que escrevemos hoje serão responsáveis por apresentar toda essa informação ao cliente final de forma responsiva, dinâmica e sem gargalos de performance. Dominar esse conceito evita código repetido e garante requisitos de qualidade de software na auditoria final (Black-box).</p>
+    </div>
+
+    <div class="slide">
+      <h2>Próxima Aula:</h2>
+      <p>A tabela que fizemos hoje está muito bonita, mas é "muda". Nós inserimos dados na tela, mas como sabemos quando o usuário interage com eles? Na próxima aula, vamos dar vida e interatividade a essa estrutura avançando no poder do JavaScript Client-Side: o mapeamento de Eventos (Clicks, Teclado, Formulários).</p><br>
+      <h3><b>Antes de vir para a próxima aula</b>, pense e reflita: como o navegador sabe exatamente em qual botão "X" você clicou, se você gerou os 50 botões dinamicamente no mesmo milissegundo?</h3>
+    </div>
+
+  </div>
+
+  <div class="controls">
+    <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+    <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+    <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+  </div>
+
+  <script>
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const currentIndicator = document.getElementById('current');
+    const totalIndicator = document.getElementById('total');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    totalIndicator.textContent = totalSlides;
+
+    function updateView() {
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index === currentSlideIndex) {
+          slide.classList.add('active');
+        }
+      });
+      currentIndicator.textContent = currentSlideIndex + 1;
+      
+      prevBtn.disabled = currentSlideIndex === 0;
+      nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlideIndex < totalSlides - 1) {
+        currentSlideIndex++;
+        updateView();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlideIndex > 0) {
+        currentSlideIndex--;
+        updateView();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+    });
+  </script>
+</body>
+</html>
