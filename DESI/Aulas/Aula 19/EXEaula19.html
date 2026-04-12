@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cadastro de Produtos</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background-color: #f4f7f6; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        /* Estilização dos Inputs */
+        .form-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; flex: 1; min-width: 150px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
+        th { background-color: #6c5ce7; color: white; }
+        
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-add { background-color: #00b894; color: white; }
+        .btn-add:hover { background-color: #009475; }
+        .btn-del { background-color: #ff7675; color: white; }
+        .btn-del:hover { background-color: #d63031; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Cadastro de Inventário</h2>
+    
+    <div class="form-group">
+        <input type="text" id="inputNome" placeholder="Nome do Produto">
+        <input type="number" id="inputPreco" placeholder="Preço (Ex: 150.50)">
+        <button class="btn btn-add" onclick="adicionarProduto()">Salvar Produto</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Preço</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-corpo"></tbody>
+    </table>
+</div>
+
+<script>
+    // 1. Nosso Banco de Dados Temporário (Array)
+    let dadosProdutos = [];
+
+    // 2. Referências do DOM
+    const tbody = document.querySelector('#tabela-corpo');
+    const inputNome = document.querySelector('#inputNome');
+    const inputPreco = document.querySelector('#inputPreco');
+
+    // 3. Função para Renderizar a Tabela
+    function renderizarTabela() {
+        tbody.innerHTML = ''; // Limpa a tela antes de redesenhar
+
+        dadosProdutos.forEach((produto, index) => {
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+                <td>${produto.id}</td>
+                <td>${produto.nome}</td>
+                <td>R$ ${produto.preco.toFixed(2)}</td>
+            `;
+
+            const tdAcoes = document.createElement('td');
+            const btnDeletar = document.createElement('button');
+            btnDeletar.textContent = 'Remover';
+            btnDeletar.className = 'btn btn-del';
+            
+            // Evento de deletar
+            btnDeletar.onclick = () => {
+                dadosProdutos.splice(index, 1);
+                renderizarTabela();
+            };
+
+            tdAcoes.appendChild(btnDeletar);
+            tr.appendChild(tdAcoes);
+            tbody.appendChild(tr);
+        });
+    }
+
+    // 4. Função para Capturar Inputs e Adicionar ao Array
+    function adicionarProduto() {
+        const nome = inputNome.value.trim();
+        const preco = parseFloat(inputPreco.value);
+
+        // Validação simples
+        if (nome === '' || isNaN(preco)) {
+            alert("Por favor, preencha o nome e o preço corretamente!");
+            return;
+        }
+
+        // Criando o novo objeto com ID incremental
+        const novoId = dadosProdutos.length > 0 ? dadosProdutos[dadosProdutos.length - 1].id + 1 : 1;
+        
+        const novoProduto = {
+            id: novoId,
+            nome: nome,
+            preco: preco
+        };
+
+        // Adiciona ao "Banco de Dados"
+        dadosProdutos.push(novoProduto);
+
+        // Limpa os campos para o próximo uso
+        inputNome.value = '';
+        inputPreco.value = '';
+        inputNome.focus(); // Coloca o cursor de volta no nome
+
+        // Atualiza a tela
+        renderizarTabela();
+    }
+</script>
+
+</body>
+</html>
