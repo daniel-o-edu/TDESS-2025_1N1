@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gabarito: Sistema de Cadastro Avançado</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background-color: #f4f7f6; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
+        
+        /* Estilização dos Inputs e Layout */
+        .form-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; flex: 1; min-width: 130px; }
+        
+        /* Tabela */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
+        th { background-color: #6c5ce7; color: white; }
+        
+        /* Botões */
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-add { background-color: #00b894; color: white; }
+        .btn-add:hover { background-color: #009475; }
+        .btn-del { background-color: #ff7675; color: white; }
+        .btn-del:hover { background-color: #d63031; }
+        .btn-edit { background-color: #f39c12; color: white; margin-right: 5px; }
+        .btn-edit:hover { background-color: #e67e22; }
+        .btn-clear { background-color: #e74c3c; color: white; margin-top: 15px;}
+        .btn-gallery { background-color: #0984e3; color: white; margin-top: 15px;}
+        
+        /* Alertas e Rodapé (Exercícios 1 e 4) */
+        .alert-success { background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #c3e6cb; }
+        .rodape { background-color: #f8f9fa; padding: 15px; text-align: right; font-weight: bold; margin-top: 15px; border-radius: 6px; border: 1px dashed #ccc; }
+        
+        /* Galeria (Exercício 9) */
+        #galeria { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; }
+        .card-produto { border: 1px solid #ddd; border-radius: 8px; padding: 15px; width: 30%; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card-produto h3 { margin-top: 0; color: #6c5ce7; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app-container">
+    <h2>Cadastro de Inventário Avançado</h2>
+    
+    <div id="erro-validacao" style="color:red; background:#fdd; padding:10px; margin-bottom:15px; border-radius:4px;">
+        Aviso do Sistema: Você possui alertas pendentes. (Isso sumirá ao salvar um produto).
+    </div>
+    
+    <div class="form-group">
+        <input type="text" id="inputNome" placeholder="Nome do Produto">
+        <input type="number" id="inputPreco" placeholder="Preço (Ex: 150.50)">
+        
+        <select id="categoria" onchange="renderizarSubcategorias(this.value)"></select>
+        <select id="subcategorias"></select>
+
+        <button class="btn btn-add" onclick="adicionarProduto()">Salvar Produto</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Preço</th>
+                <th>Categoria</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-corpo"></tbody>
+    </table>
+
+    <div id="rodape-container"></div>
+
+    <button class="btn btn-clear" onclick="limparEstoque()">🗑️ Limpar Estoque</button>
+    <button class="btn btn-gallery" onclick="renderizarGaleria()">🖼️ Ver como Galeria</button>
+
+    <section id="galeria"></section>
+</div>
+
+<script>
+    // --- ESTADO DA APLICAÇÃO (Mock Data) ---
+    let dadosProdutos = [];
+
+    const categoriasDados = [
+        { id: 1, nome: 'Eletrônicos' }, 
+        { id: 2, nome: 'Móveis' }
+    ];
+
+    const subcategoriasDados = { 
+        "Eletrônicos": ["Notebook", "Mouse", "Monitor"], 
+        "Móveis": ["Cadeira Gamer", "Mesa de Escritório"] 
+    };
+
+    // --- REFERÊNCIAS DO DOM ---
+    const tbody = document.querySelector('#tabela-corpo');
+    const inputNome = document.querySelector('#inputNome');
+    const inputPreco = document.querySelector('#inputPreco');
+    const appContainer = document.querySelector('#app-container');
+
+    // --- FUNÇÕES DE INICIALIZAÇÃO (Ex 3 e 8) ---
+    function renderizarCategorias(categorias) {
+        const select = document.querySelector('#categoria');
+        select.innerHTML = ''; 
+
+        categorias.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.nome; // Usando nome para facilitar o vínculo com subcategorias
+            option.textContent = cat.nome;     
+            select.appendChild(option);
+        });
+        
+        // Popula as subcategorias iniciais baseadas na primeira opção
+        if(categorias.length > 0) {
+            renderizarSubcategorias(categorias[0].nome);
+        }
+    }
+
+    function renderizarSubcategorias(categoriaSelecionada) {
+        const selectSub = document.querySelector('#subcategorias');
+        selectSub.innerHTML = ''; 
+        
+        const itens = subcategoriasDados[categoriaSelecionada];
+        if (itens) {
+            itens.forEach(subcat => {
+                const option = document.createElement('option');
+                option.textContent = subcat;
+                option.value = subcat;
+                selectSub.appendChild(option);
+            });
+        }
+    }
+
+    // --- FUNÇÕES DE RENDERIZAÇÃO PRINCIPAL ---
+    function renderizarTabela() {
+        tbody.innerHTML = ''; // Limpa a tabela
+
+        dadosProdutos.forEach((produto, index) => {
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+                <td>${produto.id}</td>
+                <td>${produto.nome}</td>
+                <td>R$ ${produto.preco.toFixed(2)}</td>
+                <td>${produto.categoria} - ${produto.subcategoria}</td>
+            `;
+
+            const tdAcoes = document.createElement('td');
+
+            // Botão Editar (Ex 6 e 7)
+            const btnEditar = document.createElement('button');
+            btnEditar.textContent = 'Editar';
+            btnEditar.className = 'btn btn-edit';
+            btnEditar.onclick = () => {
+                // Fechamento por Escopo (Closure)
+                alert(`Editando o produto: ${produto.nome}\n(Lógica de edição futura)`);
+            };
+
+            // Botão Remover
+            const btnDeletar = document.createElement('button');
+            btnDeletar.textContent = 'Remover';
+            btnDeletar.className = 'btn btn-del';
+            btnDeletar.onclick = () => {
+                dadosProdutos.splice(index, 1);
+                renderizarTabela();
+            };
+
+            // Anexando hierarquia
+            tdAcoes.appendChild(btnEditar);
+            tdAcoes.appendChild(btnDeletar);
+            tr.appendChild(tdAcoes);
+            tbody.appendChild(tr);
+        });
+
+        // Atualiza o rodapé toda vez que a tabela renderiza
+        const rodapeContainer = document.querySelector('#rodape-container');
+        rodapeContainer.innerHTML = ''; // Limpa rodapé antigo
+        renderizarRodape(rodapeContainer);
+    }
+
+    // --- FUNÇÕES DE LÓGICA DE NEGÓCIO ---
+    function adicionarProduto() {
+        const nome = inputNome.value.trim();
+        const preco = parseFloat(inputPreco.value);
+        const categoria = document.querySelector('#categoria').value;
+        const subcategoria = document.querySelector('#subcategorias').value;
+
+        // Ex 2: O Gerente Mandou Apagar (Remoção do DOM nativa)
+        const erroValidacao = document.querySelector('#erro-validacao');
+        if (erroValidacao) {
+            erroValidacao.remove();
+        }
+
+        if (nome === '' || isNaN(preco)) {
+            alert("Por favor, preencha o nome e o preço corretamente!");
+            return;
+        }
+
+        const novoId = dadosProdutos.length > 0 ? dadosProdutos[dadosProdutos.length - 1].id + 1 : 1;
+        
+        dadosProdutos.push({ id: novoId, nome, preco, categoria, subcategoria });
+
+        // Limpa formulário
+        inputNome.value = '';
+        inputPreco.value = '';
+        inputNome.focus();
+
+        // Atualiza a interface principal
+        renderizarTabela();
+        
+        // Se a galeria estiver aberta, atualiza ela também
+        if(document.querySelector('#galeria').innerHTML !== '') {
+            renderizarGaleria();
+        }
+
+        // Ex 1: Notificação Simples (Criação de nó)
+        const alerta = document.createElement('div');
+        alerta.classList.add('alert-success');
+        alerta.textContent = `Produto "${nome}" cadastrado com sucesso!`;
+        appContainer.insertBefore(alerta, document.querySelector('table')); // Insere logo acima da tabela
+
+        // Remove o alerta após 3 segundos para limpar a tela
+        setTimeout(() => alerta.remove(), 3000);
+    }
+
+    // Ex 5: Adicionar e Sincronizar (Limpar Estoque)
+    function limparEstoque() {
+        if(confirm("Tem certeza que deseja zerar o estoque?")) {
+            dadosProdutos = []; // Zera o estado
+            renderizarTabela(); // Sincroniza a tabela
+            document.querySelector('#galeria').innerHTML = ''; // Limpa galeria se aberta
+        }
+    }
+
+    // Ex 4: Refatoração de Acoplamento (Rodapé Dinâmico)
+    function renderizarRodape(container) {
+        if(dadosProdutos.length === 0) return; // Não mostra rodapé se não tiver itens
+
+        const div = document.createElement('div');
+        div.classList.add('rodape');
+        
+        // Calcula o total usando reduce (Bônus)
+        const valorTotal = dadosProdutos.reduce((acumulador, prod) => acumulador + prod.preco, 0);
+        
+        div.textContent = `Total de Itens: ${dadosProdutos.length} | Valor Total em Estoque: R$ ${valorTotal.toFixed(2)}`;
+        container.appendChild(div); 
+    }
+
+    // Ex 9: Cards de Portfólio (Hierarquia Complexa Lateral)
+    function renderizarGaleria() {
+        const galeria = document.querySelector('#galeria');
+        galeria.innerHTML = ''; 
+
+        if(dadosProdutos.length === 0) {
+            galeria.innerHTML = '<p style="width:100%; text-align:center; color:#888;">Estoque vazio.</p>';
+            return;
+        }
+
+        dadosProdutos.forEach(produto => {
+            const card = document.createElement('div');
+            card.classList.add('card-produto');
+
+            const h3 = document.createElement('h3');
+            h3.textContent = produto.nome;
+
+            const pCat = document.createElement('p');
+            pCat.innerHTML = `<strong>Tag:</strong> ${produto.subcategoria}`;
+
+            const pPreco = document.createElement('p');
+            pPreco.textContent = `R$ ${produto.preco.toFixed(2)}`;
+
+            card.appendChild(h3);
+            card.appendChild(pCat);
+            card.appendChild(pPreco);
+
+            galeria.appendChild(card);
+        });
+    }
+
+    // --- INICIALIZAÇÃO DA PÁGINA ---
+    renderizarCategorias(categoriasDados);
+    renderizarTabela();
+
+</script>
+</body>
+</html>
