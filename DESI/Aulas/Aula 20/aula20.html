@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 20 - Eventos e Validação de Formulários</title>
+<style>
+  body {
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa; 
+    color: #212529;
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh;
+    overflow: hidden;
+  }
+  .slide-container {
+    width: 90vw;
+    height: 90vh;
+    margin: auto;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 40px; 
+    box-sizing: border-box; 
+    position: relative;
+  }
+  .slide {
+    display: none; 
+    width: 100%; 
+    max-width: 1200px; 
+    max-height: 85vh;
+    background: #ffffff; 
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+    padding: 50px;
+    font-size: 26px; 
+    line-height: 1.6; 
+    overflow-y: auto;
+  }
+  .slide.active { 
+    display: block; 
+    animation: fadeIn 0.4s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  h1, h2, h3 { 
+    color: #0d6efd; 
+    margin-top: 0; 
+  }
+  code, pre { 
+    background: #e9ecef; 
+    padding: 10px 15px; 
+    border-radius: 8px; 
+    font-family: 'Courier New', Courier, monospace; 
+    display: block; 
+    font-size: 22px;
+    overflow-x: auto;
+  }
+  .controls {
+    height: 90px; 
+    background: #ffffff; 
+    border-top: 1px solid #dee2e6;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 0 50px;
+  }
+  button {
+    background: #0d6efd; 
+    color: white; 
+    border: none; 
+    padding: 15px 30px;
+    font-size: 22px; 
+    border-radius: 8px; 
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button:hover {
+    background: #0b5ed7;
+  }
+  button:disabled { 
+    background: #adb5bd; 
+    cursor: not-allowed; 
+  }
+  .progress { 
+    font-size: 22px; 
+    font-weight: bold; 
+    color: #495057;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 22px;
+    margin-top: 10px;
+  }
+  th {
+    background-color: #0d6efd;
+    color: white;
+    padding: 10px 14px;
+    text-align: left;
+  }
+  td {
+    padding: 10px 14px;
+    border: 1px solid #dee2e6;
+  }
+  tr:nth-child(even) td {
+    background-color: #f1f3f5;
+  }
+</style>
+</head>
+<body>
+  <div class="slide-container" id="slides">
+
+    <!-- Slide 1: Título -->
+    <div class="slide active">
+      <h1>Aula 20 - Eventos e Validação de Formulários</h1>
+      <p><b>Descrição:</b> Esta aula aborda a transição crucial entre uma página estática e uma interface interativa e segura. Vamos focar na experiência do usuário (UX) e na integridade dos dados por meio da manipulação de eventos do DOM, lógica de validação com expressões regulares e feedback visual dinâmico.</p>
+    </div>
+
+    <!-- Slide 2: Cenário Real -->
+    <div class="slide">
+      <h2>Cenário Real</h2>
+      <p>Imagine que somos a equipe de desenvolvimento de uma grande varejista na véspera da Black Friday. À meia-noite, milhares de usuários tentam se cadastrar simultaneamente. Se o nosso sistema permitir que dados "sujos" (CPFs com letras, e-mails sem "@", campos vazios) cheguem ao servidor, cada erro gerará uma requisição desnecessária que consome banda e processamento.</p>
+    </div>
+
+    <!-- Slide 3: Cenário Real (continuação) -->
+    <div class="slide">
+      <p>Em um cenário de alto tráfego, este "lixo eletrônico" pode sobrecarregar o banco de dados e derrubar o site, causando prejuízos milionários. Validar os dados no navegador do usuário não é apenas uma questão de estética, é uma estratégia de performance e disponibilidade.</p>
+    </div>
+
+    <!-- Slide 4: Pergunta -->
+    <div class="slide">
+      <h2>Pergunta</h2>
+      <p>"Antes de começarmos, vamos refletir: se vocês fossem os desenvolvedores responsáveis por salvar essa Black Friday, como fariam para garantir que o navegador do usuário 'barrasse' os dados incorretos antes mesmo de eles tentarem chegar ao nosso servidor?"</p>
+    </div>
+
+    <!-- Slide 5: Manipulação e Escuta de Eventos no DOM -->
+    <div class="slide">
+      <h2>Manipulação e Escuta de Eventos no DOM</h2>
+      <h3>A. CONCEITO</h3>
+      <p>Imagine que o JavaScript é o gerente de um restaurante muito movimentado. Se ele ficasse parado na porta esperando cada cliente chegar, o resto do restaurante pararia. Em vez disso, ele usa um sistema inteligente de Eventos. Aqui está uma explicação detalhada e didática de como esse "vigia" funciona:</p>
+    </div>
+
+    <!-- Slide 6: O Modelo Assíncrono -->
+    <div class="slide">
+      <h3>O Modelo Assíncrono (O Garçom)</h3>
+      <p>Em vez de travar o navegador esperando o usuário fazer algo, o JavaScript trabalha de forma assíncrona.</p>
+      <ul>
+        <li><b>Como funciona:</b> Você diz ao navegador: "Olha, eu vou continuar processando outras coisas aqui. Se o usuário clicar naquele botão, me avise!"</li>
+        <li><b>Isso garante</b> que o site não "congele" enquanto o usuário decide onde clicar.</li>
+      </ul>
+    </div>
+
+    <!-- Slide 7: O addEventListener -->
+    <div class="slide">
+      <h3>O addEventListener (O Vigia)</h3>
+      <p>O método addEventListener é como contratar um segurança para ficar de olho em uma porta específica. Para funcionar, ele precisa de três informações básicas:</p>
+      <ul>
+        <li><b>1. O Alvo (Onde?):</b> O elemento HTML (um botão, um campo de texto, um formulário).</li>
+        <li><b>2. O Evento (O quê?):</b> O tipo de ação que estamos esperando (click, submit, keydown).</li>
+        <li><b>3. A Rotina de Tratamento (O que fazer?):</b> A função que deve ser executada assim que o evento acontecer.</li>
+      </ul>
+    </div>
+
+    <!-- Slide 8: O Papel do event.preventDefault() -->
+    <div class="slide">
+      <h3>O Papel do event.preventDefault()</h3>
+      <p>Este é um dos conceitos mais importantes quando lidamos com formulários. Muitos elementos no HTML têm comportamentos padrão. Por exemplo:</p>
+      <ul>
+        <li>Ao clicar em um link, o navegador te leva para outra página.</li>
+        <li>Ao clicar no botão "Enviar" de um formulário, o navegador recarrega a página para enviar os dados.</li>
+      </ul>
+      <p><b>O Problema:</b> Se a página recarregar, o JavaScript perde o controle do que estava fazendo.</p>
+    </div>
+
+    <!-- Slide 9: A Solução e Analogia do Formulário -->
+    <div class="slide">
+      <p><b>A Solução:</b> Usamos o event.preventDefault(). É como se o "vigia" desse uma ordem de: "Ei, navegador, pare! Não faça o que você faz por padrão. Eu vou assumir o controle daqui agora."</p>
+      <h3>Exemplo Prático: A Analogia do Formulário</h3>
+      <p>Imagine que você está em um cartório:</p>
+      <ul>
+        <li><b>O Evento:</b> Você entrega o papel do formulário (Evento submit).</li>
+        <li><b>O Comportamento Padrão:</b> O atendente pega o papel e já carimba, enviando para o arquivo morto (Recarregar a página).</li>
+        <li><b>O preventDefault():</b> Antes do atendente carimbar, você coloca a mão sobre o papel e diz: "Espere! Deixe-me conferir se os campos estão preenchidos corretamente primeiro."</li>
+      </ul>
+    </div>
+
+    <!-- Slide 10: Resumo do Código -->
+    <div class="slide">
+      <h3>Resumo do Código</h3>
+      <p>No código, a estrutura fica assim:</p>
+      <pre><code>JavaScript
+const formulario = document.querySelector('#meuForm');
+// 1. O Alvo: formulario
+// 2. O Evento: 'submit'
+formulario.addEventListener('submit', function(event) {
+  event.preventDefault(); // 3. Intercepta o comportamento padrão (não recarrega)
+  console.log("Agora eu valido os dados sem a página sumir!");
+  // Aqui entra sua Rotina de Tratamento (Validação)
+});</code></pre>
+      <p>Ficou claro como o JavaScript "escuta" o usuário sem interromper o fluxo do site?</p>
+    </div>
+
+    <div class="slide">
+    <h3>B. Visualizando</h3>
+<img src="img01.png" style="max-width: 90%; height:auto;">
+  </div>
+  
+    <!-- Slide 11: Atenção e Perguntas Rápidas -->
+    <div class="slide">
+      <h3>C. ATENÇÃO!</h3>
+      <p>Evite usar atributos legados como onclick diretamente no HTML. Isso mistura estrutura (HTML) com comportamento (JS), o que dificulta a manutenção do código. Sempre prefira o addEventListener no arquivo .js separado.</p>
+      <h3>D. PERGUNTAS RÁPIDAS</h3>
+      <ol>
+        <li>Explique com suas palavras o que acontece se esquecermos o preventDefault() em um formulário.</li>
+        <li>Identifique no código acima quem é o Alvo do Evento.</li>
+        <li>Escreva uma linha de código que selecione um botão com a classe .btn-enviar.</li>
+      </ol>
+    </div>
+
+    <!-- Slide 12: Perguntas Rápidas (continuação) -->
+    <div class="slide">
+      <h3>D. PERGUNTAS RÁPIDAS (continuação)</h3>
+      <ol start="4">
+        <li>Corrija o erro: botao.addEventListerner('click', alert('Oi')) (Dica: o segundo parâmetro deve ser uma função, não uma chamada direta).</li>
+        <li>Como você alteraria o código para reagir ao evento de "digitação" (input) em vez de "envio"?</li>
+      </ol>
+    </div>
+
+    <!-- Slide 13: Lógica de Validação e RegEx - Conceito -->
+    <div class="slide">
+      <h2>Lógica de Validação e Expressões Regulares (RegEx)</h2>
+      <h3>A. CONCEITO</h3>
+      <p>Validar dados é, em essência, o papel de um "segurança de balada" para o seu banco de dados. O objetivo é barrar entradas que não fazem sentido antes que elas causem problemas no sistema.</p>
+    </div>
+
+    <!-- Slide 14: O Que é Validação? -->
+    <div class="slide">
+      <h3>O Que é Validação?</h3>
+      <p>Imagine que você está preenchendo um formulário de cadastro. Se o sistema aceitasse "Abacaxi" no campo de "Telefone", como a empresa ligaria para você?</p>
+      <p>A validação serve para conferir se a informação enviada é útil e fiel ao esperado. Ela ocorre em dois momentos principais:</p>
+      <ul>
+        <li><b>No Frontend (Cliente):</b> O navegador avisa na hora: "Ei, falta um @ no e-mail". Isso melhora a experiência do usuário.</li>
+        <li><b>No Backend (Servidor):</b> É a segurança real. Garante que, mesmo que alguém tente burlar o formulário, o dado incorreto não entre no banco de dados.</li>
+      </ul>
+    </div>
+
+    <!-- Slide 15: O Poder das Expressões Regulares -->
+    <div class="slide">
+      <h3>O Poder das Expressões Regulares (RegEx)</h3>
+      <p>Se a validação comum é conferir se um campo está vazio, a RegEx é o nível mestre da conferência. Ela é uma sequência de caracteres que forma um padrão de busca.</p>
+      <p>Pense na RegEx como um gabarito vazado:</p>
+      <ol>
+        <li>Você coloca o gabarito (o "molde") sobre o que o usuário escreveu.</li>
+        <li>Se os caracteres aparecerem exatamente nos buraquinhos certos, o dado passa.</li>
+        <li>Se algo sobrar ou faltar, o dado é rejeitado.</li>
+      </ol>
+      <p><b>Exemplos práticos de "Moldes":</b></p>
+      <ul>
+        <li><b>E-mail:</b> Um padrão que exige texto + @ + texto + . + texto.</li>
+        <li><b>Data (DD/MM/AAAA):</b> Um padrão que exige 2 números + / + 2 números + / + 4 números.</li>
+      </ul>
+    </div>
+
+    <!-- Slide 16: Por que isso é vital? (Integridade de Dados) -->
+    <div class="slide">
+      <h3>Por que isso é vital? (Integridade de Dados)</h3>
+      <p>A integridade da informação é o que mantém uma empresa funcionando. Dados mal validados (o famoso "dados lixo") geram:</p>
+      <ul>
+        <li><b>Erros de Processamento:</b> O sistema tenta enviar um e-mail para "12345" e trava.</li>
+        <li><b>Insegurança:</b> Hackers podem injetar códigos maliciosos em campos mal validados (o famoso SQL Injection).</li>
+        <li><b>Custos:</b> Limpar um banco de dados sujo é muito mais caro e demorado do que validar a entrada corretamente.</li>
+      </ul>
+    </div>
+
+    <!-- Slide 17: Tabela de Tipos de Validação -->
+    <div class="slide">
+      <h3>B. VISUALIZANDO</h3>
+      <table>
+        <tr>
+          <th>Tipo de Validação</th>
+          <th>Como funciona</th>
+          <th>Exemplo</th>
+        </tr>
+        <tr>
+          <td>Simples</td>
+          <td>Verifica se o campo está vazio</td>
+          <td><code style="display:inline; padding:2px 6px;">input.value === ""</code></td>
+        </tr>
+        <tr>
+          <td>Comprimento</td>
+          <td>Verifica o número de caracteres</td>
+          <td><code style="display:inline; padding:2px 6px;">senha.length >= 8</code></td>
+        </tr>
+        <tr>
+          <td>Padrão (RegEx)</td>
+          <td>Verifica a estrutura do texto</td>
+          <td><code style="display:inline; padding:2px 6px;">/\S+@\S+\.\S+/ (E-mail)</code></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="slide">
+    <h3>B. Visualizando</h3>
+<img src="img02.png" style="max-width: 90%; height:auto;">
+  </div>
+
+    <!-- Slide 18: Exemplo de Código -->
+    <div class="slide">
+      <h3>C. EXEMPLO DE CÓDIGO</h3>
+      <pre><code>JavaScript
+// Função para validar e-mail usando uma expressão regular
+function validarEmail(email) {
+  // O molde: texto + @ + texto + . + texto
+  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // O método .test() retorna true se o e-mail for válido
+  return regexEmail.test(email);
+}
+const emailDigitado = "aluno@senai.br";
+if (validarEmail(emailDigitado)) {
+  console.log("E-mail aceito!");
+} else {
+  console.log("Formato de e-mail inválido.");
+}</code></pre>
+    </div>
+
+    <!-- Slide 19: Explicação do Código -->
+    <div class="slide">
+      <h3>D. EXPLICAÇÃO DO CÓDIGO</h3>
+      <ol>
+        <li><b>const regexEmail:</b> Definimos o padrão técnico universal para um e-mail.</li>
+        <li><b>regexEmail.test(email):</b> O JavaScript compara a string recebida com o padrão. É uma operação booleana: ou passa (true), ou não passa (false).</li>
+        <li><b>Lógica de Decisão:</b> Usamos o resultado para decidir se permitimos o avanço do usuário ou se exibimos um erro.</li>
+      </ol>
+    </div>
+
+    <!-- Slide 20: Dica e Perguntas Rápidas -->
+    <div class="slide">
+      <h3>E. DICA</h3>
+      <p>Embora a validação no Frontend seja essencial para a UX, ela pode ser burlada por usuários avançados. Regra de ouro: Nunca confie 100% no cliente; a validação deve ser repetida no Backend (que aprenderemos nas próximas aulas).</p>
+      <h3>F. PERGUNTAS RÁPIDAS</h3>
+      <ol>
+        <li>Crie uma condição que verifique se uma variável nome tem menos de 3 caracteres.</li>
+        <li>O que o método .test() da RegEx retorna?</li>
+        <li>Escreva um pequeno código que verifique se o campo idade é maior ou igual a 18.</li>
+      </ol>
+    </div>
+
+    <!-- Slide 21: Perguntas Rápidas (continuação) -->
+    <div class="slide">
+      <h3>F. PERGUNTAS RÁPIDAS (continuação)</h3>
+      <ol start="4">
+        <li>Dada a RegEx /\d{5}-\d{3}/, ela serve para validar qual tipo de dado brasileiro? (Dica: pense no endereço).</li>
+        <li>Analise: por que validar o formato do e-mail é melhor do que apenas verificar se o campo não está vazio?</li>
+      </ol>
+    </div>
+
+    <!-- Slide 22: Mão na Massa -->
+    <div class="slide">
+      <h2>MÃO NA MASSA: O Guardião do Cadastro da Black Friday</h2>
+      <h3>Contexto:</h3>
+      <p>Nossa loja virtual está se preparando para a Black Friday! Para que as ofertas cheguem aos clientes reais, precisamos garantir que o formulário de cadastro não aceite "dados lixo" (como e-mails falsos ou senhas fracas). O seu objetivo é construir um protótipo de formulário que faça essa validação.</p>
+      <h3>O que vamos aprender?</h3>
+      <p>Como capturar dados de um formulário, evitar o recarregamento da página e usar uma RegEx para validar um e-mail.</p>
+    </div>
+
+    <!-- Slide 23: Passo 1 - Estrutura HTML -->
+    <div class="slide">
+      <h3>Passo 1: A Estrutura Visual (HTML)</h3>
+      <p>Primeiro, vamos criar a "cara" do nosso formulário. Crie um arquivo index.html.</p>
+      <p>Observe que criamos um texto de erro (o span), mas ele começa escondido (display:none). Nós só vamos mostrá-lo se o usuário errar!</p>
+      <p>Aqui está a estrutura HTML completa e pronta para uso:</p>
+    </div>
+
+    <!-- Slide 24: Código HTML Completo -->
+    <div class="slide">
+      <pre><code>HTML
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Cadastro - Black Friday&lt;/title&gt;
+  &lt;style&gt;
+    body {
+      font-family: Arial, sans-serif;
+      display: flex; justify-content: center;
+      align-items: center; height: 100vh;
+      background-color: #f4f4f9;
+    }
+    form { background: white; padding: 20px; border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column; gap: 15px; width: 300px; }
+    input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 10px; background-color: #28a745; color: white;
+      border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background-color: #218838; }
+  &lt;/style&gt;
+&lt;/head&gt;</code></pre>
+    </div>
+
+    <!-- Slide 25: Código HTML (continuação) -->
+    <div class="slide">
+      <pre><code>HTML (continuação)
+&lt;body&gt;
+  &lt;form id="formCadastro"&gt;
+    &lt;h3&gt;Cadastro Black Friday&lt;/h3&gt;
+    &lt;input type="email" id="email" placeholder="Seu e-mail"&gt;
+    &lt;span id="erroEmail"
+      style="color:red; display:none; font-size: 14px;"&gt;
+      E-mail inválido!
+    &lt;/span&gt;
+    &lt;input type="password" id="senha"
+      placeholder="Sua senha (mín. 6 caracteres)"&gt;
+    &lt;button type="submit"&gt;Cadastrar&lt;/button&gt;
+  &lt;/form&gt;
+  &lt;script src="script.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+
+    <!-- Slide 26: Passo 2 - JavaScript -->
+    <div class="slide">
+      <h3>Passo 2: Assumindo o Controle (JavaScript)</h3>
+      <p>Por padrão, quando clicamos em "submit", o navegador recarrega a página. Nós não queremos isso! Crie seu arquivo script.js e use o comando e.preventDefault() para dizer ao navegador: "Deixe que eu assumo o controle daqui".</p>
+      <pre><code>JavaScript
+const form = document.querySelector('#formCadastro');
+// Fica "escutando" o momento em que o botão de submit for clicado
+form.addEventListener('submit', (e) => {
+  e.preventDefault(); // Impede a página de recarregar
+  console.log("Iniciando validação...");
+  // Os próximos passos vão entrar AQUI dentro!
+});</code></pre>
+    </div>
+
+    <!-- Slide 27: Passo 3 - RegEx -->
+    <div class="slide">
+      <h3>Passo 3: O Teste do "Molde" (RegEx)</h3>
+      <p>Agora vamos pegar o que o usuário digitou e testar no nosso "molde" de e-mail. Adicione este código dentro da função do Passo 2.</p>
+      <p>Como a RegEx funciona aqui? A variável regexEmail verifica se existe um texto, seguido de um "@", seguido de mais texto, um ponto "." e o final do domínio.</p>
+      <pre><code>JavaScript
+const email = document.querySelector('#email').value;
+const senha = document.querySelector('#senha').value;
+const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+let formValido = true;
+if (!regexEmail.test(email)) {
+  document.querySelector('#erroEmail').style.display = 'block';
+  formValido = false;
+} else {
+  document.querySelector('#erroEmail').style.display = 'none';
+}</code></pre>
+    </div>
+
+    <!-- Slide 28: Passo 4 - Veredito Final -->
+    <div class="slide">
+      <h3>Passo 4: O Veredito Final</h3>
+      <p>Ainda dentro da função, vamos conferir se o formulário passou no teste do e-mail E se a senha atende ao requisito mínimo de tamanho.</p>
+      <pre><code>JavaScript
+// Se o e-mail estiver válido E a senha tiver 6 ou mais caracteres...
+if (formValido && senha.length >= 6) {
+  alert("Cadastro realizado com sucesso! Dados prontos para o servidor.");
+  form.reset(); // Limpa todos os campos para o próximo usuário
+} else if (senha.length < 6) {
+  alert("A senha precisa ter pelo menos 6 caracteres.");
+}</code></pre>
+    </div>
+
+    <!-- Slide 29: JavaScript Completo -->
+    <div class="slide">
+      <h3>Como deve ficar o seu JavaScript Completo?</h3>
+      <p>Caso tenha se perdido nas etapas, seu arquivo script.js deve estar exatamente assim:</p>
+      <pre><code>JavaScript
+const form = document.querySelector('#formCadastro');
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = document.querySelector('#email').value;
+  const senha = document.querySelector('#senha').value;
+  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  let formValido = true;
+  if (!regexEmail.test(email)) {
+    document.querySelector('#erroEmail').style.display = 'block';
+    formValido = false;
+  } else {
+    document.querySelector('#erroEmail').style.display = 'none';
+  }
+  if (formValido && senha.length >= 6) {
+    alert("Cadastro realizado com sucesso! Dados prontos para o servidor.");
+    form.reset();
+  } else if (senha.length < 6) {
+    alert("A senha precisa ter pelo menos 6 caracteres.");
+  }
+});</code></pre>
+    </div>
+
+    <!-- Slide 30: Resultado Esperado -->
+    <div class="slide">
+      <h3>Resultado Esperado</h3>
+      <p>Ao testar no navegador, se você digitar "joao.gmail.com" (sem @), a mensagem vermelha deve aparecer. Se preencher tudo certinho, um alerta de sucesso vai pular na tela e os campos ficarão em branco novamente.</p>
+      <p>Este exercício, intitulado "O Guardião do Cadastro da Black Friday", é uma excelente introdução prática ao desenvolvimento web front-end. Ele foca em como tornar uma página estática em uma aplicação interativa e funcional, garantindo que apenas dados válidos cheguem ao sistema.</p>
+      <p>Abaixo, apresento uma explicação didática dividida pelos pilares do projeto:</p>
+    </div>
+
+    <!-- Slide 31: O Objetivo - Qualidade de Dados -->
+    <div class="slide">
+      <h3>O Objetivo: Qualidade de Dados</h3>
+      <p>Em eventos de alto tráfego como a Black Friday, as empresas não podem perder tempo ou recursos com cadastros falsos. O exercício ensina a criar uma "barreira" no lado do cliente (o navegador) para validar informações antes mesmo de enviá-las a um servidor.</p>
+    </div>
+
+    <!-- Slide 32: 1. A Estrutura Visual -->
+    <div class="slide">
+      <h3>1. A Estrutura Visual (O "Corpo")</h3>
+      <p>O código HTML define os elementos que o usuário vê:</p>
+      <ul>
+        <li><b>Campos de entrada (input):</b> Para coletar o e-mail e a senha.</li>
+        <li><b>Feedback visual imediato:</b> O uso de um &lt;span&gt; com display: none é uma técnica comum. Ele está lá o tempo todo, mas "invisível", esperando o comando do JavaScript para aparecer caso o usuário cometa um erro.</li>
+      </ul>
+    </div>
+
+    <!-- Slide 33: 2. O Comportamento -->
+    <div class="slide">
+      <h3>2. O Comportamento (A "Inteligência")</h3>
+      <p>O arquivo script.js é onde a mágica acontece. Ele segue três etapas lógicas cruciais:</p>
+      <p><b>A. Interrupção do Comportamento Padrão</b></p>
+      <p>Por padrão, formulários recarregam a página ao serem enviados. O comando e.preventDefault() é a "chave" que trava esse comportamento, permitindo que o JavaScript valide os dados sem que a página "pisque" ou limpe os campos antes da hora.</p>
+    </div>
+
+    <!-- Slide 34: B. O Molde Mágico e C. Lógica de Condicional -->
+    <div class="slide">
+      <p><b>B. O Molde Mágico: RegEx</b></p>
+      <p>A validação de e-mail utiliza uma Expressão Regular (RegEx). A variável regexEmail funciona como uma máscara de busca que verifica se o texto segue o padrão obrigatório: texto + @ + texto + . + final do domínio. Se o que foi digitado não se encaixar nesse molde, o erro é exibido.</p>
+      <p><b>C. Lógica de Condicional Dupla</b></p>
+      <p>O formulário só é considerado "aprovado" se passar em dois testes simultâneos:</p>
+      <ol>
+        <li>O e-mail deve ser válido (conforme a RegEx).</li>
+        <li>A senha deve ter tamanho mínimo (pelo menos 6 caracteres).</li>
+      </ol>
+    </div>
+
+    <!-- Slide 35: 3. O Fluxo de Trabalho do Código -->
+    <div class="slide">
+      <h3>3. O Fluxo de Trabalho do Código</h3>
+      <p>O exercício demonstra de forma clara o fluxo de manipulação do DOM (Document Object Model):</p>
+      <ol>
+        <li><b>Captura:</b> O JS busca os valores digitados no HTML via document.querySelector().value.</li>
+        <li><b>Processamento:</b> Aplica os testes lógicos e matemáticos (como .length para a senha).</li>
+        <li><b>Resposta:</b> Altera o estilo do HTML (exibe o erro) ou limpa o formulário (form.reset()) em caso de sucesso.</li>
+      </ol>
+    </div>
+
+    <!-- Slide 36: Resumo da Atividade (tabela) -->
+    <div class="slide">
+      <h3>Resumo da Atividade</h3>
+      <table>
+        <tr>
+          <th>Conceito</th>
+          <th>Aplicação Prática no Exercício</th>
+        </tr>
+        <tr>
+          <td>UX (Experiência do Usuário)</td>
+          <td>Mostrar mensagens de erro específicas sem recarregar a página.</td>
+        </tr>
+        <tr>
+          <td>Segurança Básica</td>
+          <td>Garantir que senhas não sejam curtas demais.</td>
+        </tr>
+        <tr>
+          <td>Limpeza de Estado</td>
+          <td>Resetar o formulário após o sucesso para um novo uso.</td>
+        </tr>
+      </table>
+      <p>Este exercício é fundamental porque reflete um cenário real de desenvolvimento, onde o programador atua como o "guardião" que protege a integridade do banco de dados da aplicação.</p>
+      <p>O que você achou da lógica de usar o preventDefault()?</p>
+    </div>
+
+    <!-- Slide 37: FAQ -->
+    <div class="slide">
+      <h2>FAQ - Perguntas Frequentes</h2>
+      <p><b>Pergunta:</b> Posso usar apenas o atributo required do HTML5 em vez de JavaScript?</p>
+      <p><b>Resposta:</b> O required é ótimo para uma camada inicial, mas o JavaScript permite validações muito mais ricas, como comparar dois campos de senha ou verificar a força da senha em tempo real. O ideal é usar ambos.</p>
+      </div>
+      
+    <div class="slide">
+      <h2>FAQ - Perguntas Frequentes</h2>
+      <p><b>Pergunta:</b> Qual a diferença entre event.target e event.currentTarget?</p>
+      <p><b>Resposta:</b> event.target é o elemento exato que você clicou (pode ser um ícone dentro do botão). event.currentTarget é o elemento onde você registrou o addEventListener (o botão em si).</p>
+    </div>
+
+    <!-- Slide 38: FAQ (continuação) -->
+    <div class="slide">
+      <h2>FAQ - Perguntas Frequentes (continuação)</h2>
+      <p><b>Pergunta:</b> O preventDefault() cancela todos os eventos?</p>
+      <p><b>Resposta:</b> Não, ele cancela apenas o "comportamento padrão" do navegador para aquele evento específico (como abrir um link ou enviar um formulário).</p>
+      </div>
+      
+    <div class="slide">
+      <h2>FAQ - Perguntas Frequentes</h2>
+      <p><b>Pergunta:</b> Como validar se dois campos de senha são iguais?</p>
+      <p><b>Resposta:</b> if (senha.value === confirmaSenha.value) { ... }. É uma validação lógica simples, mas vital para a segurança do cadastro.</p>
+      </div>
+      
+    <div class="slide">
+      <h2>FAQ - Perguntas Frequentes</h2>
+      <p><b>Pergunta:</b> Por que usar classList.add('erro') em vez de style.color = 'red'?</p>
+      <p><b>Resposta:</b> Usar classes mantém o CSS no arquivo CSS. É mais limpo e fácil de alterar o design de todos os erros da aplicação de uma só vez.</p>
+    </div>
+
+    <!-- Slide 39: Resumindo -->
+    <div class="slide">
+      <h2>RESUMINDO</h2>
+      <ul>
+        <li><b>addEventListener:</b> O método padrão para "ouvir" interações do usuário sem poluir o HTML.</li>
+        <li><b>preventDefault():</b> Função essencial para assumir o controle do formulário e impedir o recarregamento da página.</li>
+        <li><b>RegEx (Expressões Regulares):</b> Padrões poderosos para validar se strings (como e-mails e telefones) seguem o formato correto.</li>
+        <li><b>Validação Client-Side:</b> Primeira linha de defesa de um sistema, focada em UX e economia de recursos do servidor.</li>
+        <li><b>Feedback Visual:</b> Uso do DOM para mostrar ao usuário exatamente o que ele precisa corrigir, sem culpá-lo.</li>
+      </ul>
+    </div>
+
+    <!-- Slide 40: Exercícios de Fixação - Título -->
+    <div class="slide">
+      <h1 style="text-align: center;">EXERCÍCIOS DE FIXAÇÃO</h1>
+    </div>
+
+    <!-- Slide 41: Arquivo Base HTML -->
+    <div class="slide">
+      <h3>Arquivo Base (index.html)</h3>
+      <p>Crie este arquivo HTML. Ele contém um formulário de cadastro com campos para Nome, E-mail, Senha e Confirmação de Senha, além de elementos de erro ocultos.</p>
+      <pre><code>HTML
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;Cadastro - Validação Progressiva&lt;/title&gt;
+  &lt;style&gt;
+    body { font-family: Arial, sans-serif; display: flex;
+      justify-content: center; align-items: center;
+      height: 100vh; background-color: #f4f4f9; }
+    form { background: white; padding: 20px; border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column; gap: 10px; width: 300px; }
+    input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 10px; background-color: #28a745; color: white;
+      border: none; border-radius: 4px; cursor: pointer; }
+    .erro-msg { color: red; font-size: 12px; display: none; }
+    .input-erro { border-color: red; }
+  &lt;/style&gt;
+&lt;/head&gt;</code></pre>
+    </div>
+
+    <!-- Slide 42: Arquivo Base HTML (continuação) -->
+    <div class="slide">
+      <pre><code>HTML (continuação)
+&lt;body&gt;
+  &lt;form id="meuFormulario"&gt;
+    &lt;h3&gt;Crie sua Conta&lt;/h3&gt;
+    &lt;input type="text" id="nome" placeholder="Seu nome completo"&gt;
+    &lt;span id="erroNome" class="erro-msg"&gt;Por favor, preencha seu nome.&lt;/span&gt;
+    &lt;input type="email" id="email" placeholder="Seu e-mail"&gt;
+    &lt;span id="erroEmail" class="erro-msg"&gt;Formato de e-mail inválido.&lt;/span&gt;
+    &lt;input type="password" id="senha" placeholder="Sua senha (mín. 6 caracteres)"&gt;
+    &lt;span id="erroSenha" class="erro-msg"&gt;A senha precisa ter pelo menos 6 caracteres.&lt;/span&gt;
+    &lt;input type="password" id="confirmaSenha" placeholder="Confirme sua senha"&gt;
+    &lt;span id="erroConfirmaSenha" class="erro-msg"&gt;As senhas não coincidem.&lt;/span&gt;
+    &lt;button type="submit"&gt;Cadastrar&lt;/button&gt;
+  &lt;/form&gt;
+  &lt;script src="script.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+
+    <!-- Slide 43: Exercício 1 -->
+    <div class="slide">
+      <h3>Exercício 1 - Escutando o Formulário</h3>
+      <p><b>Descrição:</b> Para iniciar a manipulação do DOM sem poluir o HTML com atributos onclick, você deve selecionar o formulário pelo seu ID e adicionar um "ouvinte" para o momento em que o usuário tentar enviá-lo.</p>
+      <p><b>Entrega:</b> Código JavaScript contendo a seleção do elemento form via querySelector e o método addEventListener escutando o evento submit.</p>
+    </div>
+
+    <!-- Slide 44: Exercício 2 -->
+    <div class="slide">
+      <h3>Exercício 2 - Assumindo o Controle (Prevenção de Recarregamento)</h3>
+      <p><b>Descrição:</b> O comportamento padrão do navegador ao enviar um formulário é recarregar a página (o que atrapalha a validação client-side). Modifique a função do ouvinte de eventos criado no exercício 1 para interceptar e cancelar essa ação padrão.</p>
+      <p><b>Entrega:</b> Adição do parâmetro event na função do ouvinte e a execução do comando event.preventDefault(); logo na primeira linha.</p>
+    </div>
+
+    <!-- Slide 45: Exercício 3 -->
+    <div class="slide">
+      <h3>Exercício 3 - Captura de Dados e Variável de Controle</h3>
+      <p><b>Descrição:</b> Agora que o recarregamento foi impedido, você precisa "pegar" o que o usuário digitou e preparar o terreno para as validações. Crie também uma variável de controle para registrar se o formulário como um todo é válido ou não.</p>
+      <p><b>Entrega:</b> Variáveis em JavaScript utilizando .value para armazenar os dados dos campos (Nome, E-mail, Senha, Confirmação) e uma variável let formValido = true;.</p>
+    </div>
+
+    <!-- Slide 46: Exercício 4 -->
+    <div class="slide">
+      <h3>Exercício 4 - Validação Simples (Campo Vazio)</h3>
+      <p><b>Descrição:</b> Crie sua primeira regra de negócio. O campo "Nome" não pode ser enviado em branco ou apenas com espaços. Se estiver vazio, a mensagem de erro oculta no HTML deve aparecer e o formulário deve ser marcado como inválido.</p>
+      <p><b>Entrega:</b> Uma estrutura condicional (if/else) que utiliza o método .trim() === "" no valor do nome. Se verdadeiro, altera o display do erro correspondente para block e muda a variável formValido para false.</p>
+    </div>
+
+    <!-- Slide 47: Exercício 5 -->
+    <div class="slide">
+      <h3>Exercício 5 - O Molde da RegEx para E-mail</h3>
+      <p><b>Descrição:</b> Expressões Regulares são padrões poderosos para validar texto. Antes de validar o e-mail preenchido, você precisa definir no código qual é o formato aceitável (algo que contenha texto, "@", texto, "." e texto).</p>
+      <p><b>Entrega:</b> Declaração de uma constante regexEmail armazenando o padrão literal /^[^\s@]+@[^\s@]+\.[^\s@]+$/;</p>
+    </div>
+
+    <!-- Slide 48: Exercício 6 -->
+    <div class="slide">
+      <h3>Exercício 6 - Testando o E-mail contra a RegEx</h3>
+      <p><b>Descrição:</b> Utilize a Expressão Regular criada no exercício anterior para testar o valor que o usuário digitou no campo de e-mail. Caso o teste falhe, exiba a mensagem de erro de formato inválido.</p>
+      <p><b>Entrega:</b> Condicional if utilizando o método !regexEmail.test(emailValor). Em caso de falha, exibe a mensagem de erro de e-mail e define formValido = false.</p>
+    </div>
+
+    <!-- Slide 49: Exercício 7 -->
+    <div class="slide">
+      <h3>Exercício 7 - Segurança Básica: Comprimento de Senha</h3>
+      <p><b>Descrição:</b> Para garantir um mínimo de segurança no cadastro (visando a integridade dos dados no banco), crie uma validação que impeça o envio caso a senha escolhida tenha menos de 6 caracteres.</p>
+      <p><b>Entrega:</b> Condicional verificando a propriedade .length &lt; 6 da string da senha. Se for menor, exibe a mensagem de erro específica de senha e invalida o formulário.</p>
+    </div>
+
+    <!-- Slide 50: Exercício 8 -->
+    <div class="slide">
+      <h3>Exercício 8 - Validação Lógica (Igualdade de Senhas)</h3>
+      <p><b>Descrição:</b> Um erro comum do usuário é errar a digitação da senha. Verifique se o conteúdo digitado no campo "Senha" é exatamente igual ao digitado no campo "Confirmar Senha". Se não for, bloqueie o envio.</p>
+      <p><b>Entrega:</b> Condicional if comparando os dois valores (senhaValor !== confirmaSenhaValor). Exibição do erro de senhas divergentes e alteração de formValido para false caso não coincidam.</p>
+    </div>
+
+    <!-- Slide 51: Exercício 9 -->
+    <div class="slide">
+      <h3>Exercício 9 - Feedback Visual Avançado (Uso de Classes)</h3>
+      <p><b>Descrição:</b> Como visto no fechamento da aula, usar estilos diretos (inline) não é a melhor prática. Refatore o feedback visual do campo E-mail para, em vez de apenas mostrar a mensagem, adicionar uma classe CSS específica (input-erro) ao campo input quando ele for inválido, e removê-la quando for corrigido.</p>
+      <p><b>Entrega:</b> Atualização da validação do Exercício 6 incluindo os comandos inputEmail.classList.add('input-erro') (no caso de erro) e inputEmail.classList.remove('input-erro') (no bloco else).</p>
+    </div>
+
+    <!-- Slide 52: Exercício 10 -->
+    <div class="slide">
+      <h3>Exercício 10 - O Veredito Final (Sucesso e Reset)</h3>
+      <p><b>Descrição:</b> Após todas as validações, se o usuário preencheu tudo perfeitamente, a variável de controle criada no Exercício 3 terá sobrevivido intacta. Exiba uma mensagem de sucesso ao usuário e, em seguida, limpe todos os dados do formulário para que ele fique pronto para um novo cadastro.</p>
+      <p><b>Entrega:</b> Condicional final verificando se formValido continua true. Se sim, execução de um alert("Cadastro realizado com sucesso!") seguido da chamada da função nativa formulario.reset();.</p>
+    </div>
+
+    <!-- Slide 53: Fechamento -->
+    <div class="slide">
+      <h2>FECHAMENTO</h2>
+      <h3>Conexão com a Situação de Aprendizagem (SA)</h3>
+      <p>Tudo o que construímos hoje garante a solidez das letras "C" (Create) e "U" (Update) do nosso CRUD. Na entrega final da SA, vocês terão telas de cadastro e edição. Sem os validadores que aprendemos hoje, o banco de dados que criaremos com PHP seria "bombardeado" com dados mal formatados, violando os critérios de Integridade e Usabilidade da nossa rubrica de avaliação.</p>
+    </div>
+
+  </div>
+
+  <div class="controls">
+    <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+    <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+    <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+  </div>
+
+  <script>
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const currentIndicator = document.getElementById('current');
+    const totalIndicator = document.getElementById('total');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    totalIndicator.textContent = totalSlides;
+
+    function updateView() {
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index === currentSlideIndex) {
+          slide.classList.add('active');
+        }
+      });
+      currentIndicator.textContent = currentSlideIndex + 1;
+      prevBtn.disabled = currentSlideIndex === 0;
+      nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlideIndex < totalSlides - 1) {
+        currentSlideIndex++;
+        updateView();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlideIndex > 0) {
+        currentSlideIndex--;
+        updateView();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+    });
+  </script>
+</body>
+</html>
