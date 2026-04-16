@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro - Validação Progressiva</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f9; }
+        form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 10px; width: 300px; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .erro-msg { color: red; font-size: 12px; display: none; }
+        .input-erro { border-color: red; } /* Classe para estilizar o erro conforme FAQ */
+    </style>
+</head>
+<body>
+    <form id="meuFormulario">
+        <h3>Crie sua Conta</h3>
+        
+        <input type="text" id="nome" placeholder="Seu nome completo">
+        <span id="erroNome" class="erro-msg">Por favor, preencha seu nome.</span>
+
+        <input type="email" id="email" placeholder="Seu e-mail">
+        <span id="erroEmail" class="erro-msg">Formato de e-mail inválido.</span>
+
+        <input type="password" id="senha" placeholder="Sua senha (mín. 6 caracteres)">
+        <span id="erroSenha" class="erro-msg">A senha precisa ter pelo menos 6 caracteres.</span>
+
+        <input type="password" id="confirmaSenha" placeholder="Confirme sua senha">
+        <span id="erroConfirmaSenha" class="erro-msg">As senhas não coincidem.</span>
+
+        <button type="submit">Cadastrar</button>
+    </form>
+    <script src="script.js"></script>
+</body>
+</html>
+
