@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 22 - Assincronismo: Promises e Async/Await</title>
+<style>
+  body {
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa; 
+    color: #212529;
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh;
+    overflow: hidden;
+  }
+  .slide-container {
+    width: 90vw;
+    height: 90vh;
+    margin: auto;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 40px; 
+    box-sizing: border-box; 
+    position: relative;
+  }
+  .slide {
+    display: none; 
+    width: 100%; 
+    max-width: 1200px; 
+    max-height: 85vh;
+    background: #ffffff; 
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+    padding: 50px;
+    font-size: 26px; 
+    line-height: 1.6; 
+    overflow-y: auto;
+  }
+  .slide.active { 
+    display: block; 
+    animation: fadeIn 0.4s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  h1, h2, h3 { 
+    color: #0d6efd; 
+    margin-top: 0; 
+  }
+  code, pre { 
+    background: #e9ecef; 
+    padding: 10px 15px; 
+    border-radius: 8px; 
+    font-family: 'Courier New', Courier, monospace; 
+    display: block; 
+    font-size: 22px;
+    overflow-x: auto;
+  }
+  .controls {
+    height: 90px; 
+    background: #ffffff; 
+    border-top: 1px solid #dee2e6;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 0 50px;
+  }
+  button {
+    background: #0d6efd; 
+    color: white; 
+    border: none; 
+    padding: 15px 30px;
+    font-size: 22px; 
+    border-radius: 8px; 
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button:hover {
+    background: #0b5ed7;
+  }
+  button:disabled { 
+    background: #adb5bd; 
+    cursor: not-allowed; 
+  }
+  .progress { 
+    font-size: 22px; 
+    font-weight: bold; 
+    color: #495057;
+  }
+  
+  /* Estilos Adicionais do Template Avançado */
+  .slide-label { font-weight: bold; color: #6c757d; text-transform: uppercase; margin-bottom: 15px; font-size: 20px; }
+  .cover-desc { font-size: 28px; color: #495057; }
+  .divider { border: 0; height: 1px; background: #dee2e6; margin: 30px 0; }
+  .callout { padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 6px solid; }
+  .callout.blue { background: #e7f1ff; border-color: #0d6efd; color: #084298; }
+  .callout.green { background: #d1e7dd; border-color: #198754; color: #0f5132; }
+  .callout.red { background: #f8d7da; border-color: #dc3545; color: #842029; }
+  .callout.yellow { background: #fff3cd; border-color: #ffc107; color: #664d03; }
+  .callout-title { font-weight: bold; margin-bottom: 10px; text-transform: uppercase; font-size: 22px; }
+  .two-col { display: flex; gap: 30px; }
+  .col-card { flex: 1; background: #f8f9fa; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+  .code-block { margin: 20px 0; }
+  .section-header { text-align: center; margin-top: 5%; }
+  .section-num { font-size: 80px; font-weight: bold; color: #dee2e6; line-height: 1; }
+  .section-header h2 { font-size: 48px; margin: 20px 0; color: #0d6efd; }
+  .topics-grid { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
+  .topic-chip { background: #0d6efd; color: white; padding: 8px 16px; border-radius: 20px; font-size: 18px; }
+</style>
+</head>
+<body>
+  <div class="slide-container" id="slides">
+    
+    <div class="slide active">
+      <div class="slide-label">Aula 22</div>
+      <h1>Assincronismo: Promises e Async/Await</h1>
+      <p class="cover-desc">Exposição prática sobre o fluxo de execução no JavaScript. Diferenciação entre operações bloqueantes (síncronas) e não bloqueantes (assíncronas).</p>
+      <p>Evolução dos Callbacks para Promises e a adoção da sintaxe moderna com async/await. Aplicação prática simulando carregamento de dados do servidor (delay com setTimeout), integração com interface visual (loading spinner) e resiliência estrutural usando try/catch.</p>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Contextualização</div>
+      <h2>Cenário Real</h2>
+        <div class="callout-title">Exemplo ou Cenário</div>
+        <p>Imagine o sistema de uma grande rede de varejo durante a Black Friday. O cliente preenche os dados do cartão de crédito e clica em "Finalizar Compra".</p>
+      <p>Se o JavaScript fosse executado de forma estritamente síncrona e a comunicação com o gateway de pagamento (banco) demorasse 8 segundos, o navegador do usuário congelaria completamente.</p>
+    </div>
+
+    <div class="slide">
+      <p>Ele não conseguiria rolar a página, o cursor do mouse não responderia a outros botões e a interface pareceria "quebrada". O pânico se instalaria e a taxa de abandono de carrinho dispararia.</p>
+      <div class="callout blue">
+        <div class="callout-title">Explicação</div>
+        <p>O assincronismo é o motor invisível que evita esse colapso, permitindo que a aplicação continue responsiva e "viva" aos olhos do usuário enquanto a transação é validada em segundo plano, garantindo uma experiência de uso fluida e profissional.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Reflexão</div>
+      <h2>Pergunta:</h2>
+      <div class="callout green">
+        <div class="callout-title">Desafio de Raciocínio</div>
+        <p>"Se você fosse o desenvolvedor front-end encarregado dessa tela de finalização de compra, como garantiria que o usuário soubesse que o pagamento está sendo processado de forma segura, sem deixá-lo ansioso e sem travar o restante da página?"</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <h2>Entendendo o JavaScript: Síncrono, Assíncrono e Callbacks</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Seção 01</div>
+      <h3>A. CONCEITO</h3>
+      <p>Compreender como o JavaScript lida com o tempo e as tarefas é essencial para qualquer desenvolvedor.</p>
+      <p>A metáfora do restaurante é excelente para visualizar o problema e a solução. Vamos desbravar esses conceitos de forma didática, dividindo o processo em partes mais fáceis de digerir.</p>
+    </div>
+
+    <div class="slide">
+      <h3>A Regra de Ouro: Uma Coisa de Cada Vez (Single-threaded)</h3>
+      <p>O JavaScript roda em uma thread única (a Ul Thread). Isso significa que ele tem apenas um "trabalhador" lendo e executando as instruções do seu código.</p>
+      <div class="callout yellow">
+        <div class="callout-title">Analogia</div>
+        <p>É como se existisse apenas uma única pista em uma rodovia onde os carros (instruções) não podem ultrapassar uns aos outros.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>O Modelo Síncrono: A Operação Bloqueante</h3>
+      <p>Por padrão, o JavaScript é síncrono. O código é lido linha por linha, de cima para baixo. A próxima linha só é executada quando a atual terminar.</p>
+      <p><strong>Visualizando o Síncrono:</strong> Voltando ao fast-food, é o atendente do caixa que anota o pedido, vai para a cozinha, frita o hambúrguer, monta o lanche, entrega ao cliente e apenas depois disso chama a próxima pessoa da fila.</p>
+    </div>
+
+    <div class="slide">
+      <div class="callout red">
+        <div class="callout-title">Atenção ao Risco</div>
+        <p><strong>O Grande Problema:</strong> Se o hambúrguer demorar muito para ficar pronto (como fazer o download de um arquivo grande ou buscar dados em uma API), toda a fila para.</p>
+      </div>
+      <p>No navegador, isso significa que a tela congela, botões não clicam e a usabilidade é destruída. Chamamos isso de <strong>código bloqueante</strong>.</p>
+    </div>
+
+    <div class="slide">
+      <h3>O Modelo Assíncrono: Delegando o Trabalho</h3>
+      <p>Para evitar que a tela do usuário congele, o JavaScript delega tarefas demoradas para o próprio navegador (através de ferramentas chamadas Web APIs), que consegue fazer coisas em segundo plano sem atrapalhar a thread principal.</p>
+      <p><strong>Visualizando o Assíncrono:</strong> O atendente anota o pedido e manda a ordem para a cozinha (o Navegador). Ele te entrega uma senha (o Callback) e imediatamente chama a próxima pessoa. A fila não para!</p>
+    </div>
+
+    <div class="slide">
+      <h3>Como o Assíncrono se Organiza: Event Loop e Task Queue</h3>
+      <p>Se o trabalhador principal está sempre focado na linha atual de código, como ele sabe que a tarefa que estava em segundo plano terminou? É aqui que entra a mágica da arquitetura do JavaScript.</p>
+      <ul>
+        <li><strong>Web APIs (A Cozinha):</strong> Fazem o trabalho pesado ou a contagem de tempo nos bastidores.</li>
+        <li><strong>Task Queue (A Fila da Bandeja):</strong> Quando a cozinha termina o lanche, ela não pode simplesmente jogar na cara do atendente. Ela coloca o lanche pronto (junto com a senha) em uma fila de espera.</li>
+        <li><strong>Event Loop (O Gerente):</strong> É um mecanismo que fica observando duas coisas: o atendente (Thread principal) e a fila da bandeja (Task Queue). Se o atendente estiver livre, o Event Loop pega o primeiro item da fila de entrega e passa para o atendente finalizar.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h3>Callbacks e o "Callback Hell"</h3>
+      <p>A Callback é justamente a "senha" da nossa metáfora. Em termos de código, é uma função que você passa como argumento para outra função, dizendo: "Guarde essa instrução e execute-a apenas quando o trabalho demorado terminar".</p>
+      <h3>A Armadilha do Callback Hell:</h3>
+      <p>Se você precisa de uma sequência longa de tarefas dependentes, a situação complica. Por exemplo:</p>
+      <ol>
+        <li>Buscar o usuário.</li>
+        <li>Com o usuário, buscar os pedidos dele.</li>
+        <li>Com os pedidos, calcular o frete.</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <p>Se usarmos callbacks para isso, precisaremos colocar uma função dentro da outra, dentro da outra. Isso gera um código que cresce para a direita, em um formato de pirâmide >.</p>
+      <div class="callout red">
+        <div class="callout-title">Alerta</div>
+        <p>Esse é o Callback Hell, que torna o código visualmente poluído, difícil de entender e um pesadelo para consertar caso dê algum erro.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>B. VISUALIZANDO</h3>
+      <img src="img01.png" style="max-width: 90%; height:auto;">
+    </div>
+
+    <div class="slide">
+      <h3>C. EXEMPLO DE CÓDIGO</h3>
+      <div class="code-block">
+<pre><code>JavaScript
+// Exemplo mostrando a ordem de execução do Event Loop com Callbacks
+console.log("1. Atendente: Bom dia, anotando seu pedido...");
+
+// O setTimeout simula a cozinha preparando o lanche em 2 segundos
+setTimeout(function() {
+  console.log("3. Cozinha: O hambúrguer do cliente 1 está pronto!");
+}, 2000);
+
+console.log("2. Atendente: Próximo cliente da fila, por favor!");</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>D. EXPLICAÇÃO DO CÓDIGO</h3>
+      <p><strong>Linha 2:</strong> O motor do JS lê e executa instantaneamente de forma síncrona.</p>
+      <p><strong>Linha 5 (setTimeout):</strong> O JS vê uma operação assíncrona. Ele entrega a função de callback e o tempo (2000ms) para o navegador gerenciar e passa reto para a próxima linha, sem esperar.</p>
+      <p><strong>Linha 9:</strong> Executada imediatamente após o início do timer. Apenas depois de 2 segundos, o navegador insere a mensagem "3. Cozinha..." na fila para ser impressa.</p>
+      <div class="callout blue">
+        <div class="callout-title">Resultado</div>
+        <p>O código não trava.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>E. ATENÇÃO</h3>
+      <div class="callout red">
+        <div class="callout-title">Atenção</div>
+        <p>O setTimeout com tempo de 0 milissegundos NÃO é executado imediatamente.</p>
+      </div>
+      <p>Ele é jogado na fila assíncrona e só será executado após todas as linhas síncronas do código principal terminarem. O assincronismo respeita sempre a fila de prioridades.</p>
+    </div>
+
+    <div class="slide">
+      <h3>F. RESPONDA RÁPIDO</h3>
+      <div class="callout green">
+        <ol>
+          <li>O que significa o JavaScript ser "single-threaded"?</li>
+          <li>Qual mensagem apareceria primeiro se tivéssemos um setTimeout de Oms antes de um console.log("Teste") solto no código?</li>
+          <li>Como escrever um setTimeout que imprima a palavra "Assíncrono" após 3 segundos.</li>
+          <li>Por que o uso desenfreado de callbacks (Callback Hell) é considerado uma má prática no mercado de trabalho moderno?</li>
+          <li>Qual componente do navegador é responsável por observar se a pilha de execução está vazia para injetar a próxima tarefa da fila assíncrona?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">02</div>
+        <h2>Modernizando o JavaScript: Entendendo as Promises</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>A. CONCEITO</h3>
+      <p>A transição de Callbacks para Promises é um dos grandes saltos de qualidade na vida de qualquer desenvolvedor JavaScript.</p>
+      <p>Para resolver a confusão e a fragilidade do "Callback Hell", a linguagem trouxe essa ferramenta que organiza o caos e torna a leitura do código muito mais natural.</p>
+      <p>Vamos destrinchar esse conceito de forma didática!</p>
+    </div>
+
+    <div class="slide">
+      <h3>O que é uma Promise?</h3>
+      <p>Em termos simples, uma Promise (Promessa) é um objeto que age como um "vale" ou um "recibo" para um valor que ainda não existe, mas que estará disponível no futuro.</p>
+      <p>Em vez de você passar uma função lá para dentro da operação demorada (o antigo callback), a função demorada te devolve uma Promise instantaneamente.</p>
+      <p>A partir daí, você usa esse "recibo" para programar o que deve acontecer quando o trabalho terminar, deixando o fluxo do código reto e previsível.</p>
+    </div>
+
+    <div class="slide">
+      <h3>Os 3 Estados de uma Promessa</h3>
+      <p>Uma Promise nunca é ambígua. A partir do momento em que é criada, ela só pode estar em um de três estados muito bem definidos:</p>
+      <ul>
+        <li><strong>Pending (Pendente):</strong> É o estado inicial. A promessa foi feita, a operação (como o download de uma imagem ou a busca em uma API) começou, mas ainda está processando.</li>
+        <li><strong>Fulfilled (Resolvida/Concluída):</strong> Sucesso! A operação terminou corretamente e trouxe o valor esperado.</li>
+        <li><strong>Rejected (Rejeitada):</strong> Falha! Algo deu errado no processo (a internet caiu, o servidor travou, o arquivo não existe). A Promise devolve o motivo do erro.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h3>A Metáfora Visual: O Pager do Restaurante</h3>
+      <p>A analogia do restaurante é perfeita para entender como isso funciona na vida real:</p>
+      <ol>
+        <li><strong>O Pedido (A Criação):</strong> Você faz o seu pedido no caixa. O atendente não te obriga a ficar parado esperando (bloqueante), mas também não te dá uma senha de papel exigindo que ele grite seu nome (callback).</li>
+        <li><strong>O Pager (A Promise):</strong> Ele te entrega um pager vibratório. Essa é a sua Promise. Você pode ir para a sua mesa e continuar conversando livremente.</li>
+        <li><strong>Estado Pending:</strong> Enquanto o pager está quieto em cima da mesa, a promessa está pendente. A cozinha está trabalhando.</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <ol start="4">
+        <li><strong>Estado Fulfilled via .then():</strong> O lanche ficou pronto! O pager pisca em verde e vibra. No código, o método .then() é exatamente a nossa reação a essa luz verde: "Se der certo, pegue a bandeja e coma".</li>
+        <li><strong>Estado Rejected via .catch():</strong> O chapeiro percebeu que acabou a carne. O pager pisca em vermelho. No código, o método catch() é a nossa reação a essa luz vermelha: "Se der erro, peça o dinheiro de volta ou mude o pedido".</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h3>Por que isso é revolucionário?</h3>
+      <p>Com as Promises, nós paramos de aninhar funções dentro de funções. Nós criamos um encadeamento elegante.</p>
+      <p>Se precisarmos fazer três buscas demoradas em sequência, escrevemos uma debaixo da outra usando múltiplos .then(), e se qualquer uma delas falhar, um único .catch() no final consegue lidar com o erro.</p>
+      <div class="callout blue">
+        <div class="callout-title">Vantagem</div>
+        <p>O código volta a ser fácil de ler e simples de dar manutenção!</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>B. VISUALIZANDO</h3>
+      <img src="img02.png" style="max-width: 90%; height:auto;">
+    </div>
+
+    <div class="slide">
+      <h3>C. EXEMPLO DE CÓDIGO</h3>
+      <div class="code-block">
+<pre><code>JavaScript
+// Criando uma função que retorna uma Promise que simula um banco de dados
+function buscarUsuario(id) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if(id === 1) {
+        // Sucesso! Transita para o estado Fulfilled
+        resolve({ nome: "Maria Silva", cargo: "Desenvolvedora" });
+      } else {
+        // Falha! Transita para o estado Rejected
+        reject("Erro 404: Usuário não encontrado no banco de dados.");
+      }
+    }, 1500); // Simulando 1.5s de delay da rede
+  });
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="code-block">
+<pre><code>JavaScript
+// Consumindo a Promise de forma organizada
+console.log("Iniciando busca...");
+
+buscarUsuario(1)
+  .then(dados => console.log(`Usuário encontrado: ${dados.nome}`)) // Executa se resolve()
+  .catch(erro => console.error(`Falha: ${erro}`)); // Executa se reject()
+</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>D. EXPLICAÇÃO DO CÓDIGO</h3>
+      <ol>
+      <li>Criamos a Promise que aceita dois argumentos internos: resolve e reject.</li>
+      <li>Colocamos nosso simulador de tempo (setTimeout) lá dentro para garantir que é uma operação demorada.</li>
+      <li>Se o ID for 1, chamamos resolve(...) injetando os dados falsos. Isso acionará o método .then() do consumidor.</li>
+      <li>Se não for 1, chamamos reject(...) com uma string de erro, que será interceptada magicamente pelo bloco .catch().</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h3>E. DICA</h3>
+      <div class="callout blue">
+        <div class="callout-title">Dica Prática</div>
+        <p>O poder das Promises está no encadeamento (chaining). Você pode ter vários .then() sequenciais, onde o resultado de um passa para o próximo, tornando o fluxo de dados linear e fácil de rastrear.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>F. RESPONDA RÁPIDO</h3>
+      <div class="callout green">
+        <ol>
+          <li>Quais são os três estados fundamentais de uma Promise?</li>
+          <li>Em que circunstância uma Promise invoca a função atrelada ao .catch()?</li>
+          <li>Como modificar o código acima para buscar o ID 2 e qual o comportamento do console de erro?</li>
+          <li>Diga uma Promise simples que seja resolvida com o texto "Olá, Mundo" imediatamente.</li>
+          <li>Se o navegador perder a conexão com a internet durante a execução de uma fetch API, qual estado a Promise assumirá?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">03</div>
+        <h2>A Evolução da Leitura: Async/Await e Try/Catch</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>A. CONCEITO</h3>
+      <p>Você já deve ter percebido como as Promises melhoraram muito a nossa vida em relação à pirâmide de callbacks.</p>
+      <p>No entanto, encadear vários then() ainda deixa o código um pouco "picotado".</p>
+      <p>O nosso cérebro é treinado para ler textos de forma linear, de cima para baixo. É exatamente para resgatar essa naturalidade que o Async/Await foi criado!</p>
+      <p>Vamos desmistificar esses conceitos de forma bem clara.</p>
+    </div>
+
+    <div class="slide">
+      <h3>O "Açúcar Sintático": Lendo o futuro no presente</h3>
+      <p>O async e o await não são tecnologias completamente novas que substituem as Promises; eles são o que chamamos na programação de "açúcar sintático".</p>
+      <p>Eles usam o motor das Promises por baixo dos panos, mas colocam uma "roupagem" muito mais amigável, permitindo que a gente escreva código assíncrono como se ele fosse código síncrono comum.</p>
+    </div>
+
+    <div class="slide">
+      <div class="two-col">
+        <div class="col-card">
+          <h4>async (A Declaração)</h4>
+          <p>Quando você coloca essa palavra antes de criar uma função, você está avisando ao interpretador do JavaScript: "Atenção, essa função vai lidar com o tempo e com promessas".</p>
+        </div>
+        <div class="col-card">
+          <h4>await (A Pausa Estratégica)</h4>
+          <p>Traduzido literalmente como "aguarde", ele é colocado exatamente antes da instrução que retorna uma Promise. Ele diz ao código: "Pause a execução desta função específica até que a resposta chegue".</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="callout blue">
+        <div class="callout-title">O Pulo do Gato</div>
+        <p>Essa "pausa" gerada pelo await não congela o seu navegador. O JavaScript é inteligente o suficiente para pausar apenas aquela função, liberando o Event Loop para continuar cuidando da interface (botões clicáveis, animações rodando) sem que a tela trave.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>A Rede de Segurança: Try / Catch</h3>
+      <p>Se com o async/await nós abandonamos o uso do .then() para o sucesso, também não temos mais o .catch() encadeado no final da linha para lidar com as falhas.</p>
+      <p>Como garantimos que o sistema não quebre se a internet cair? Usamos uma estrutura clássica e robusta: o bloco Try / Catch.</p>
+    </div>
+
+    <div class="slide">
+      <div class="two-col">
+        <div class="col-card">
+        <h4><strong>try (Tentar):</strong></h4>
+        <p>É a zona de otimismo. Você envolve todo o seu código await (o caminho feliz) dentro deste bloco. O JavaScript vai "tentar" executar tudo linha por linha.</p>
+        </div>
+        <div class="col-card">
+        <h4><strong>catch (Capturar):</strong></h4>
+        <p>É a sua rede de segurança. Se qualquer coisa der errado lá dentro do bloco try (um erro 404 de API, servidor fora do ar, erro de digitação), o JavaScript aborta a tentativa na hora e "pula" diretamente para o bloco catch. Lá, você recebe o erro e pode tratá-lo com elegância (mostrando um aviso na tela para o usuário, por exemplo).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>A Metáfora Visual: O Maestro da Cozinha</h3>
+      <p>Se a Promise solta era o Pager Vibratório, o Async/Await acoplado com Try/Catch é como ter um Maestro (Gerente) organizando a cozinha passo a passo.</p>
+      <ol>
+      <li>O gerente entra e avisa que fará uma operação complexa (async).</li>
+      <li>Ele dá a ordem: "Coloque a carne na chapa e aguarde (await) fritar". Ele não paralisa o restaurante inteiro, mas ele, especificamente, não dá o próximo passo daquela receita até a carne ficar pronta.</li>
+      <li>Ele define a regra: "Tente (try) montar o hambúrguer perfeito seguindo essa ordem lógica".</li>
+    </div>
+
+    <div class="slide">
+      <div class="callout red">
+        <p>4. Se o pão queimar no meio do processo, ele imediatamente aciona a contingência: "Capture (catch) o problema, descarte o pão queimado, emita um alerta para a equipe e peça desculpas ao cliente".</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>B. VISUALIZANDO</h3>
+      <img src="img03.png" style="max-width: 90%; height:auto;">
+    </div>
+
+    <div class="slide">
+      <h3>C. EXEMPLO DE CÓDIGO</h3>
+      <div class="code-block">
+<pre><code>JavaScript
+// Usando a mesma função buscarUsuario(id) que retorna a Promise criada anteriormente
+
+// Declarando a função como assíncrona
+async function exibirPerfilUsuario(id) {
+    console.log("Renderizando esqueleto da tela...");
+    
+    try {
+        // Pausamos o fluxo apenas nesta função enquanto aguardamos a Promise
+        const usuario = await buscarUsuario(id); 
+        
+        // Esta linha só executa se a linha acima tiver sucesso
+        console.log(`Sucesso: Atualizando DOM com o nome ${usuario.nome}`);
+        </code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="code-block">
+<pre><code>    } catch (erro) {
+        // Se a Promise disparar um reject, caímos imediatamente aqui
+        console.error(`Ops, tivemos um problema: ${erro}`);
+    } finally {
+        // Executa sempre, dando certo ou errado
+        console.log("Ocultando animação global de carregamento...");
+    }
+}
+
+exibirPerfilUsuario(1);
+</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>D. EXPLICAÇÃO DO CÓDIGO</h3>
+      <ul>
+        <li>A palavra <strong>async</strong> antes de function habilita o superpoder de usar o await. Toda função async retorna uma Promise implicitamente.</li>
+        <li><code>const usuario = await buscarUsuario(id);</code>substitui a necessidade de um .then(). O resultado "desempacotado" da Promise vai direto para a variável usuario. Limpo e elegante.</li>
+        <li>A estrutura <strong>try/catch</strong> centraliza a gestão de falhas, melhorando o debug.</li>
+        <li>O bloco <strong>finally</strong> é perfeito para fazer a limpeza da UI (como desligar o spinner de carregamento), pois ele roda de qualquer jeito no fim do processo.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h3>E. ATENÇÃO</h3>
+      <div class="callout red">
+        <div class="callout-title">Erro Comum</div>
+        <p>Um erro comum de juniores é esquecer o await antes da chamada da Promise. Se você não colocar o await, a variável receberá o objeto da Promise pendente, e não o resultado dos dados que estavam vindo pela rede. Seu código quebrará logo em seguida ao tentar acessar propriedades inexistentes.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h3>F. RESPONDA RÁPIDO</h3>
+      <div class="callout green">
+        <ol>
+          <li>Onde você obrigatoriamente deve declarar a palavra async para poder usar o await?</li>
+          <li>Como uma função async reage quando não utilizamos o bloco try/catch e uma operação interna falha?</li>
+          <li>Remova a palavra await do código acima, rode no console, e descreva o valor de usuario.</li>
+          <li>Explique com suas palavras a utilidade do bloco finally.</li>
+          <li>Substitua o id da chamada da função por 5 (um erro) e mapeie mentalmente qual o caminho a execução do código tomou.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">04</div>
+        <h2>Mão na Massa: Integrando Assincronismo e UX na Prática</h2>
+        <p>Aplicação Prática em Interface</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Mão na Massa</div>
+      <div class="callout yellow">
+        <div class="callout-title">Contexto</div>
+        <p>O CEO da startup em que você trabalha pediu uma prova de conceito (PoC). Precisamos criar um botão que busque dados na base de clientes, mas com uma regra vital de UX (User Experience): enquanto os dados não chegam, o usuário precisa ver um "Loading spinner" ativado, para ter clareza de que o sistema está trabalhando e não travou. Se der erro, um alerta vermelho deve ser mostrado.</p>
+      </div>
+      <div class="callout blue">
+        <div class="callout-title">O Desafio</div>
+        <p>Vamos integrar simulação de delay de rede, manipulação de estado do DOM (ativar/desativar o loading) e a sintaxe moderna do async/await com try/catch.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <p>Abaixo, você encontra o código completo e unificado. Você pode salvá-lo como um arquivo index.html e abrir direto no seu navegador para ver a mágica acontecer!</p>
+      <h3>O Código Completo (index.html)</h3>
+      <p><em>(Dividido nos próximos slides para melhor leitura)</em></p>
+    </div>
+
+    <div class="slide">
+      <h4>HTML e CSS Base</h4>
+      <div class="code-block">
+<pre><code>HTML
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;PoC - Assincronismo e UX&lt;/title&gt;
+    
+    &lt;style&gt;
+        /* CSS Base e Animação do Spinner */
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .oculto { display: none; }
+        </code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="code-block">
+<pre><code>        .spinner { 
+            border: 4px solid #f3f3f3; 
+            border-top: 4px solid #3498db; 
+            border-radius: 50%; 
+            width: 20px; 
+            height: 20px; 
+            animation: spin 1s linear infinite;
+            margin-top: 10px;
+        }
+
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+
+        #resultado { margin-top: 15px; font-weight: bold; }
+        button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
+        button:disabled { cursor: not-allowed; background-color: #cccccc; }
+    &lt;/style&gt;
+&lt;/head&gt;</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="code-block">
+<pre><code>&lt;body&gt;
+
+    &lt;h2&gt;Dashboard Financeiro&lt;/h2&gt;
+    &lt;button id="btnCarregar"&gt;Carregar Dados Financeiros&lt;/button&gt;
+    &lt;div id="loading" class="spinner oculto"&gt;&lt;/div&gt;
+    &lt;div id="resultado"&gt;&lt;/div&gt;
+
+    &lt;script&gt;
+        // 1. O Servidor Fake (Nossa Promise)
+        function requisicaoApiFake() {
+            return new Promise((resolve, reject) =&gt; {
+                // Simulando delay de rede de 2 segundos
+                setTimeout(() =&gt; {</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="code-block">
+<pre><code>                    // Sorteia um número de 1 a 10. Se &gt; 2 (80% de chance), dá sucesso.
+                    const sorteio = Math.floor(Math.random() * 10) + 1;
+                    if (sorteio &gt; 2) {
+                        resolve({ saldo: "R$ 4.530,00", ultimaMovimentacao: "15/10/2026" });
+                    } else {
+                        reject("Servidor offline. Tente novamente.");
+                    }
+                }, 2000); 
+            });
+        }</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="code-block">
+<pre><code>        // 2. O Maestro da Interface (Lidando com o tempo)
+        async function carregarDados() {
+            const btn = document.getElementById('btnCarregar');
+            const loading = document.getElementById('loading');
+            const resultado = document.getElementById('resultado');
+
+            // ESTADO 1: Preparação e Loading
+            btn.disabled = true;           // Previne múltiplos cliques indesejados
+            loading.classList.remove('oculto'); // Mostra a animação
+            resultado.innerHTML = "";      // Limpa a tela para os novos dados
+
+            try {</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="code-block">
+<pre><code>                // ESTADO 2: A Pausa Estratégica (Espera não-bloqueante)
+                const dados = await requisicaoApiFake();
+                
+                // ESTADO 3 (Sucesso): Injetando no DOM
+                resultado.style.color = "green";
+                resultado.innerHTML = `Saldo: ${dados.saldo} &lt;br&gt; Última Movimentação: ${dados.ultimaMovimentacao}`;
+                
+            } catch (erro) {
+                // ESTADO 3 (Falha): Contingência e Feedback Visual
+                resultado.style.color = "red";
+                resultado.innerHTML = `⚠️ Erro Crítico: ${erro}`;</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="code-block">
+<pre><code>            } finally {
+                // ESTADO 4: A Limpeza (Executa dando certo ou errado)
+                loading.classList.add('oculto'); // Esconde a animação
+                btn.disabled = false;            // Reativa o botão
+            }
+        }
+
+        // 3. O Gatilho
+        document.getElementById('btnCarregar').addEventListener('click', carregarDados);
+    &lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Análise</div>
+      <h3>Dissecando a Lógica Passo a Passo</h3>
+      <p>Para garantir que o conceito fique cristalino, veja como as peças desse quebra-cabeça se encaixam:</p>
+      <ol>
+        <li><strong>A Infraestrutura Síncrona (O Gatilho):</strong> Tudo começa na última linha do script. Nós "escutamos" o clique do botão e disparamos a função carregarDados.</li>
+        <li><strong>O Maestro Entra em Ação (async):</strong> A função carregarDados é declarada como assíncrona. Imediatamente, ela altera a interface: desativa o botão (protegendo o sistema contra usuários impacientes) e exibe o spinner girando.</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <ol start="3">
+        <li><strong>O Ponto de Espera (await e try):</strong> Dentro do bloco otimista try, o JavaScript encontra o await. Ele aciona a função requisicaoApiFake() e pausa a execução do Maestro. Note que a tela não congela: o spinner continua girando perfeitamente porque o Event Loop do navegador continua livre para atualizar a interface gráfica.</li>
+        <li><strong>O Trabalho de Bastidores (A Promise):</strong> A função fake simula um servidor. Ela obriga o sistema a esperar 2 segundos (setTimeout) e rola um "dado" invisível de 10 lados. Se cair 1 ou 2, ela simula uma falha de servidor (reject). Se cair de 3 a 10, ela simula sucesso e devolve os dados (resolve).</li>
+      </ol>
+    </div>
+
+    <div class="slide">
+      <h4><strong>5. A Resposta e a Contingência (catch):</strong></h4>
+      <div class="two-col">
+        <div class="col-card">
+          <p><strong>Caminho Feliz:</strong> Se a Promise for resolvida, o await recebe os dados, o código avança para a próxima linha e imprime o saldo em verde.</p>
+        </div>
+        <div class="col-card">
+          <p><strong>Caminho Triste:</strong> Se a Promise for rejeitada (os 20% de chance de erro), o interpretador pula todo o resto do try e cai direto na rede de segurança do catch, imprimindo a falha em vermelho.</p>
+         </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h4><strong>6. A Faxina Final (finally):</strong></h4>
+      <p>Independentemente de qual caminho o código tomou no passo anterior, o finally é invocado para esconder o spinner e liberar o botão novamente, fechando o ciclo perfeitamente.</p>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Expectativa</div>
+      <h3>Resultado Esperado</h3>
+      <p>O resultado esperado ao rodar o exercício (abrindo o arquivo index.html no navegador) é um comportamento interativo dividido nas seguintes etapas:</p>
+      <h4>1º. Estado Inicial:</h4>
+      <p>Você verá o título "Dashboard Financeiro" e um botão clicável escrito "Carregar Dados Financeiros". A tela estará limpa, sem carregamentos ou textos abaixo do botão.</p>
+    </div>
+
+    <div class="slide">
+      <h4>2º. Ação e Feedback Imediato (Ao clicar no botão):</h4>
+      <ul>
+        <li>O botão ficará cinza e desabilitado, impedindo que você clique novamente.</li>
+        <li>Um spinner circular azul (animação de carregamento) aparecerá logo abaixo do botão e começará a girar.</li>
+        <li>A interface não vai travar.</li>
+      </ul>
+      
+      <h4>3º. O Delay (Espera):</h4>
+      <p>O spinner continuará girando na tela por exatos 2 segundos, simulando o tempo que a internet levaria para ir até o servidor buscar as informações.</p>
+    </div>
+
+    <div class="slide">
+      <h4>4º. A Resolução (Dois cenários possíveis):</h4>
+      <p>Como programamos uma taxa de sucesso de 80%, após os 2 segundos, o spinner desaparecerá, o botão voltará a ser clicável e uma das duas coisas acontecerá:</p>
+      
+      <div class="callout green">
+        <div class="callout-title">Cenário A (Sucesso - Maioria das vezes)</div>
+        <p>Aparecerá um texto na cor verde informando os dados resgatados:<br>
+        Saldo: R$ 4.530,00<br>
+        Última Movimentação: 15/10/2026</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="callout red">
+        <div class="callout-title">Cenário B (Falha - Cerca de 20% das vezes)</div>
+        <p>Aparecerá um texto na cor vermelha informando o erro simulado:<br>
+        ⚠️ Erro Crítico: Servidor offline. Tente novamente.</p>
+      </div>
+      
+      <p>Se você continuar clicando no botão repetidas vezes (aguardando o ciclo terminar), verá o sistema alternando entre os resultados de sucesso e erro, provando que o bloco try/catch está gerenciando os dois cenários perfeitamente.</p>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">05</div>
+        <h2>FAQ - Perguntas Frequentes</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">FAQ</div>
+      <p><strong>Pergunta:</strong> Eu posso usar a palavra await solta no meio do meu script, sem estar dentro de uma função?</p>
+      <p><strong>Resposta:</strong> Nas versões mais recentes do JavaScript (ES modules) você pode usar o chamado Top-level await. Porém, em scripts de navegador normais, isso vai disparar um erro de sintaxe. O seguro é sempre encapsular a lógica que tem await dentro de uma função marcada com async.</p>
+
+      <hr class="divider">
+
+      <p><strong>Pergunta:</strong> Qual a diferença prática entre a UI Thread travar com código síncrono e travar usando Web Workers?</p>
+      <p><strong>Resposta:</strong> A UI Thread controla a pintura na tela e os cliques. Web Workers operam em um processo totalmente separado do sistema operacional. O assincronismo que ensinamos hoje (Event Loop) usa "tempos mortos" de uma thread só. O Web Worker roda cálculos astronômicos (matemáticos complexos) em outro núcleo do processador sem sobrecarregar a UI de forma alguma.</p>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">FAQ</div>
+      <p><strong>Pergunta:</strong> Se minha página faz três requisições para APIs diferentes, colocar um await após o outro não seria lento?</p>
+      <p><strong>Resposta:</strong> Excelente pergunta. Sim! Se elas não dependem uma da outra (ex: buscar perfil, buscar clima e buscar cotação), usar await sequencial forçará a segunda a esperar a primeira acabar. Nesse caso de mercado, utilizamos o padrão Promise.all([req1, req2, req3]) para fazer as três de uma vez em paralelo.</p>
+
+      <hr class="divider">
+
+      <p><strong>Pergunta:</strong> Como fica a IA (Inteligência Artificial) generativa no processo de estudar promises? Devo pedir para ela resolver meus erros de try/catch?</p>
+      <p><strong>Resposta:</strong> IA é uma ferramenta para gerar exemplos adicionais, não um atalho para terceirizar a lógica. Peça à IA: "Me explique por que minha promise está retornando &lt;pending&gt;", em vez de pedir o código pronto. Se a IA escrever a abstração do await, você não treina o modelo mental de pausas na thread.</p>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">FAQ</div>
+      <p><strong>Pergunta:</strong> Ainda existe Callback em código moderno? Posso aposentar?</p>
+      <p><strong>Resposta:</strong> Você pode aposentar o Callback Hell, mas callbacks continuam existindo fortemente. Todo tratador de eventos (ex: btn.addEventListener('click', () =&gt; {...})) ou funções de array modernas (ex: array.map(item =&gt; item * 2)) utilizam a essência de passar uma função anônima para ser chamada em resposta a um evento ou iterador.</p>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Síntese</div>
+      <h3>RESUMINDO</h3>
+      <ul>
+        <li><strong>Thread Única (Single Thread):</strong> Característica do JS de executar uma só instrução pesada por vez; tarefas síncronas bloqueiam o usuário.</li>
+        <li><strong>Event Loop & Callbacks:</strong> O mecanismo de fila do navegador e funções que eram passadas para tratar a resposta no futuro (causava pirâmide de código).</li>
+        <li><strong>Promise:</strong> Objeto inteligente que guarda o estado (Pending, Fulfilled, Rejected) e os dados futuros de uma operação assíncrona.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Síntese</div>
+      <h3>RESUMINDO (Continuação)</h3>
+      <ul>
+        <li><strong>Async / Await:</strong> "Açúcar sintático" que permite escrever códigos assíncronos lidos como síncronos, pausando a função mas deixando o navegador livre.</li>
+        <li><strong>Try / Catch / Finally:</strong> Estruturas de blindagem de código. Tratam casos de falha sem derrubar o sistema e fazem limpezas de interface do usuário de maneira elegante.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">06</div>
+        <h2>EXERCÍCIOS DE FIXAÇÃO</h2>
+        <p>Desafios práticos</p>
+        <h3>Os 10 exercícios estão descritos no documento pdf da aula.</h3>
+        <p>Eles devem ser entregues individualmente no AVA, mas podem ser realizados em grupos.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+    <div class="section-header">
+      <h1><strong>SEM BAGUNÇA</strong></h1>
+      <h1><strong>ENTENDIDO???</strong></h1>
+    </div>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">07</div>
+        <h2>FECHAMENTO</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Fechamento</div>
+      <h3>Conexão com a Situação de Aprendizagem (SA):</h3>
+      <p>Em nosso projeto, construiremos o Frontend e o Backend separadamente. O Backend será escrito em PHP. Como vamos enviar e receber os dados no Frontend (JavaScript) sem ter que ficar apertando F5 ou dar reload na página toda vez que gravarmos ou pesquisarmos um registro no banco?</p>
+      <div class="callout blue">
+        <div class="callout-title">Aplicação</div>
+        <p>É exatamente aqui que o async/await brilha. Utilizaremos o conhecimento da aula de hoje, junto à interface de spinner de carregamento, para nos comunicarmos silenciosamente com a API REST que criaremos no PHP nas próximas semanas, garantindo a robustez do nosso CRUD.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-label">Fechamento</div>
+      <h3>Próxima Aula:</h3>
+      <p>Avançaremos nossos superpoderes assíncronos implementando a função nativa fetch(). Vamos deixar as simulações e conectar nosso JavaScript com a "internet de verdade", consumindo APIs públicas que rodam no servidor.</p>
+      <div class="callout yellow">
+        <div class="callout-title">Reflexão de Mercado</div>
+        <p>Antes do nosso próximo encontro, faça uma reflexão de mercado: "Você entende por que, num modelo de arquitetura de software moderno, o código frontend do navegador e o banco de dados nunca confiam um no outro de forma síncrona?"</p>
+      </div>
+    </div>
+
+  </div> <div class="controls">
+    <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+    <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+    <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+  </div>
+
+  <script>
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const currentIndicator = document.getElementById('current');
+    const totalIndicator = document.getElementById('total');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    totalIndicator.textContent = totalSlides;
+
+    function updateView() {
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index === currentSlideIndex) {
+          slide.classList.add('active');
+        }
+      });
+      currentIndicator.textContent = currentSlideIndex + 1;
+      
+      prevBtn.disabled = currentSlideIndex === 0;
+      nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlideIndex < totalSlides - 1) {
+        currentSlideIndex++;
+        updateView();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlideIndex > 0) {
+        currentSlideIndex--;
+        updateView();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+    });
+    
+    updateView();
+  </script>
+</body>
+</html>

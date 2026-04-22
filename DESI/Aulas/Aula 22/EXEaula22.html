@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoC - Assincronismo e UX</title>
+    
+    <style>
+        /* CSS Base e Animação do Spinner */
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .oculto { display: none; }
+        
+        .spinner { 
+            border: 4px solid #f3f3f3; 
+            border-top: 4px solid #3498db; 
+            border-radius: 50%; 
+            width: 20px; 
+            height: 20px; 
+            animation: spin 1s linear infinite;
+            margin-top: 10px;
+        }
+
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+
+        #resultado { margin-top: 15px; font-weight: bold; }
+        button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
+        button:disabled { cursor: not-allowed; background-color: #cccccc; }
+    </style>
+</head>
+<body>
+
+    <h2>Dashboard Financeiro</h2>
+    <button id="btnCarregar">Carregar Dados Financeiros</button>
+    <div id="loading" class="spinner oculto"></div>
+    <div id="resultado"></div>
+
+    <script>
+        // 1. O Servidor Fake (Nossa Promise)
+        function requisicaoApiFake() {
+            return new Promise((resolve, reject) => {
+                // Simulando delay de rede de 2 segundos
+                setTimeout(() => {
+                    // Sorteia um número de 1 a 10. Se > 2 (80% de chance), dá sucesso.
+                    const sorteio = Math.floor(Math.random() * 10) + 1;
+                    if (sorteio > 2) {
+                        resolve({ saldo: "R$ 4.530,00", ultimaMovimentacao: "15/10/2026" });
+                    } else {
+                        reject("Servidor offline. Tente novamente.");
+                    }
+                }, 2000); 
+            });
+        }
+
+        // 2. O Maestro da Interface (Lidando com o tempo)
+        async function carregarDados() {
+            const btn = document.getElementById('btnCarregar');
+            const loading = document.getElementById('loading');
+            const resultado = document.getElementById('resultado');
+
+            // ESTADO 1: Preparação e Loading
+            btn.disabled = true;           // Previne múltiplos cliques indesejados
+            loading.classList.remove('oculto'); // Mostra a animação
+            resultado.innerHTML = "";      // Limpa a tela para os novos dados
+
+            try {
+                // ESTADO 2: A Pausa Estratégica (Espera não-bloqueante)
+                const dados = await requisicaoApiFake();
+                
+                // ESTADO 3 (Sucesso): Injetando no DOM
+                resultado.style.color = "green";
+                resultado.innerHTML = `Saldo: ${dados.saldo} <br> Última Movimentação: ${dados.ultimaMovimentacao}`;
+                
+            } catch (erro) {
+                // ESTADO 3 (Falha): Contingência e Feedback Visual
+                resultado.style.color = "red";
+                resultado.innerHTML = `⚠️ Erro Crítico: ${erro}`;
+                
+            } finally {
+                // ESTADO 4: A Limpeza (Executa dando certo ou errado)
+                loading.classList.add('oculto'); // Esconde a animação
+                btn.disabled = false;            // Reativa o botão
+            }
+        }
+
+        // 3. O Gatilho
+        document.getElementById('btnCarregar').addEventListener('click', carregarDados);
+    </script>
+
+</body>
+</html>
