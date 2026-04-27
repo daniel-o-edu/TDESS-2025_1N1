@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 24 - Modularização JavaScript</title>
+<style>
+  body {
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa; 
+    color: #212529;
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh;
+    overflow: hidden;
+  }
+  .slide-container {
+    width: 90vw;
+    height: 90vh;
+    margin: auto;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 40px; 
+    box-sizing: border-box; 
+    position: relative;
+  }
+  .slide {
+    display: none; 
+    width: 100%; 
+    max-width: 1200px; 
+    max-height: 85vh;
+    background: #ffffff; 
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+    padding: 50px;
+    font-size: 26px; 
+    line-height: 1.6; 
+    overflow-y: auto;
+  }
+  .slide.active { 
+    display: block; 
+    animation: fadeIn 0.4s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  h1, h2, h3 { 
+    color: #0d6efd; 
+    margin-top: 0; 
+  }
+  code, pre { 
+    background: #e9ecef; 
+    padding: 10px 15px; 
+    border-radius: 8px; 
+    font-family: 'Courier New', Courier, monospace; 
+    display: block; 
+    font-size: 22px;
+    overflow-x: auto;
+  }
+  .controls {
+    height: 90px; 
+    background: #ffffff; 
+    border-top: 1px solid #dee2e6;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 0 50px;
+  }
+  button {
+    background: #0d6efd; 
+    color: white; 
+    border: none; 
+    padding: 15px 30px;
+    font-size: 22px; 
+    border-radius: 8px; 
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button:hover {
+    background: #0b5ed7;
+  }
+  button:disabled { 
+    background: #adb5bd; 
+    cursor: not-allowed; 
+  }
+  .progress { 
+    font-size: 22px; 
+    font-weight: bold; 
+    color: #495057;
+  }
+  /* Estilos adicionais para as estruturas solicitadas */
+  .slide-label { font-size: 18px; text-transform: uppercase; color: #6c757d; margin-bottom: 10px; font-weight: bold; }
+  .cover-desc { font-size: 24px; color: #495057; }
+  .divider { border: 0; border-top: 2px solid #dee2e6; margin: 30px 0; }
+  .topics-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
+  .topic-chip { background: #e9ecef; padding: 8px 15px; border-radius: 20px; font-size: 20px; }
+  .callout { padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 6px solid; }
+  .callout.blue { background: #e7f1ff; border-color: #0d6efd; color: #084298; }
+  .callout.green { background: #d1e7dd; border-color: #198754; color: #0f5132; }
+  .callout.red { background: #f8d7da; border-color: #dc3545; color: #842029; }
+  .callout.yellow { background: #fff3cd; border-color: #ffc107; color: #664d03; }
+  .callout-title { font-weight: bold; margin-bottom: 10px; font-size: 24px; }
+  .two-col { display: flex; gap: 30px; }
+  .col-card { flex: 1; background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; }
+  .section-header { text-align: center; margin-top: 10%; }
+  .section-num { font-size: 60px; font-weight: bold; color: #dee2e6; }
+</style>
+</head>
+<body>
+  <div class="slide-container" id="slides">
+    
+    <div class="slide active">
+      <div class="slide-label">Capa</div>
+      <h1>Aula 24 - Modularização JavaScript</h1>
+      <p class="cover-desc">
+        Descrição: Exposição dos módulos ES6 (import/export), organização de arquivos. Separar código em módulos: utils.js, dom.js, api.js, main.js.
+      </p>
+      <div class="topics-grid">
+        <div class="topic-chip">Refatorar código spaghetti anterior em módulos. Cada módulo com responsabilidade única.</div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="callout yellow">
+        <div class="callout-title">Cenário Real</div>
+        <p>Fomos contratados por uma startup em supercrescimento para assumir um painel de controle financeiro.</p>
+        <p>Ao abrir o repositório, nos deparamos com um único arquivo chamado app.js com mais de 5.000 linhas de código.</p>
+        <p>Lá dentro, misturam-se funções que calculam juros, blocos que montam tabelas HTML e chamadas de rede para o servidor.</p>
+        <p>Na última semana, um desenvolvedor tentou alterar a cor de um botão de alerta e, sem querer, quebrou a lógica que enviava o formulário de pagamentos, causando prejuízo real à empresa.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="callout blue">
+        <div class="callout-title">Pergunta:</div>
+        <p>Se você entrasse hoje nesse projeto com um arquivo de 5.000 linhas misturando visual e regras de negócio, por onde você começaria a "arrumar a casa" para que a equipe pudesse voltar a trabalhar sem o medo constante de quebrar o sistema?</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <h2>O Problema do Escopo Global e a Sintaxe dos Módulos ES6</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>O Problema do Escopo Global</h2>
+      <p>Imagine que, antigamente, o JavaScript funcionava como uma grande sala com uma única mesa de trabalho no centro (este é o escopo global, ou o window no navegador).</p>
+      <p>Todos os seus arquivos de código tinham que usar essa mesma mesa.</p>
+      <ul>
+        <li><strong>A Confusão:</strong> O arquivo header.js vai até a mesa e anota num papel: let user = "Maria". Logo depois, o arquivo footer.js chega na mesma mesa, vê o espaço, e anota por cima: let user = "João".</li>
+        <li><strong>O Resultado:</strong> Quando o seu programa tenta descobrir quem é o user, a "Maria" sumiu e só restou o "João". Um arquivo sobrescreveu a informação do outro sem querer.</li>
+      </ul>
+      <p><strong>O Impacto:</strong> Em sistemas grandes, isso vira um pesadelo. Você nunca tem certeza se a variável que você criou vai ser apagada ou alterada por outro arquivo no meio do caminho. O sistema fica imprevisível.</p>
+    </div>
+
+    <div class="slide">
+      <h2>A Solução: Módulos ES6 e o "Contrato Seguro"</h2>
+      <p>Para resolver essa bagunça, o JavaScript introduziu os Módulos ES6 (a partir de 2015).</p>
+      <p>A regra mudou: agora, cada arquivo JavaScript é como uma caixa forte blindada e independente.</p>
+      <ul>
+        <li><strong>O Encapsulamento:</strong> O que acontece dentro do arquivo, fica dentro do arquivo. Se você criar let user = "Maria" dentro de um módulo, essa variável está "presa" lá. O footer.js não consegue nem ver que ela existe, muito menos sobrescrevê-la. Acabaram-se as colisões de nomes!</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Como eles conversam? (A Sintaxe)</h2>
+      <p>Se as caixas são blindadas, como compartilhamos ferramentas entre elas?</p>
+      <p>Através de "tubos de transferência" muito específicos, controlados por duas palavras-chave:</p>
+      <ul>
+        <li><strong>export (A Porta de Saída):</strong> É como você avisar ao sistema o que pode sair da sua caixa forte. Exemplo: O arquivo utils.js (Caixa A) tem uma função de somar. Ele diz: "Eu deixo quem quiser usar a minha função. -> export { somar };"</li>
+        <li><strong>import (A Porta de Entrada):</strong> É como você puxar algo de outra caixa pelo tubo. Exemplo: O arquivo main.js (Caixa B) precisa daquela função. Ele diz: "Eu quero trazer a função de somar que está lá na Caixa A. -> import { somar } from './utils.js';"</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <div class="callout blue">
+        <div class="callout-title">Resumo da Ópera:</div>
+        <p>Os Módulos ES6 transformaram uma bagunça global num sistema organizado de importação e exportação.</p>
+        <p>Isso cria um contrato super claro: você só tem acesso àquilo que foi explicitamente exportado e importado.</p>
+        <p>O código fica mais seguro, fácil de dar manutenção e perfeito para ser reaproveitado em outras partes do projeto!</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>B. VISUALIZANDO</h2>
+      <p>Imagine duas caixas fortes blindadas (Módulos). A Caixa A (utils.js) tem ferramentas de cálculo. A Caixa B (main.js) precisa dessas ferramentas. O escopo global antigo seria como jogar o conteúdo das duas caixas no chão do mesmo quarto, onde qualquer um pode pisar ou misturar tudo.</p>
+      <p>Com Módulos ES6, criamos um tubo de transferência seguro entre as duas caixas.</p>
+      <p>A Caixa A diz export { ferramenta } e a Caixa B diz import { ferramenta } from './CaixaA.js'. Apenas o que foi explicitamente exportado viaja pelo tubo.</p>
+    </div>
+
+    <div class="slide">
+      <img src="img01.png" style="max-width: 90%; height:auto;">
+    </div>
+
+    <div class="slide">
+      <h2>C. EXEMPLO DE CÓDIGO</h2>
+      <div class="code-block">
+        <pre><code>// Arquivo: mathUtils.js (Nosso primeiro módulo)
+// Usamos 'export' antes do que desejamos tornar público
+export const calculateTaxes = (amount) => {
+  return amount * 0.15;
+};
+
+// Se algo é a principal função do arquivo, usamos 'export default'
+export default function formatCurrency(value) {
+  return `R$ ${value.toFixed(2)}`;
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>C. EXEMPLO DE CÓDIGO (Continuação)</h2>
+      <div class="code-block">
+        <pre><code>// Arquivo: main.js (Consumidor do módulo)
+// Importamos o 'default' sem chaves, e os 'named exports' com chaves
+import formatCurrency, { calculateTaxes } from './mathUtils.js';
+
+let purchaseValue = 100;
+let tax = calculateTaxes(purchaseValue);
+console.log(`Imposto a pagar: ${formatCurrency(tax)}`);
+// Saída: Imposto a pagar: R$ 15.00</code></pre>
+      </div>
+    </div>
+    
+    <div class="slide">
+      <h2>(Lembre-se: no HTML, precisamos declarar a chamada do script principal como módulo):</h2>
+      <div class="code-block">
+        <pre><code>&lt;script type="module" src="main.js"&gt;&lt;/script&gt;</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>D. EXPLICAÇÃO DO CÓDIGO</h2>
+      <p>Vamos manter a nossa analogia das Caixas Fortes para traduzir exatamente o que está acontecendo nesse código!</p>
+      <p>Aqui, nós temos duas caixas: a Caixa A (mathUtils.js), que fabrica e fornece ferramentas, e a Caixa B (main.js), que precisa dessas ferramentas para trabalhar.</p>
+    </div>
+
+    <div class="slide">
+      <h2>Caixa Fornecedora (mathUtils.js)</h2>
+      <p>Dentro desta caixa forte, criamos duas ferramentas financeiras. Mas repare que elas têm níveis de "fama" diferentes na hora de serem exportadas (colocadas no tubo de saída):</p>
+      <ul>
+        <li><strong>Exportação Nomeada (export const calculateTaxes):</strong> Pense nela como uma ferramenta de prateleira. Uma caixa pode ter várias dessas (como várias chaves de fenda de tamanhos diferentes). Como existem várias, para exportá-la, precisamos dar um nome exato a ela. Você diz: "Estou enviando pelo tubo uma ferramenta chamada calculateTaxes".</li>
+        <li><strong>Exportação Padrão (export default function formatCurrency):</strong> Esta é a "estrela da companhia", a ferramenta principal e mais importante desta caixa. Uma caixa forte só pode ter uma exportação default. É como se a caixa dissesse: "Se alguém pedir a minha ferramenta principal sem especificar o nome, entregue o formatCurrency".</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Caixa Consumidora (main.js)</h2>
+      <p>Agora, a nossa segunda caixa precisa usar essas ferramentas. Ela vai até o final do tubo e faz o pedido usando a palavra import.</p>
+      <p>A sintaxe muda dependendo do tipo de exportação que foi feita:</p>
+      <ul>
+        <li><strong>Importando o default (Sem chaves):</strong> Como o formatCurrency é a ferramenta principal e exclusiva, a Caixa B simplesmente o recebe de braços abertos: import formatCurrency. Não precisa de chaves, porque não há risco de confusão; só existe um "produto principal" vindo daquela caixa.</li>
+        <li><strong>Importando as "Nomeadas" (Com chaves {}):</strong> Como podem existir dezenas de ferramentas secundárias na Caixa A, a Caixa B precisa ser super específica e pescar exatamente o que quer. Por isso usamos as chaves: { calculateTaxes }. É como dizer: "Daquela caixa inteira, abra o compartimento de ferramentas e me dê apenas aquela que se chama exatamente calculateTaxes".</li>
+      </ul>
+      <p>As duas chegam perfeitamente à Caixa B na mesma linha de código: import formatCurrency, { calculateTaxes } from './mathUtils.js';</p>
+    </div>
+
+    <div class="slide">
+      <h2>O Gerente do Prédio (O HTML)</h2>
+      <p>Para que essa mágica dos tubos seguros (Módulos) funcione, o navegador (que é o dono do prédio onde as caixas estão) precisa ser avisado.</p>
+      <p>Antigamente, os navegadores não sabiam lidar com esses tubos. Quando você coloca &lt;script type="module" src="main.js"&gt;&lt;/script&gt; no HTML, você está dizendo ao navegador:</p>
+      <p><i><b>"Atenção! Este não é um script bagunçado do estilo antigo. Este arquivo usa o moderno sistema de Módulos (caixas fortes blindadas). Por favor, ligue os tubos de transferência!"</b></i></p>
+      <p><strong>Bônus de Segurança:</strong> Ao usar type="module", o navegador automaticamente liga o "Strict Mode" (modo rigoroso). Isso significa que o JavaScript não vai deixar você cometer erros bobos, como criar variáveis sem usar let ou const, garantindo que o seu código fique não apenas organizado, mas extremamente seguro.</p>
+    </div>
+
+    <div class="slide">
+      <div class="callout red">
+        <div class="callout-title">E. ATENÇÃO</div>
+        <p><strong>Erro de CORS:</strong> Como os módulos carregam arquivos externos de forma dinâmica, abri-los dando dois cliques no arquivo index.html (protocolo file://) gerará um erro de segurança (CORS policy) no console.</p>
+        <p>Para testar módulos, você obrigatoriamente precisa usar um servidor local (como a extensão Live Server do VSCode).</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">02</div>
+        <h2>Princípio da Responsabilidade Única (SRP) e<br> Arquitetura Front-end</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+    <h2>A. CONCEITOS</h2>
+      <p>Vamos expandir a nossa analogia! Agora que sabemos como criar caixas seguras (os Módulos), precisamos decidir o que colocar dentro de cada uma. É aqui que entra o Princípio da Responsabilidade Única.</p>
+    <h2>O Problema do "Faz-Tudo"</h2>
+      <p>Pense que a sua aplicação é um restaurante e você criou um único arquivo chamado super_app.js para cuidar de tudo. Ele faz o trabalho de anotar os pedidos (botões no HTML), cozinhar (calcular dados) e falar com o fornecedor pelo telefone (buscar dados na API).</p>
+    </div>
+
+    <div class="slide">
+          <p><strong>O Risco:</strong> Se o fornecedor mudar o número de telefone, o super_app.js precisa ser alterado. Se o cardápio mudar, ele precisa ser alterado. Se a decoração das mesas mudar, adivinhe? Ele precisa ser alterado. Ele tem vários motivos para mudar.</p>
+      <p><strong>O Resultado:</strong> Isso gera o que chamamos de Alto Acoplamento. O código fica tão entrelaçado que consertar um botão pode quebrar um cálculo matemático sem você perceber.</p>
+      <p><b>O Princípio da Responsabilidade Única (SRP)</b> é a regra que acaba com isso. Ele decreta que cada módulo (arquivo) deve ter um, e apenas um, trabalho a fazer.</p>
+      </div>
+      
+      <div class="slide">
+      <h2>Arquitetura Front-end</h2>
+      <p>No Front-end, aplicamos o SRP parando de misturar tudo e criando uma "equipe de especialistas". A estrutura sugerida no seu texto divide o projeto em 4 pilares clássicos. Pense neles como os músicos de uma orquestra:</p>
+    </div>
+
+    <div class="slide">
+      <div class="two-col">
+        <div class="col-card">
+          <h3>utils.js (O Especialista em Lógica)</h3>
+          <p><strong>O que faz:</strong> Contém "funções puras". Ele recebe um dado, faz um processamento (como cálculos matemáticos ou formatação de datas) e devolve o resultado.</p>
+          <p><strong>O que NÃO faz:</strong> Ele não sabe o que é internet e não faz ideia de como desenhar algo na tela do usuário.</p>
+        </div>
+        <div class="col-card">
+          <h3>api.js (O Carteiro / Comunicação)</h3>
+          <p><strong>O que faz:</strong> É o único arquivo autorizado a conversar com o mundo externo (o servidor/banco de dados). Ele vai até a internet, busca ou envia as informações, e volta.</p>
+          <p><strong>O que NÃO faz:</strong> Ele não formata os dados que chegaram e não mexe em nenhum botão da tela.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="two-col">
+        <div class="col-card">
+          <h3>dom.js (O Cenógrafo / Tela e HTML)</h3>
+          <p><strong>O que faz:</strong> É o único que tem permissão para "encostar" na tela do usuário (o HTML). Se algo precisa aparecer, sumir, mudar de cor, ou se um clique precisa ser monitorado, é trabalho dele.</p>
+          <p><strong>O que NÃO faz:</strong> Ele não faz cálculos complexos e nunca se comunica diretamente com o servidor.</p>
+        </div>
+        <div class="col-card">
+          <h3>main.js (O Maestro da Orquestra)</h3>
+          <p><strong>O que faz:</strong> Ele importa as ferramentas dos outros três arquivos e coordena o fluxo de trabalho. Ele não faz o trabalho braçal, apenas dita as regras.</p>
+          <p><strong>Como ele age:</strong> Ele basicamente diz: "Ei, api.js, busque os dados do usuário. Pronto? Legal. Agora, utils.js, pegue esses dados brutos e formate a data de nascimento. Feito? Ótimo. dom.js, pegue essa data formatada e exiba na tela do usuário!"</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="callout blue">
+        <div class="callout-title">Resumindo:</div>
+        <p>Ao dividir seu projeto assim, você ganha paz de espírito. Se amanhã o endereço do seu servidor mudar, você só precisa abrir o arquivo api.js e alterar uma linha.</p>
+        <p>Você tem a garantia absoluta de que não quebrou os cálculos do utils.js nem o visual do dom.js, pois eles estão seguros em suas próprias caixas com responsabilidades únicas.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>B. VISUALIZANDO</h2>
+      <h3>O Problema: Arquitetura com alto Acoplamento (Sem SRP)</h3>
+      <img src="img02.png" style="max-width: 90%; height:auto;">
+    </div>
+
+    <div class="slide">
+      <h2>B. VISUALIZANDO</h2>
+      <h3>Arquitetura Front-end Modular & SRP</h3>
+      <img src="img03.png" style="max-width: 90%; height:auto;">
+    </div>
+
+    <div class="slide">
+      <h2>C. EXEMPLO DE CÓDIGO</h2>
+      <p>Vamos colocar a nossa orquestra para tocar! Agora que entendemos a teoria dos Módulos e do Princípio da Responsabilidade Única (SRP), veja como aquele conceito se transforma em código real.</p>
+      <p>Abaixo, temos a nossa "equipe de especialistas" trabalhando em perfeita harmonia:</p>
+      <div class="code-block">
+        <pre><code>// 1. api.js (O Carteiro) -> Única responsabilidade: Fetch de dados
+export async function fetchUsers() {
+  // Finge que estamos indo na internet buscar isso...
+  return [{ id: 1, name: "ana" }, { id: 2, name: "carlos" }];
+}
+
+// 2. utils.js (O Especialista em Lógica) -> Única responsabilidade: Lógica pura
+export function capitalizeName(name) {
+  // Transforma "ana" em "Ana"
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>C. EXEMPLO DE CÓDIGO (Continuação)</h2>
+      <div class="code-block">
+        <pre><code>// 3. dom.js (O Cenógrafo) -> Única responsabilidade: Interagir com o HTML
+export function renderUsers(usersArray) {
+  const list = document.getElementById('user-list');
+  list.innerHTML = ""; // Limpa a lista antes de pintar
+  usersArray.forEach(user => {
+    list.innerHTML += `&lt;li&gt;${user}&lt;/li&gt;`;
+  });
+}
+
+// 4. main.js (O Maestro) -> Única responsabilidade: Coordenar o fluxo
+import { fetchUsers } from './api.js';
+import { capitalizeName } from './utils.js';
+import { renderUsers } from './dom.js';
+
+async function initApp() {
+  // Passo 1: Maestro pede ao api.js os dados brutos
+  const rawUsers = await fetchUsers();
+  
+  // Passo 2: Maestro pede ao utils.js para limpar/formatar os dados
+  const formattedUsers = rawUsers.map(user => capitalizeName(user.name));
+  
+  // Passo 3: Maestro entrega os dados limpos para o dom.js pintar na tela
+  renderUsers(formattedUsers);
+}
+
+// O único "gatilho" global: Quando a página carregar, a orquestra começa!
+document.addEventListener('DOMContentLoaded', initApp);</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>D. EXPLICAÇÃO DO CÓDIGO</h2>
+      <h3>Leitura Fluida (Código como um Livro)</h3>
+      <p>Note a elegância da função initApp() no arquivo main.js. Qualquer pessoa, seja um programador iniciante ou um veterano, consegue ler essas linhas e entender exatamente o que está acontecendo.</p>
+      <p>O código conta uma história clara: busca, formata e renderiza. O Maestro não suja as mãos, ele apenas delega.</p>
+    </div>
+
+    <div class="slide">
+      <h3>Arquitetura Resiliente (À Prova de Chefes)</h3>
+      <p>Aqui está o verdadeiro "pulo do gato" do SRP. Imagine que, amanhã, seu chefe entra na sala e diz: "Mudança de planos! Não vamos mais buscar esses usuários de um arquivo local, agora precisamos conectar com uma API em PHP num servidor do outro lado do mundo."</p>
+      <p>No passado (o escopo global bagunçado), você entraria em pânico tentando achar onde alterar isso sem quebrar a tela. Hoje?</p>
+      <p>Você sorri, abre apenas a caixa forte do api.js, e muda a rota lá dentro.</p>
+      <ul>
+        <li>O main.js não fica sabendo da mudança.</li>
+        <li>O dom.js continua pintando a tela do mesmo jeito.</li>
+        <li>O utils.js continua formatando nomes.</li>
+      </ul>
+      <p>Nós isolamos os "comportamentos perigosos" e as dependências externas da nossa aplicação. Isso é o que chamamos de um sistema flexível, altamente coeso e de fácil manutenção!</p>
+    </div>
+
+    <div class="slide">
+      <div class="callout yellow">
+        <div class="callout-title">E. DICA</div>
+        <p><strong>Ética e Produtiva (IA):</strong> Ao herdar um código complexo, você pode usar uma IA Generativa (como Gemini ou ChatGPT) para ajudar a identificar "costuras" no código ("Identifique quais funções deste script lidam com DOM e quais lidam com fetch").</p>
+        <p>No entanto, a decisão final da divisão arquitetural deve ser sua, visando o longo prazo. Ferramentas de IA muitas vezes agrupam lógicas de forma conveniente, mas quebram a coesão a longo prazo.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="callout green">
+        <div class="callout-title">F. EXERCÍCIOS RÁPIDOS</div>
+        <ol>
+          <li>Se precisamos mudar a cor de fundo de um erro na tela, qual dos 4 arquivos (main, api, utils, dom) devemos alterar?</li>
+          <li>Uma função validateEmail(email) que retorna true ou false deve morar em qual arquivo?</li>
+          <li>Um código (ou cabeçalhos de função) que vai lidar com Produtos (listar e salvar) deve ser salvo em qual arquivo?</li>
+          <li>Um desenvolvedor colocou document.getElementById('btn').style.color = 'red' dentro do utils.js. Por que isso é uma violação arquitetural?</li>
+          <li>No main.js de exemplo, como você adicionaria um passo extra que filtra apenas usuários cujo nome começa com "A", mantendo o padrão de responsabilidade?</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="section-header">
+        <div class="section-num">03</div>
+        <h2>Técnicas de Refatoração Prática</h2>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>A. CONCEITO</h2>
+      <p>Refatorar não é reescrever do zero. Refatoração é o processo de alterar a estrutura interna de um código para torná-lo mais fácil de entender e mais barato de modificar, sem alterar seu comportamento observável.</p>
+      <p>É como trocar o encanamento de um prédio sem que os moradores percebam falta de água.</p>
+      <p>Ao lidar com "código spaghetti", nossa estratégia deve ser cirúrgica, extraindo as peças aos poucos.</p>
+      <p>A ordem recomendada é: primeiro, extrair as funções puras e regras de negócio para o utils.js (são fáceis, pois não dependem de nada). Em seguida, isole a comunicação externa (Fetch/Ajax) para o api.js. Por fim, extraia as manipulações de tela para o dom.js. O código que "sobrar" no script original naturalmente se tornará o seu main.js.</p>
+    </div>
+
+    <div class="slide">
+      <h2>B. VISUALIZANDO</h2>
+      <p><strong>Fluxo de Refatoração Segura:</strong></p>
+      <ol>
+        <li>Identificar o bloco de código acoplado (ex: um botão de clique que busca dados e altera a tela).</li>
+        <li>Extrair a lógica de busca para um arquivo novo (api.js).</li>
+        <li>Exportar / Importar a nova função.</li>
+        <li>Substituir o bloco original pela chamada da função importada.</li>
+        <li>Testar imediatamente! (Se quebrou, desfaça. Nunca extraia dois blocos de uma vez).</li>
+      </ol>
+    </div>
+    
+    <div class="slide">
+      <h3>Fluxo de Refatoração Segura Do Caos ao Módulo</h3>
+      <img src="img04.png" style="max-width: 90%; height:auto;">
+    </div>
+
+    <div class="slide">
+      <h2>C. EXEMPLO DE CÓDIGO</h2>
+      <p>Antes (Spaghetti - script.js)</p>
+      <div class="code-block">
+        <pre><code>// Tudo misturado...
+document.getElementById('loadData').addEventListener('click', async () => {
+  // 1. Alteração visual (DOM)
+  document.getElementById('status').innerText = "Carregando...";
+  
+  // 2. Fetch (API)
+  const response = await fetch('https://fakestoreapi.com/products/1');
+  const product = await response.json();
+  
+  // 3. Regra de negócio / Util (Formatando preço)
+  const priceBR = `R$ ${product.price.toFixed(2).replace('.', ',')}`;
+  
+  // 4. Alteração visual (DOM)
+  document.getElementById('status').innerText = "Sucesso!";
+  document.getElementById('result').innerHTML = `&lt;b&gt;${product.title}&lt;/b&gt; - ${priceBR}`;
+});</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>C. EXEMPLO DE CÓDIGO (Depois)</h2>
+      <p>Depois (Refatorado - main.js)</p>
+      <div class="code-block">
+        <pre><code>import { fetchProduct } from './api.js';
+import { formatBRL } from './utils.js';
+import { updateStatus, renderProduct } from './dom.js';
+
+document.getElementById('loadData').addEventListener('click', async () => {
+  updateStatus("Carregando...");
+  
+  try {
+    const product = await fetchProduct(1);
+    const priceBR = formatBRL(product.price);
+    updateStatus("Sucesso!");
+    renderProduct(product.title, priceBR);
+  } catch (error) {
+    updateStatus("Erro ao carregar os dados.");
+  }
+});</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>D. EXPLICAÇÃO DO CÓDIGO</h2>
+      <p>No "Antes", o manipulador de eventos fazia quatro coisas completamente diferentes. A responsabilidade daquele callback era muito alta. Se a formatação de dinheiro mudasse no país, teríamos que abrir o arquivo que controla os cliques de botão. Isso não faz sentido arquiteturalmente.</p>
+      <p>No "Depois", aplicamos a refatoração. O main.js conta uma história em alto nível (fetchProduct, formatBRL, renderProduct). Nós escondemos os detalhes de implementação. Isso também facilitou a inclusão de um bloco try...catch, tornando nosso código mais robusto (exigência técnica do nosso curso) contra falhas de rede. As implementações internas de fetchProduct ou renderProduct foram movidas para seus respectivos módulos, protegendo o fluxo principal.</p>
+    </div>
+
+    <div class="slide">
+      <div class="callout red">
+        <div class="callout-title">E. ATENÇÃO</div>
+        <p><strong>A Regra de Ouro:</strong> Nunca adicione uma nova funcionalidade (feature) enquanto estiver refatorando. Como diz Robert C. Martin no livro Clean Code, são dois "chapéus" diferentes. Ou você veste o chapéu de refatorar (apenas reorganiza) ou o de construir (cria coisas novas). Se fizer os dois ao mesmo tempo, não saberá o que causou o bug.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>FAQ - Perguntas frequentes</h2>
+      <p><strong>Pergunta:</strong> Qual a diferença prática entre export default e export const?</p>
+      <p><strong>Resposta:</strong> export default é usado quando o arquivo possui um propósito principal e único (ex: um componente, uma classe inteira). Você pode importá-lo dando qualquer nome (import QualquerNome from './arquivo.js'). O export const (nomeado) é para exportar várias pequenas peças de um arquivo utilitário. A importação exige o uso de chaves e o nome exato (import { minhaFuncao } from './arquivo.js').</p>
+    </div>
+
+    <div class="slide">
+      <h2>FAQ - Perguntas frequentes</h2>
+      <p><strong>Pergunta:</strong> Por que o console acusa o erro "CORS policy" quando tento abrir meu index.html com módulos?</p>
+      <p><strong>Resposta:</strong> Módulos ES6 dependem do protocolo HTTP/HTTPS para resolver as requisições de arquivos externos (import), obedecendo rigorosas políticas de segurança (CORS). Se você abre o HTML pelo duplo-clique (protocolo file://), o navegador bloqueia a importação por precaução. A solução é rodar um servidor local (Live Server).</p>
+    </div>
+
+    <div class="slide">
+      <h2>FAQ - Perguntas frequentes</h2>
+      <p><strong>Pergunta:</strong> Eu posso importar tudo de uma vez usando import * as Utils from './utils.js'? É recomendado?</p>
+      <p><strong>Resposta:</strong> Sim, você pode. Isso criará um objeto Utils com todas as funções dentro (ex: Utils.formatDate()). Porém, raramente é recomendado. O ideal é importar apenas o que você vai usar. Isso ajuda no "Tree Shaking" em ferramentas de build (como Webpack ou Vite), que apagam funções não utilizadas para deixar o arquivo final mais leve para o usuário.</p>
+    </div>
+
+    <div class="slide">
+      <h2>FAQ - Perguntas frequentes</h2>
+      <p><strong>Pergunta:</strong> Um módulo pode importar coisas de outro módulo, ou só o main.js faz as importações?</p>
+      <p><strong>Resposta:</strong> Módulos podem importar de outros módulos tranquilamente! Por exemplo, se seu api.js precisa de um token de segurança, ele pode importar uma função getToken() diretamente do utils.js. O JavaScript moderno é inteligente o suficiente para resolver essa teia de dependências sem duplicar o carregamento.</p>
+    </div>
+
+    <div class="slide">
+      <h2>FAQ - Perguntas frequentes</h2>
+      <p><strong>Pergunta:</strong> Precisarei mudar essa estrutura de api, dom, utils quando a gente for para o PHP no back-end?</p>
+      <p><strong>Resposta:</strong> Pelo contrário, essa arquitetura salvará nossa vida! Quando o PHP entrar, o utils.js, dom.js e main.js permanecerão intocados. Você só precisará alterar o conteúdo das funções de api.js para que, ao invés de usar arrays de teste, façam um fetch('meu_arquivo_php.php'). O resto da aplicação continuará funcionando sem nem perceber a troca do banco de dados!</p>
+    </div>
+
+    <div class="slide">
+      <div class="callout blue">
+        <div class="callout-title">RESUMINDO</div>
+        <ul>
+          <li><strong>Módulos ES6:</strong> Arquivos JavaScript isolados que possuem escopo próprio. Evitam vazamento de variáveis para a memória global (fim do código que subscreve regras de outros arquivos).</li>
+          <li><strong>Import/Export:</strong> A "ponte de comunicação" entre módulos. O que não recebe export permanece privado e inacessível, gerando um código super seguro (encapsulado).</li>
+          <li><strong>Separação de Preocupações (SoC):</strong> Filosofia de arquitetura onde dividimos o código por sua natureza. Usamos api.js para rede, dom.js para interface e utils.js para matemática/regras estáticas.</li>
+          <li><strong>Princípio da Responsabilidade Única (SRP):</strong> Cada arquivo ou função deve ter apenas UM motivo para sofrer modificações no futuro, garantindo alta coesão e baixo acoplamento.</li>
+          <li><strong>Refatoração Cirúrgica:</strong> A arte de reorganizar a estrutura interna do código sem alterar o que o usuário enxerga por fora. Sempre refatoramos passo a passo, isolando dependências e testando imediatamente.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2>FECHAMENTO</h2>
+      <p><strong>Conexão com a Situação de Aprendizagem (SA):</strong></p>
+      <p>No nosso projeto final, vocês terão que integrar uma aplicação Web usando PHP no Backend e Banco de Dados MySQL. A aula de hoje preparou o terreno perfeito para o sucesso de vocês. Ao extrairmos a comunicação de rede para um módulo isolado (api.js), garantimos que o código de interface gráfica da equipe fique protegido.</p>
+      <p>Na entrega do projeto, quando o Backend estiver pronto, vocês simplesmente irão ao arquivo api.js e trocarão as listas simuladas de JavaScript pelas requisições reais HTTP aos endpoints criados em PHP (CRUD).</p>
+      <p>Como orquestramos tudo no main.js, as engrenagens já estarão montadas, e a tela do sistema será alimentada por banco de dados real em questão de minutos, sem nenhum "código quebrado" por problemas de acoplamento!</p>
+    </div>
+
+    <div class="slide">
+      <h2>Próxima Aula:</h2>
+      <p>Com o encerramento do nosso módulo de Front-end dinâmico, entraremos no Bloco 04 com foco absoluto em infraestrutura: Backend PHP e Banco de Dados. Deixaremos o navegador e mergulharemos no servidor, entendendo a ponte entre o usuário e o banco de dados.</p>
+      <p>Provocação antes de vir: Nós usamos o JavaScript hoje de forma isolada, rodando no computador do próprio usuário. Mas o que acontece quando precisamos salvar informações valiosas, senhas criptografadas e estoques críticos, onde o usuário não pode ter acesso e nem manipular os valores? Onde esse código deve rodar? Reflitam sobre segurança e até a próxima aula!</p>
+    </div>
+
+    <div class="slide">
+      <div class="callout green">
+        <h1><strong>AGORA VAMOS PARA O DESAFIO MÃO NA MASSA.</strong></h1>
+      </div>
+    </div>
+
+</div>
+  <div class="controls">
+    <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+    <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+    <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+  </div>
+
+  <script>
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const currentIndicator = document.getElementById('current');
+    const totalIndicator = document.getElementById('total');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    totalIndicator.textContent = totalSlides;
+
+    function updateView() {
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index === currentSlideIndex) {
+          slide.classList.add('active');
+        }
+      });
+      currentIndicator.textContent = currentSlideIndex + 1;
+      
+      prevBtn.disabled = currentSlideIndex === 0;
+      nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlideIndex < totalSlides - 1) {
+        currentSlideIndex++;
+        updateView();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlideIndex > 0) {
+        currentSlideIndex--;
+        updateView();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+    });
+  </script>
+</body>
+</html>
