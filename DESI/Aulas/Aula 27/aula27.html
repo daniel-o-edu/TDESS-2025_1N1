@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 27 - SQL na Prática: Subconjuntos da linguagem</title>
+<style>
+ body {
+ margin: 0; 
+ padding: 0; 
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ background-color: #f8f9fa; 
+ color: #212529;
+ display: flex; 
+ flex-direction: column; 
+ height: 100vh;
+ overflow: hidden;
+ }
+ .slide-container {
+ width: 90vw;
+ height: 85vh;
+ margin: auto;
+ display: flex; 
+ align-items: center; 
+ justify-content: center;
+ padding: 40px; 
+ box-sizing: border-box; 
+ position: relative;
+ }
+ .slide {
+ display: none; 
+ width: 100%; 
+ max-width: 1200px; 
+ max-height: 80vh;
+ background: #ffffff; 
+ border-radius: 12px;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+ padding: 50px;
+ font-size: 26px; 
+ line-height: 1.6; 
+ overflow-y: auto;
+ }
+ .slide.active { 
+ display: block; 
+ animation: fadeIn 0.4s ease-in-out;
+ }
+ @keyframes fadeIn {
+ from { opacity: 0; transform: translateY(10px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
+ h1, h2, h3 { 
+ color: #0d6efd; 
+ margin-top: 0; 
+ }
+ code, pre { 
+ background: #e9ecef; 
+ padding: 10px 15px; 
+ border-radius: 8px; 
+ font-family: 'Courier New', Courier, monospace; 
+ display: block; 
+ font-size: 22px;
+ overflow-x: auto;
+ }
+ .controls {
+ height: 90px; 
+ background: #ffffff; 
+ border-top: 1px solid #dee2e6;
+ display: flex; 
+ justify-content: space-between; 
+ align-items: center; 
+ padding: 0 50px;
+ }
+ button {
+ background: #0d6efd; 
+ color: white; 
+ border: none; 
+ padding: 15px 30px;
+ font-size: 22px; 
+ border-radius: 8px; 
+ cursor: pointer;
+ transition: background 0.2s;
+ }
+ button:hover {
+ background: #0b5ed7;
+ }
+ button:disabled { 
+ background: #adb5bd; 
+ cursor: not-allowed; 
+ }
+ .progress { 
+ font-size: 22px; 
+ font-weight: bold; 
+ color: #495057;
+ }
+ 
+ /* Classes Adicionais do Prompt Avançado */
+ .slide-label { font-weight: bold; text-transform: uppercase; color: #6c757d; margin-bottom: 20px; font-size: 20px; letter-spacing: 1px; }
+ .cover-desc { font-size: 28px; }
+ .divider { border: 0; border-top: 2px solid #dee2e6; margin: 30px 0; }
+ .topics-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; }
+ .topic-chip { background: #e9ecef; padding: 10px 20px; border-radius: 50px; font-size: 20px; }
+ .cover-meta { color: #adb5bd; font-size: 18px; }
+ 
+ .callout { padding: 20px 30px; border-radius: 8px; margin: 20px 0; border-left: 8px solid; }
+ .callout-title { font-weight: bold; margin-bottom: 10px; font-size: 24px; }
+ .callout.blue { background: #cce5ff; border-color: #004085; color: #004085; }
+ .callout.green { background: #d4edda; border-color: #155724; color: #155724; }
+ .callout.red { background: #f8d7da; border-color: #721c24; color: #721c24; }
+ .callout.yellow { background: #fff3cd; border-color: #856404; color: #856404; }
+ 
+ .two-col { display: flex; gap: 40px; }
+ .col-card { flex: 1; background: #f8f9fa; padding: 30px; border-radius: 8px; border: 1px solid #dee2e6; }
+ 
+ .code-block { margin: 20px 0; }
+ .table-wrap { overflow-x: auto; }
+ table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+ th, td { border: 1px solid #dee2e6; padding: 15px; text-align: left; }
+ th { background: #e9ecef; color: #495057; font-weight: bold; }
+ 
+ .section-header { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+ .section-num { font-size: 80px; font-weight: bold; color: #e9ecef; margin-bottom: -20px; }
+ .section-header h2 { font-size: 48px; color: #0d6efd; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+ <div class="slide-container" id="slides">
+
+    <div class="slide active">
+        <div class="slide-label">Aula 27</div>
+        <h1>SQL na Prática: Subconjuntos da linguagem.</h1>
+        <p class="cover-desc">
+            Descrição: Nesta aula melhoramos a construção e gestão de bancos de dados relacionais com o aprendizado dos subconjuntos SQL. Os comandos são divididos em grupos funcionais para gerenciar bancos de dados relacionais: DDL (estrutura), DML (manipulação), DQL (consulta), DCL (segurança) e TCL (transações). Eles organizam as instruções para criar, consultar, alterar e controlar o acesso a dados de forma eficiente, garantindo a integridade da informação.
+        </p>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Contextualização</div>
+        <h2>Visão geral dos subconjuntos SQL</h2>
+        <p>Muitas autores tratam SQL como um conjunto de "sublinguagens" conceituais, justamente para organizar mentalmente o que cada comando faz: definir estrutura (DDL), manipular dados (DML), consultar dados (DQL), controlar acesso (DCL) e controlar transações (TCL). Esses subconjuntos não são "módulos separados" no banco, mas categorias teóricas usadas na documentação e no ensino para dar ordem ao grande conjunto de comandos SQL.</p>
+        <p>Em vez de tratar o SQL como um bloco único, nós o dividimos para separar quem define a estrutura, quem manipula os dados e quem controla o acesso. Aqui estão os principais subconjuntos que você precisa conhecer:</p>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Contextualização</div>
+        <h3>1. DDL (Data Definition Language)</h3>
+        <p>É a Linguagem de Definição de Dados. Serve para criar e modificar a "carcaça" do banco de dados (tabelas, índices, colunas).</p>
+        <ul>
+            <li>CREATE: Cria objetos (como uma nova tabela).</li>
+            <li>ALTER: Altera a estrutura de um objeto existente.</li>
+            <li>DROP: Exclui um objeto permanentemente.</li>
+            <li>TRUNCATE: Remove todos os registros de uma tabela, mas mantém a estrutura.</li>
+        </ul>
+        </div>
+        
+        <div class="slide">
+        <div class="slide-label">Contextualização</div>
+        <h3>2. DML (Data Manipulation Language)</h3>
+        <p>É a Linguagem de Manipulação de Dados. É aqui que o trabalho do dia a dia acontece, lidando diretamente com a informação guardada.</p>
+        <ul>
+            <li>INSERT: Adiciona novos dados.</li>
+            <li>UPDATE: Modifica dados existentes.</li>
+            <li>DELETE: Remove registros específicos.</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Contextualização</div>
+        <h3>3. DQL (Data Query Language)</h3>
+        <p>É a Linguagem de Consulta de Dados. Embora alguns autores a incluam dentro do DML, ela é tão importante que costuma ser tratada à parte.</p>
+        <ul>
+            <li>SELECT: É o comando soberano para buscar e visualizar informações.</li>
+        </ul>
+        </div>
+        
+        <div class="slide">
+        <div class="slide-label">Contextualização</div>
+        <h3>4. DCL (Data Control Language)</h3>
+        <p>É a Linguagem de Controle de Dados. Focada em segurança e permissões de usuários.</p>
+        <ul>
+            <li>GRANT: Dá acesso ou privilégios ao usuário.</li>
+            <li>REVOKE: Retira os acessos concedidos anteriormente.</li>
+        </ul>
+        <h3>5. DTL ou TCL (Data/Transaction Control Language)</h3>
+        <p>É a Linguagem de Controle de Transação. Ela garante a integridade dos dados, permitindo que você confirme ou desfaça mudanças em bloco.</p>
+        <ul>
+            <li>COMMIT: Salva permanentemente as alterações no banco.</li>
+            <li>ROLLBACK: Desfaz as alterações caso algo tenha dado errado (o famoso "Ctrl+Z").</li>
+            <li>SAVEPOINT: Cria um ponto de restauração dentro de uma transação.</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <div class="section-header">
+            <div class="section-num">01</div>
+            <h2>Definição de DDL</h2>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 01</div>
+        <h2>A. CONCEITO</h2>
+        <h3>DDL: A Engenharia do Banco de Dados</h3>
+        <p>DDL significa Data Definition Language (Linguagem de Definição de Dados). Se imaginarmos o banco de dados como uma biblioteca, a DDL não mexe nos livros, mas sim na construção do prédio, das estantes e das etiquetas de organização.</p>
+        </div>
+        
+         <div class="slide">
+        <div class="slide-label">Seção 01</div>
+        <h3>O que ela gerencia?</h3>
+        <p>A DDL é responsável pelo esquema (schema) do banco. Ela define:</p>
+        <ul>
+            <li>Tabelas: Onde os dados ficarão.</li>
+            <li>Colunas: Quais informações serão salvas (Nome, CPF, Data).</li>
+            <li>Tipos de Dados: Se a coluna aceita texto, números ou datas.</li>
+            <li>Constraints (Restrições): Regras como "este campo não pode ser vazio" ou "este e-mail deve ser único".</li>
+            <li>Índices: "Atalhos" para encontrar dados mais rápido.</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 01</div>
+        <h3>Os 4 Comandos Principais</h3>
+        <ul>
+            <li><strong>CREATE (Criar):</strong> É o ponto de partida. Usado para criar novas tabelas ou bancos de dados do zero. Exemplo: "Vou fabricar uma gaveta nova chamada 'Clientes'."</li>
+            <li><strong>ALTER (Alterar):</strong> Usado quando você precisa mudar a estrutura de algo que já existe. Adicionar uma coluna nova ou mudar o tipo de uma coluna. Exemplo: "Esqueci de colocar o campo 'Telefone' na gaveta de Clientes. Vou adicioná-lo agora."</li>
+            <li><strong>DROP (Remover/Derrubar):</strong> Exclui o objeto e tudo o que estiver dentro dele de forma permanente. Apaga a estrutura e os dados. Exemplo: "Não preciso mais da gaveta 'Fornecedores'. Vou jogá-la no lixo."</li>
+            <li><strong>TRUNCATE (Esvaziar):</strong> Remove todos os dados de dentro de uma tabela, mas mantém a estrutura (a "caixa") intacta para uso futuro. É mais rápido que o DELETE. Exemplo: "Quero limpar todos os papéis de dentro da gaveta, mas quero manter a gaveta lá no móvel."</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 01</div>
+        <h3>Analogia para fixação</h3>
+        <p>DDL (Estrutura): Você define que a garrafa é de vidro, tem 500ml e tampa azul.</p>
+        <p>DML (Dados): Você coloca a água, troca a água ou bebe a água.</p>
+        <div class="callout red">
+            <p>Regra de ouro: Comandos DDL geralmente não podem ser desfeitos com um simples ROLLBACK em muitos sistemas de banco de dados. Mexeu na DDL, a mudança é estrutural e imediata!</p>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 01</div>
+        <h2>B. VISUALIZANDO</h2>
+        <img src="img01.png" style="max-width: 90%; height:auto;" alt="Visualização do método DDL">
+        <br>
+            </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 01</div>
+        <h2>C. ATIVIDADE</h2>
+        <p>Sistema de Livraria Comunitária: Para este exercício, utilizaremos o contexto de uma Biblioteca, que é comum para todos nós. Vamos definir três tabelas essenciais para o funcionamento básico:</p>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tabela</th>
+                        <th>Propósito</th>
+                        <th>Campos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>LIVRO</td>
+                        <td>Armazenar o acervo</td>
+                        <td>ID, Título, IDAutor, Preço</td>
+                    </tr>
+                    <tr>
+                        <td>AUTOR</td>
+                        <td>Dados de quem escreve</td>
+                        <td>ID, Nome, Nacionalidade</td>
+                    </tr>
+                    <tr>
+                        <td>CLIENTE</td>
+                        <td>Quem aluga</td>
+                        <td>ID, Nome, Email</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        </div>
+        
+      <div class="slide">
+       <div class="slide-label">Seção 01</div>
+        <p>Desafio: Você deve redigir os scripts SQL que criam essas três tabelas. Lembre-se da ordem de criação: tabelas que não dependem de ninguém (como Autor e Cliente) devem vir antes daquelas que possuem referências (como Livro). Ao final apresente os scripts para o Professor.</p>
+    </div>
+
+    <div class="slide">
+        <div class="section-header">
+            <div class="section-num">02</div>
+            <h2>O que é DML? (Data Manipulation Language)</h2>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 02</div>
+        <h2>A. CONCEITO</h2>
+        <p>Vamos transformar esse conceito técnico em algo palpável. Para facilitar o entendimento, imagine que um Banco de Dados é como um Arquivo de Aço de um escritório, e a DML é a mão do arquivista mexendo nos papéis dentro das gavetas.</p>
+        <p>A Linguagem de Manipulação de Dados é o conjunto de comandos SQL focado na ação. Se o DDL (Data Definition Language) serve para "construir o móvel" (criar tabelas), o DML serve para "gerenciar o conteúdo" (os registros). Pense na DML como os verbos de ação do seu banco de dados. Eles não mexem na estrutura da tabela, apenas na informação que vive lá dentro.</p>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 02</div>
+        <h3>Os Pilares da Escrita (Os Comandos)</h3>
+        <p>Para dominar a manipulação de dados, focamos em três comandos essenciais que alteram o estado da sua tabela:</p>
+        <ul>
+            <li><strong>INSERT (O Adicionar):</strong> É o comando usado para "dar entrada" em uma nova informação. É como preencher uma ficha nova e colocá-la na gaveta.
+                <ul>
+                    <li>Ação: Cria uma nova linha na tabela.</li>
+                    <li>Exemplo: Adicionar um novo cliente ao sistema.</li>
+                </ul>
+            </li>
+            </ul>
+            </div>
+
+        <div class="slide">
+        <div class="slide-label">Seção 02</div>
+            <ul>
+            <li><strong>UPDATE (O Editar):</strong> Usado quando a informação já existe, mas precisa ser corrigida ou atualizada.
+                <ul>
+                    <li>Ação: Altera valores em colunas de linhas que já estão lá.</li>
+                    <li>Cuidado: Sempre use a cláusula WHERE para não alterar todos os dados da tabela de uma vez só!</li>
+                    <li>Exemplo: Mudar o endereço de um cliente que se mudou.</li>
+                </ul>
+            </li>
+            <li><strong>DELETE (O Remover):</strong> Utilizado para retirar informações que não são mais necessárias.
+                <ul>
+                    <li>Ação: Exclui uma ou mais linhas da tabela.</li>
+                    <li>Cuidado: Assim como no Update, o WHERE é seu amigo aqui para evitar apagar o banco inteiro.</li>
+                    <li>Exemplo: Remover um produto que saiu de linha.</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 02</div>
+        <h2>B. VISUALIZANDO</h2>
+        <img src="img02.png" style="max-width: 90%; height:auto;" alt="Visualização de Comandos DML">
+        <br>
+            </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 02</div>
+        <h2>C. ATIVIDADE</h2>
+        <p>Movimentando a Livraria: Para complementar a criação das tabelas (DDL), agora vamos colocar as mãos na massa com a DML. Esta atividade foca em popular e gerenciar a Livraria Comunitária que você acabou de estruturar. Agora que as gavetas do seu "Arquivo de Aço" (as tabelas AUTOR, CLIENTE e LIVRO) estão prontas, você é o arquivista responsável por registrar as primeiras operações da livraria.</p>
+        <p>Objetivo: Praticar a manipulação de registros utilizando os verbos de ação do SQL: INSERT, UPDATE e DELETE.</p>
+        </div>
+        
+        <div class="slide">  
+        <div class="slide-label">Seção 02</div>
+        <h3>Parte 1: INSERT (Povoando o acervo)</h3>
+        <p>Uma livraria vazia não ajuda ninguém! Registre os primeiros dados no sistema seguindo a lógica das chaves estrangeiras.</p>
+        <ol>
+            <li>Cadastre um Autor: Adicione o autor "Machado de Assis", nacionalidade "Brasileira".</li>
+            <li>Cadastre um Cliente: Adicione você mesmo como cliente da livraria (Nome e Email).</li>
+            <li>Cadastre um Livro: Adicione o livro "Dom Casmurro", preço "45.90", associando-o ao ID do autor que você acabou de criar.</li>
+        </ol>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 02</div>
+        <h3>Parte 2: UPDATE (Corrigindo informações)</h3>
+        <p>O mercado mudou e precisamos ajustar nossos dados.</p>
+        <ol>
+            <li>Reajuste de Preço: O livro "Dom Casmurro" entrou em promoção. Altere o preço dele para 39.90. Dica: Não esqueça do WHERE para não alterar o preço de todos os livros da livraria por engano!</li>
+            <li>Atualização de Cadastro: O cliente que você cadastrou mudou de e-mail. Atualize o registro com um novo endereço eletrônico.</li>
+        </ol>
+        </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 02</div>        
+        <h3>Parte 3: DELETE (Limpando o arquivo)</h3>
+        <p>Alguns registros precisam ser removidos para manter o sistema organizado.</p>
+        <ol>
+            <li>Remover Cliente: Um cliente solicitou a exclusão de seus dados da base. Escreva o comando para remover o seu registro da tabela CLIENTE.</li>
+            <li>Reflexão Crítica: Se você tentasse deletar o Autor "Machado de Assis" agora, mas o Livro "Dom Casmurro" ainda estivesse cadastrado no banco, o que você acha que aconteceria? (Considere a regra de integridade referencial).</li>
+        </ol>
+        </div>
+        
+    <div class="slide">
+        <div class="slide-label">Seção 02</div>        
+        <p>Entrega para o Professor: Redija os scripts SQL das operações acima. Para que seu código seja seguro.</p>
+        <div class="callout green">
+            <p>Dica de Ouro do Arquivista: Sempre que for rodar um UPDATE ou DELETE, faça um SELECT antes com o mesmo WHERE que pretende usar. Assim, você tem certeza de quais linhas serão afetadas antes de "canetar" a alteração definitiva!</p>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="section-header">
+            <div class="section-num">03</div>
+            <h2>DQL - Um caso à parte</h2>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 03</div>
+        <h2>A. CONCEITO</h2>
+        <p>Para fechar o nosso entendimento sobre SQL, chegamos ao "olho" do sistema. Se o DDL constrói o armário e o DML mexe nas pastas, o DQL é o ato de abrir a gaveta e ler o que está escrito.</p>
+        <p>Mas afinal o que é DQL (Data Query Language)? A Linguagem de Consulta de Dados é a parte do SQL focada em extrair e visualizar informações. É aqui que o banco de dados mostra seu verdadeiro valor: a capacidade de encontrar uma agulha no palheiro em milissegundos. O DQL não altera absolutamente nada no seu banco. Ele é como uma lanterna: você ilumina os dados para enxergá-los, mas a luz não muda a cor ou o formato do que está sendo iluminado.</p>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 03</div>
+        <h3>O Comando Soberano: SELECT</h3>
+        <p>O SELECT é, sem dúvida, o comando mais utilizado em todo o universo SQL. Ele funciona como um filtro inteligente que responde às suas perguntas. E como ele funciona na prática?</p>
+        <p>Imagine que você está diante do arquivo de aço da biblioteca e faz um pedido ao arquivista: "Por favor, me mostre apenas o Título e o Preço de todos os livros que custam mais de R$ 50,00."</p>
+        <p>No mundo do SQL, esse pedido "traduzido" seria:</p>
+        <ol>
+            <li><strong>SELECT</strong> (O que eu quero ver?): Titulo, Preço</li>
+            <li><strong>FROM</strong> (Onde isso está guardado?): LIVRO</li>
+            <li><strong>WHERE</strong> (Qual é o critério?): Preço > 50.00</li>
+        </ol>
+        </div>
+        
+    <div class="slide">
+        <div class="slide-label">Seção 03</div>        
+        <h3>A Diferença Crucial: Ver x Mexer</h3>
+        <p>É muito comum ver o SELECT dentro do grupo DML em alguns livros, mas didaticamente ele ganha sua própria categoria (DQL) por um motivo simples: Segurança de Estado.</p>
+        <ul>
+            <li>No DML (Escrita): Você tem o poder de mudar a realidade (mudar um preço, apagar um cliente). Existe risco.</li>
+            <li>No DQL (Leitura): Você apenas observa. É uma operação segura que pode ser repetida mil vezes sem nunca afetar a integridade dos dados.</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 03</div>
+        <h2>B. VISUALIZANDO</h2>
+        <img src="img03.png" style="max-width: 90%; height:auto;" alt="Visualização do DQL e SELECT">
+        <br>
+            </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 03</div>
+        <h2>C. ATIVIDADE</h2>
+        <div class="callout blue">
+            <p>Baseado na nossa Livraria Comunitária, como você escreveria o "comando de voz" para o banco de dados se quisesse:</p>
+            <p>Crie um script que lista o Nome de todos os Clientes que possuem o email finalizado em '@gmail.com'?</p>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="section-header">
+            <div class="section-num">04</div>
+            <h2>Finalizando DCL e DTL</h2>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 04</div>
+        <h2>A. CONCEITO</h2>
+        <p>Para completar sua jornada pelo universo SQL, vamos aos dois últimos pilares. Se o banco de dados fosse um banco de dinheiro real, o DCL seria o segurança da porta e o DTL seria o sistema que garante que seu dinheiro não suma durante uma transferência.</p>
+        </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 04</div>
+        <h3>DCL (Data Control Language)</h3>
+        <p>A Linguagem de Controle de Dados é o "porteiro" do banco de dados. Em uma empresa, nem todo mundo pode ver tudo. O RH não precisa ver o código-fonte, e o estagiário talvez não deva ver os salários da diretoria. O DCL serve para gerenciar quem pode fazer o quê.</p>
+        <ul>
+            <li><strong>GRANT (Conceder):</strong> É como dar uma chave para alguém. Você autoriza um usuário a fazer um SELECT, INSERT ou qualquer outra ação. Exemplo: "Eu dou permissão para o João ler a tabela de Livros."</li>
+            <li><strong>REVOKE (Revogar):</strong> É como tomar a chave de volta. Você retira um acesso que tinha dado antes. Exemplo: "O João saiu da equipe, então vou tirar o acesso dele ao sistema."</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 04</div>
+        <h3>DTL ou TCL (Transaction Control Language)</h3>
+        <p>A Linguagem de Controle de Transação é o "botão de segurança" das suas operações. Ela lida com a integridade. Imagine que você está transferindo dinheiro: o sistema tira da sua conta (Operação 1), mas antes de depositar na outra, a internet cai (Operação 2 falhou). O DTL garante que o dinheiro volte para você em vez de sumir no limbo.</p>
+        <ul>
+            <li><strong>COMMIT (Confirmar):</strong> É o botão de "Salvar". Você diz ao banco: "Tudo deu certo, pode gravar isso no disco para sempre". Uma vez dado o COMMIT, não tem mais volta fácil.</li>
+            <li><strong>ROLLBACK (Desfazer):</strong> É o sagrado "Ctrl + Z". Se você percebeu que fez um DELETE sem WHERE (o pesadelo de todo programador), o ROLLBACK cancela tudo o que você fez desde o último COMMIT e volta os dados ao que eram antes.</li>
+            <li><strong>SAVEPOINT (Ponto de Salvamento):</strong> É como um checkpoint de videogame. Você cria um ponto de restauração no meio de um trabalho longo. Se errar o final, volta para o SAVEPOINT em vez de recomeçar tudo do zero.</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Seção 04</div>
+        <h2>B. VISUALIZANDO</h2>
+        <img src="img04.png" style="max-width: 90%; height:auto;" alt="Visualização do DCL e DTL">
+        <br>
+            </div>
+
+    <div class="slide">
+        <div class="slide-label">Resumo</div>
+        <h2>Resumo da aula: O Universo SQL</h2>
+        <p>Nesta aula, exploramos que o SQL não é um bloco único, mas sim um conjunto de categorias teóricas (sublinguagens) que organizam como interagimos com os dados e a estrutura de um banco de dados.</p>
+        
+        <h3>1. DDL: A Engenharia (Estrutura)</h3>
+        <ul>
+            <li>Responsável por construir a "carcaça" do banco (tabelas e colunas).</li>
+            <li>Comandos: CREATE, ALTER, DROP e TRUNCATE.</li>
+            <li>Analogia: É como construir o prédio de uma biblioteca e instalar as estantes.</li>
+        </ul>
+        </div>
+        
+    <div class="slide">
+        <div class="slide-label">Resumo</div>        
+        <h3>2. DML: A Ação (Manipulação)</h3>
+        <ul>
+            <li>Lida diretamente com a informação guardada dentro das estruturas.</li>
+            <li>Comandos: INSERT, UPDATE e DELETE.</li>
+            <li>Analogia: É a mão do arquivista colocando, editando ou removendo papéis das gavetas.</li>
+        </ul>
+    
+        <h3>3. DQL: O Olhar (Consulta)</h3>
+        <ul>
+            <li>Focada exclusivamente em extrair e visualizar informações sem alterá-las.</li>
+            <li>Comando Soberano: SELECT.</li>
+            <li>Analogia: Funciona como uma lanterna que ilumina os dados para leitura, sem mudar sua cor ou formato.</li>
+        </ul>
+        </div>
+
+    <div class="slide">
+        <div class="slide-label">Resumo</div>
+        <h3>4. DCL: A Segurança (Controle)</h3>
+        <ul>
+            <li>Gerencia as permissões e quem tem autorização para acessar o quê.</li>
+            <li>Comandos: GRANT (dar acesso) e REVOKE (retirar acesso).</li>
+            <li>Analogia: É o "porteiro" ou segurança que decide quem tem as chaves do arquivo.</li>
+        </ul>
+
+        <h3>5. DTL/TCL: A Integridade (Transação)</h3>
+        <ul>
+            <li>Garante que operações complexas sejam concluídas com sucesso ou totalmente desfeitas em caso de erro.</li>
+            <li>Comandos: COMMIT (salvar), ROLLBACK (desfazer) e SAVEPOINT (ponto de restauração).</li>
+            <li>Analogia: O botão de "Salvar" definitivo versus o sagrado "Ctrl+Z" do banco de dados.</li>
+        </ul>
+        </div>
+       
+       <div class="slide">
+        <div class="callout yellow">
+            <p>Dica de Ouro: Lembre-se sempre de que, enquanto o DQL é seguro para leitura, comandos de DML (UPDATE e DELETE) exigem o uso cauteloso da cláusula WHERE para evitar alterações indesejadas em todo o banco de dados.</p>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="section-header">
+            <h2>FECHAMENTO</h2>
+        </div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-label">Fechamento</div>
+        <h2>Próxima Aula:</h2>
+        <p>Na próxima aula vamos iniciar nossos estudos da linguagem PHP, que será a base do nosso projeto de Situação de Aprendizagem. Iniciaremos com a exposição da sintaxe PHP, variáveis, tipos, arrays, $_GET, $_POST. Demonstração de como criar.php no servidor local e abrir no browser e na prática vamos construir um formulário HTML processar com PHP exibir dados e validação server-side básica.</p>
+    </div>
+
+ </div>
+
+ <div class="controls">
+    <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+    <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+    <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+ </div>
+
+ <script>
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const currentIndicator = document.getElementById('current');
+    const totalIndicator = document.getElementById('total');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    totalIndicator.textContent = totalSlides;
+
+    function updateView() {
+        slides.forEach((slide, index) => {
+            slide.classList.remove('active');
+            if (index === currentSlideIndex) {
+                slide.classList.add('active');
+            }
+        });
+        currentIndicator.textContent = currentSlideIndex + 1;
+        
+        prevBtn.disabled = currentSlideIndex === 0;
+        nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+    }
+
+    function nextSlide() {
+        if (currentSlideIndex < totalSlides - 1) {
+            currentSlideIndex++;
+            updateView();
+        }
+    }
+
+    function prevSlide() {
+        if (currentSlideIndex > 0) {
+            currentSlideIndex--;
+            updateView();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+        if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+    });
+ </script>
+</body>
+</html>
