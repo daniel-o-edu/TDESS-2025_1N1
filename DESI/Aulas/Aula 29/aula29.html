@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 29 - PHP Orientado a Objetos I</title>
+<style>
+ body {
+ margin: 0; 
+ padding: 0; 
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ background-color: #f8f9fa; 
+ color: #212529;
+ display: flex; 
+ flex-direction: column; 
+ height: 100vh;
+ overflow: hidden;
+ }
+ .slide-container {
+ width: 95vw;
+ height: 85vh;
+ margin: auto;
+ display: flex; 
+ align-items: center; 
+ justify-content: center;
+ padding: 20px; 
+ box-sizing: border-box; 
+ position: relative;
+ }
+ .slide {
+ display: none; 
+ width: 100%; 
+ max-width: 1200px; 
+ height: 80vh;
+ background: #ffffff; 
+ border-radius: 12px;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+ padding: 50px;
+ font-size: 24px; 
+ line-height: 1.5; 
+ overflow-y: auto;
+ }
+ .slide.active { 
+ display: block; 
+ animation: fadeIn 0.4s ease-in-out;
+ }
+ @keyframes fadeIn {
+ from { opacity: 0; transform: translateY(10px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
+ h1, h2, h3 { 
+ color: #6f42c1; /* Roxo para temática PHP */
+ margin-top: 0; 
+ }
+ code, pre { 
+ background: #f1f3f5; 
+ padding: 10px 15px; 
+ border-radius: 8px; 
+ font-family: 'Courier New', Courier, monospace; 
+ display: block; 
+ font-size: 18px;
+ overflow-x: auto;
+ white-space: pre-wrap;
+ border-left: 4px solid #6f42c1;
+ }
+ .controls {
+ height: 80px; 
+ background: #ffffff; 
+ border-top: 1px solid #dee2e6;
+ display: flex; 
+ justify-content: space-between; 
+ align-items: center; 
+ padding: 0 50px;
+ }
+ button {
+ background: #6f42c1; 
+ color: white; 
+ border: none; 
+ padding: 12px 25px;
+ font-size: 18px; 
+ border-radius: 8px; 
+ cursor: pointer;
+ transition: background 0.2s;
+ }
+ button:hover {
+ background: #5a32a3;
+ }
+ button:disabled { 
+ background: #adb5bd; 
+ cursor: not-allowed; 
+ }
+ .progress { 
+ font-size: 20px; 
+ font-weight: bold; 
+ color: #495057;
+ }
+ .slide-label { font-weight: bold; text-transform: uppercase; color: #6c757d; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px; }
+ .callout { padding: 20px 30px; border-radius: 8px; margin: 20px 0; border-left: 8px solid; }
+ .callout.blue { background: #cce5ff; border-color: #004085; color: #004085; }
+ .callout.red { background: #f8d7da; border-color: #721c24; color: #721c24; }
+ .callout.yellow { background: #fff3cd; border-color: #856404; color: #856404; }
+ .section-header { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+ .section-num { font-size: 80px; font-weight: bold; color: #e9ecef; margin-bottom: -20px; }
+ .section-header h2 { font-size: 48px; color: #6f42c1; margin-bottom: 20px; }
+ table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+ table th, table td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+ table th { background-color: #f1f3f5; }
+ img { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; border: 1px solid #dee2e6; }
+</style>
+</head>
+<body>
+ <div class="slide-container" id="slides">
+
+ <div class="slide active">
+ <div class="slide-label">Aula 29</div>
+ <h1>PHP Orientado a Objetos I</h1>
+ <p><strong>Descrição:</strong> Exploração técnica de estruturas de dados coletivas (arrays) e introdução aos pilares da POO: classes, atributos e métodos. Criação da classe modelo (entidade) para o projeto da Situação de Aprendizagem.</p>
+ <div class="callout blue">
+ <p><strong>Pergunta:</strong> "Antes de começarmos, pensem: se vocês tivessem que gerenciar as informações de 10.000 produtos diferentes em um array manual, como garantiriam que nenhum desenvolvedor acidentalmente cadastrasse um 'preço' como sendo um texto em vez de um número?"</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">01</div>
+ <h2>Arrays e Coleções de Dados no PHP</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Arrays no PHP</div>
+ <h2>A. CONCEITO</h2>
+ <p>No PHP, os arrays são ferramentas extremamente versáteis. Eles não são apenas listas; são mapas ordenados que podem assumir diferentes formas dependendo da sua necessidade de organização.</p>
+ <h3>Tipos de Arrays</h3>
+ <p>Entender arrays no PHP é como aprender a organizar diferentes tipos de armários. Dependendo do que você quer guardar e de como quer encontrar depois, você escolhe uma estratégia diferente.</p>
+ <p>Antes de mergulharmos na prática, precisamos entender as três faces dos arrays:</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Arrays no PHP</div>
+ <h3>1. Arrays Indexados (A Lista de Chamada)</h3>
+ <p>É o tipo mais comum. Imagine uma fila ou uma lista de compras. A posição de cada item é definida por um número (índice), e no PHP, essa contagem sempre começa no 0.</p>
+ <ul>
+ <li><strong>Como funciona:</strong> Você foca nos valores. O PHP se encarrega de dar um "número de identificação" para cada um na ordem em que aparecem.</li>
+ </ul>
+ <p>Exemplo prático:</p>
+ <pre><code>$frutas = ["Maçã", "Banana", "Morango"];
+// O PHP entende: 0 => Maçã, 1 => Banana, 2 => Morango
+echo $frutas[1]; // Saída: Banana</code></pre>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Arrays no PHP</div>
+ <h3>2. Arrays Associativos (O Dicionário)</h3>
+ <p>Aqui, em vez de números automáticos, você escolhe uma palavra-chave (string) para identificar o valor. É como uma agenda de contatos ou uma etiqueta de identificação.</p>
+ <ul>
+ <li><strong>Como funciona:</strong> Você usa o operador => para associar uma "Etiqueta" a um "Conteúdo". Isso torna o código muito mais fácil de ler (semântico).</li>
+ </ul>
+ <p>Exemplo prático:</p>
+ <pre><code>$carro = [
+ "marca" => "Toyota",
+ "modelo" => "Corolla",
+ "ano" => 2024
+];
+echo $carro["modelo"]; // Saída: Corolla</code></pre>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Arrays no PHP</div>
+ <h3>3. Arrays Multidimensionais (A Planilha ou Matriz)</h3>
+ <p>Imagine uma tabela do Excel. Você tem linhas e colunas. No PHP, um array multidimensional nada mais é do que um array que guarda outros arrays dentro dele.</p>
+ <ul>
+ <li><strong>Como funciona:</strong> É usado para estruturas de dados complexas, onde um único item possui várias subinformações. Para acessar um dado, você usa dois ou mais colchetes (um para "entrar" no primeiro array e outro para o "interno").</li>
+ </ul>
+ <p>Exemplo prático:</p>
+ <pre><code>$usuarios = [
+ ["nome" => "Ana", "email" => "ana@email.com"],
+ ["nome" => "Beto", "email" => "beto@email.com"]
+];
+// Acessando o nome do segundo usuário (índice 1)
+echo $usuarios[1]["nome"]; // Saída: Beto</code></pre>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Arrays no PHP</div>
+ <h3>Resumo Comparativo</h3>
+ <table>
+ <thead>
+ <tr>
+ <th>Tipo</th>
+ <th>Chave (Key)</th>
+ <th>Uso Ideal</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td>Indexado</td>
+ <td>Números (0, 1, 2...)</td>
+ <td>Listas simples, ordem cronológica.</td>
+ </tr>
+ <tr>
+ <td>Associativo</td>
+ <td>Strings ("nome", "preco")</td>
+ <td>Objetos, registros únicos, configurações.</td>
+ </tr>
+ <tr>
+ <td>Multidimensional</td>
+ <td>Números ou Strings</td>
+ <td>Tabelas, catálogos, sistemas de coordenadas.</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Arrays no PHP</div>
+ <h2>B. VISUALIZANDO</h2>
+ <div style="text-align:center;">
+ <img src="img01.png" alt="[Imagem 01 - Representação Arrays]">
+ <p style="font-size:16px; color:#666;">(Visualização gráfica dos tipos de arrays no PHP)</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Arrays no PHP</div>
+ <h2>C. EXEMPLO DE CÓDIGO</h2>
+ <p>Para consolidar o que aprendemos, vamos montar um cenário real: um Sistema de Gestão de Frota. Neste exemplo, utilizaremos os três tipos de arrays para organizar as informações de maneira lógica.</p>
+ <pre><code>&lt;?php
+// 1. ARRAY INDEXADO (Lista simples de categorias)
+$categorias = ["Sedan", "SUV", "Hatch"];
+
+// 2. ARRAY ASSOCIATIVO (Dados técnicos de um veículo específico)
+$veiculo_destaque = [
+ "modelo" => "Corolla",
+ "marca" => "Toyota",
+ "ano" => 2024,
+ "cor" => "Prata"
+];
+
+// 3. ARRAY MULTIDIMENSIONAL (Tabela/Matriz de vários veículos)
+$frota = [
+ [
+ "placa" => "ABC-1234",
+ "status" => "Disponível",
+ "km" => 15000
+ ],
+ [
+ "placa" => "XYZ-5678",
+ "status" => "Em manutenção",
+ "km" => 42000
+ ]
+];
+
+// --- EXIBINDO OS DADOS
+echo "--- CATEGORIAS ---\n";
+echo "A primeira categoria é: " . $categorias[0] . "\n\n";
+echo "--- DESTAQUE ---\n";
+echo "Veículo: " . $veiculo_destaque["modelo"] . " (" . $veiculo_destaque["marca"] . ")\n\n";
+echo "--- RELATÓRIO DE FROTA ---\n";
+echo "O veículo de placa " . $frota[1]["placa"] . " está " . $frota[1]["status"] . ".";
+?&gt;</code></pre>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Arrays no PHP</div>
+ <h2>D. EXPLICAÇÃO DO CÓDIGO</h2>
+ <ul>
+ <li><strong>1. Array Indexado ($categorias):</strong> Criamos uma lista onde a ordem importa. O PHP atribuiu automaticamente o índice 0 para "Sedan", 1 para "SUV" e 2 para "Hatch". Para exibir "Sedan", usamos $categorias[0].</li>
+ <li><strong>2. Array Associativo ($veiculo_destaque):</strong> Em vez de números, usamos etiquetas (chaves) que descrevem o dado. Usamos o operador => para ligar a chave "ano" ao valor 2024. Isso torna o código semântico: $veiculo_destaque["modelo"] é muito mais fácil de entender do que um índice numérico.</li>
+ <li><strong>3. Array Multidimensional ($frota):</strong> Criamos uma "super variável" que armazena outros arrays. Cada item dentro de $frota é, por si só, um array associativo. Acesso: $frota[1]["placa"] seleciona o segundo bloco de dados e pega o valor da placa.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Arrays no PHP</div>
+ <h2>E. DICAS</h2>
+ <div class="callout yellow">
+ <ol>
+ <li><strong>Aspas sempre:</strong> Sempre utilize aspas (simples ou duplas) nas chaves de strings. O PHP moderno gera avisos de performance e segurança se você esquecer.</li>
+ <li><strong>Cuidado com o Case:</strong> Chaves são case-sensitive. "Nome" é diferente de "nome".</li>
+ <li><strong>Sempre utilize aspas simples ou duplas nas chaves de strings:</strong> Embora o PHP aceite chaves sem aspas em alguns contextos (tratando-as como constantes), isso gera avisos de performance e segurança em versões modernas.</li>
+ </ol>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">02</div>
+ <h2>Classes e Atributos: O Molde e suas Características</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Classes e Atributos</div>
+ <h2>A. CONCEITO</h2>
+ <p>A Programação Orientada a Objetos (POO) é uma filosofia de construção de sistemas que busca aproximar o código do mundo real por meio de objetos que carregam dados e comportamentos. Aqui está uma explicação didática dos conceitos Classes e Atributos.</p>
+ <h3>Classe: O Projeto ou Molde</h3>
+ <p>Uma Classe é a estrutura que define como um objeto será. Imagine que você quer fabricar vários carros de um mesmo modelo; a classe seria o projeto de engenharia ou a planta baixa desse carro.</p>
+ <ul>
+ <li><strong>Função:</strong> Ela declara formalmente quais dados o objeto terá e como ele se comportará.</li>
+ <li><strong>Declaração no PHP:</strong> Utilizamos a palavra-chave class seguida do nome da classe.</li>
+ <li><strong>Instanciação:</strong> Para criar um objeto real a partir dessa planta, usamos o operador new. Esse processo cria uma "instância" (o objeto propriamente dito) que ocupará um espaço na memória.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Classes e Atributos</div>
+ <h3>Atributos: As Características (Dados)</h3>
+ <p>Os Atributos representam as características ou o estado de um objeto. Se a classe for um "Produto", os atributos seriam as informações que o descrevem.</p>
+ <ul>
+ <li><strong>Exemplos comuns:</strong> Descrição, preço e estoque são atributos típicos de um objeto Produto.</li>
+ <li><strong>Visibilidade:</strong> No código, os atributos são definidos no início da classe usando palavras-chave como public, protected ou private.</li>
+ </ul>
+ <div class="callout blue">
+ <p><strong>Nota didática:</strong> Embora atributos públicos permitam acesso direto, o uso de atributos privados ou protegidos é preferível para garantir o encapsulamento (segurança dos dados).</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Classes e Atributos</div>
+ <h2>B. VISUALIZANDO</h2>
+ <div style="text-align:center;">
+ <img src="img02.png" alt="[Imagem 02 - Representação Classe e Objeto]">
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Classes e Atributos</div>
+ <h2>C. EXEMPLO DE CÓDIGO</h2>
+ <p>Abaixo, veja como transformamos a planta (Classe) em objetos reais com características próprias (Atributos):</p>
+ <pre><code>&lt;?php
+// A CLASSE: O molde para todos os produtos
+class Produto {
+ public $descricao; // Atributo
+ public $estoque;   // Atributo
+ public $preco;     // Atributo
+}
+
+// OS OBJETOS: Instâncias reais criadas a partir do molde
+$p1 = new Produto;
+$p1->descricao = 'Chocolate'; // Definindo o valor do atributo
+$p1->preco = 7;
+
+$p2 = new Produto;
+$p2->descricao = 'Café'; // Cada objeto tem seus próprios atributos
+$p2->preco = 4;
+?&gt;</code></pre>
+ <p>Neste exemplo, $p1 e $p2 são objetos distintos que compartilham a mesma estrutura (Classe), mas possuem dados diferentes (Atributos).</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Classes e Atributos</div>
+ <h2>D. EXPLICAÇÃO DO CÓDIGO</h2>
+ <ul>
+ <li><strong>1. A Definição da Classe (class Produto):</strong> class Produto { ... }: Aqui você está batizando o seu modelo. Por convenção, nomes de classes em PHP começam com letra maiúscula. public $descricao;, $estoque;, $preco;: Estes são os Atributos. A palavra public indica que esses valores podem ser acessados de qualquer lugar do código.</li>
+ <li><strong>2. Criação de Objetos (Instanciação):</strong> $p1 = new Produto;: O operador new cria um novo objeto na memória. Agora, $p1 é uma instância real e única. Criamos um segundo objeto $p2. Embora usem o mesmo molde, são independentes.</li>
+ <li><strong>3. Manipulação de Atributos (->):</strong> O operador seta (->) é a ferramenta que o PHP usa para "entrar" no objeto e acessar seus componentes. $p1->descricao = 'Chocolate'; diz: "No objeto $p1, procure o atributo descricao e atribua a ele o texto 'Chocolate'".</li>
+ </ul>
+ <p><strong>O que acontece com o $estoque?</strong> No código, o atributo $estoque foi definido na classe, mas nunca recebeu um valor nos objetos. Por padrão ele estaria vazio (null).</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Classes e Atributos</div>
+ <h2>E. ATENÇÃO!</h2>
+ <div class="callout red">
+ <p>Nunca deixe atributos sensíveis como public. Se qualquer parte do sistema puder alterar o saldo de uma conta bancária sem passar por uma validação, você criou uma falha de segurança gravíssima.</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">03</div>
+ <h2>Métodos: Comportamentos e Acesso Seguro</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Métodos</div>
+ <h2>A. CONCEITO</h2>
+ <p>Os métodos são um dos pilares fundamentais da Programação Orientada a Objetos (POO). Se os atributos são as "características" de um objeto, os métodos são as suas ações ou comportamentos.</p>
+ <h3>O que é um Método?</h3>
+ <p>Um método é, essencialmente, uma função escrita dentro de uma classe. Ele representa o que os objetos daquela classe podem fazer.</p>
+ <ul>
+ <li><strong>Analogia:</strong> Se pensarmos em um objeto da classe Carro, os atributos seriam "cor" e "modelo", enquanto os métodos seriam as ações "acelerar", "frear" e "ligar".</li>
+ </ul>
+ <h3>A Sintaxe no PHP</h3>
+ <p>Para declarar um método, utilizamos a palavra-chave function dentro do corpo da classe. Assim como as funções comuns, eles podem receber parâmetros e retornar valores.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Métodos</div>
+ <pre><code>class Conta {
+ public $saldo;
+ // Um método para depositar valores
+ public function depositar($valor) {
+ if ($valor > 0) {
+ $this->saldo += $valor; // Modifica um atributo do próprio objeto
+ }
+ }
+}</code></pre>
+ <p><strong>O uso do $this:</strong> Dentro de um método, utilizamos a pseudo-variável $this para referenciar atributos ou outros métodos do próprio objeto que está executando a ação.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Métodos</div>
+ <h3>Tipos Especiais de Métodos</h3>
+ <ul>
+ <li><strong>Métodos Construtores (__construct):</strong> São executados automaticamente assim que um novo objeto é criado (instanciado). Eles servem para inicializar atributos ou realizar tarefas de configuração inicial.</li>
+ <li><strong>Métodos Estáticos (static):</strong> Diferente dos métodos comuns, os métodos estáticos pertencem à classe e não a um objeto específico. Podem ser chamados sem criar uma instância (Classe::metodo()).</li>
+ <li><strong>Métodos Mágicos:</strong> São métodos que o PHP executa automaticamente em situações especiais. Exemplos incluem o __get() e __set(), e o __toString().</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Métodos</div>
+ <h3>Por que usar métodos?</h3>
+ <ol>
+ <li><strong>Encapsulamento:</strong> Os métodos permitem controlar como os dados (atributos) são alterados. Em vez de mudar o saldo de uma conta diretamente, você chama o método depositar(), que pode validar se o valor é positivo.</li>
+ <li><strong>Reutilização:</strong> Uma vez definido na classe pai, o comportamento pode ser herdado por outras classes (Herança), evitando a duplicação de código.</li>
+ <li><strong>Abstração:</strong> Você não precisa saber como o método faz o cálculo interno; basta saber o que ele faz e quais dados ele precisa para funcionar.</li>
+ </ol>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Métodos</div>
+ <h2>B. VISUALIZANDO</h2>
+ <div style="text-align:center;">
+ <img src="img03.png" alt="[Imagem 03 - Métodos e Comportamentos]">
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Métodos</div>
+ <h2>C. EXEMPLO DE CÓDIGO</h2>
+ <pre><code>&lt;?php
+class ContaBancaria {
+ public $titular;
+ public $saldo;
+
+ // MÉTODO CONSTRUTOR: Executado automaticamente ao criar o objeto
+ public function __construct($nome, $valorInicial) {
+ $this->titular = $nome;
+ $this->saldo = $valorInicial;
+ echo "Conta de {$this->titular} criada com sucesso!\n";
+ }
+
+ // MÉTODO DE AÇÃO: Realiza um depósito
+ public function depositar($valor) {
+ if ($valor > 0) {
+ $this->saldo += $valor;
+ echo "Depósito de R$ {$valor} realizado.\n";
+ }
+ }
+
+ // MÉTODO DE AÇÃO: Realiza um saque com validação
+ public function sacar($valor) {
+ if ($valor > 0 && $valor <= $this->saldo) {
+ $this->saldo -= $valor;
+ echo "Saque de R$ {$valor} autorizado.\n";
+ } else {
+ echo "Saque de R$ {$valor} negado: Saldo insuficiente.\n";
+ }
+ }
+
+ // MÉTODO DE RETORNO: Exibe o saldo atual
+ public function obterSaldo() {
+ return "Saldo atual de {$this->titular}: R$ {$this->saldo}\n";
+ }
+}
+
+// --- UTILIZANDO OS MÉTODOS
+$minhaConta = new ContaBancaria("Maria", 500); 
+$minhaConta->depositar(200); 
+$minhaConta->sacar(100);
+$minhaConta->sacar(1000); 
+echo $minhaConta->obterSaldo(); 
+?&gt;</code></pre>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Métodos</div>
+ <h2>D. EXPLICAÇÃO DO CÓDIGO</h2>
+ <ul>
+ <li><strong>1. O Método Especial __construct:</strong> Este é o "porteiro" da classe. Ele garante que, assim que você der um new ContaBancaria, o objeto já nasça com um nome e um saldo inicial.</li>
+ <li><strong>2. O uso do $this:</strong> Observe que dentro dos métodos usamos $this->saldo. O $this diz ao PHP: "Ei, mexa no saldo DESTA conta específica que está chamando o método agora".</li>
+ <li><strong>3. Métodos com Parâmetros ($valor):</strong> Os métodos depositar e sacar recebem informações externas através de variáveis entre parênteses.</li>
+ <li><strong>4. Lógica e Validação (Encapsulamento):</strong> No método sacar, incluímos um if. Ele impede que o saldo fique negativo. O método funciona como um filtro de segurança.</li>
+ <li><strong>5. Métodos com Retorno (return):</strong> O método obterSaldo não apenas executa uma tarefa, ele "devolve" uma resposta para quem o chamou.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Reflexão</div>
+ <h2>E. REFLITA</h2>
+ <div class="callout yellow">
+ <p>Se você tem 50 telas no seu sistema que exibem o preço formatado e hoje o cliente decide mudar de "R$" para "US$", onde seria mais fácil alterar: em 50 arquivos HTML ou em um único método exibirPrecoFormatado() dentro da classe?</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">?</div>
+ <h2>FAQ - Perguntas Frequentes</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">FAQ</div>
+ <p><strong>Pergunta: Posso criar uma classe sem o método __construct?</strong></p>
+ <p>Resposta: Sim! O PHP criará um construtor vazio padrão. Porém, se o seu objeto precisa de dados básicos para "existir" (como o CPF de um cliente), é boa prática obrigar esses dados no construtor.</p>
+ <hr>
+ <p><strong>Pergunta: Qual a diferença real entre Array Associativo e Classe?</strong></p>
+ <p>Resposta: O array é apenas um "saco de dados". Ele não tem comportamento. A Classe une os dados aos comportamentos (métodos). Use arrays para listas simples e Classes para representar entidades do seu negócio.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">FAQ</div>
+ <p><strong>Pergunta: O que é o erro "Cannot access private property"?</strong></p>
+ <p>Resposta: Isso acontece quando você tenta fazer algo como $produto->preco = 10; fora da classe. Como o atributo é private, você deve usar o método setter: $produto->setPreco(10);.</p>
+ <hr>
+ <p><strong>Pergunta: Posso usar IA para gerar Getters e Setters?</strong></p>
+ <p>Resposta: Sim, IDEs e IAs são ótimas para isso (é um código repetitivo). No entanto, a lógica de validação (ex: não aceitar estoque negativo) é responsabilidade sua e deve ser revisada.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">FAQ</div>
+ <p><strong>Pergunta: Por que usar tipagem (string, int) nos parâmetros?</strong></p>
+ <p>Resposta: Para evitar erros bobos. Se você espera um número para o cálculo de imposto e recebe uma string "dez", o PHP 8 com strict_types avisará o erro na hora, em vez de fazer um cálculo errado silencioso.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">RESUMINDO</div>
+ <h3>Arrays e Coleções de Dados</h3>
+ <ul>
+ <li><strong>Arrays Indexados:</strong> Listas numeradas onde cada valor é acessado por um índice inteiro que começa em 0.</li>
+ <li><strong>Arrays Associativos:</strong> Estruturas tipo "dicionário" que utilizam chaves nominais (strings) para identificar valores de forma semântica.</li>
+ <li><strong>Arrays Multidimensionais:</strong> Conjuntos complexos onde um array armazena outros arrays, funcionando como tabelas ou matrizes.</li>
+ </ul>
+ <h3>Classes e Atributos</h3>
+ <ul>
+ <li><strong>Classe:</strong> O projeto técnico ou molde que define a estrutura e os comportamentos de um objeto.</li>
+ <li><strong>Instanciação (new):</strong> O processo de criar um objeto real e individual a partir de uma classe na memória.</li>
+ <li><strong>Atributos:</strong> Variáveis internas de uma classe que armazenam as características ou o estado de um objeto.</li>
+ <li><strong>Visibilidade (public/private):</strong> Regras que definem quem pode acessar ou alterar os dados internos de um objeto.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">RESUMINDO</div>
+ <h3>Métodos: Comportamentos e Acesso Seguro</h3>
+ <ul>
+ <li><strong>Métodos:</strong> Funções internas de uma classe que definem as ações e comportamentos que um objeto pode realizar.</li>
+ <li><strong>Pseudo-variável $this:</strong> Referência interna usada para que um método acesse atributos ou outros métodos do próprio objeto.</li>
+ <li><strong>Método Construtor (__construct):</strong> Função executada automaticamente para configurar o objeto no exato momento da sua criação.</li>
+ <li><strong>Encapsulamento:</strong> Prática de usar métodos para validar e proteger a alteração de atributos, garantindo a segurança dos dados.</li>
+ <li><strong>Abstração:</strong> Capacidade de utilizar as funções de um objeto sem precisar conhecer a complexidade do código interno.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">FECHAMENTO</div>
+ <h2>Conexão com a Situação de Aprendizagem (SA)</h2>
+ <p>O que fizemos hoje é a base do seu CRUD. As classes que vocês criaram serão as "Entidades" que o banco de dados irá preencher. Sem essas classes, vocês teriam que tratar cada dado do banco manualmente em todas as páginas, o que tornaria o projeto final impossível de entregar no prazo.</p>
+ </div>
+
+ </div>
+
+ <div class="controls">
+ <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+ <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+ <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+ </div>
+
+ <script>
+ let currentSlideIndex = 0;
+ const slides = document.querySelectorAll('.slide');
+ const totalSlides = slides.length;
+ const currentIndicator = document.getElementById('current');
+ const totalIndicator = document.getElementById('total');
+ const prevBtn = document.getElementById('prevBtn');
+ const nextBtn = document.getElementById('nextBtn');
+
+ totalIndicator.textContent = totalSlides;
+
+ function updateView() {
+ slides.forEach((slide, index) => {
+ slide.classList.remove('active');
+ if (index === currentSlideIndex) {
+ slide.classList.add('active');
+ }
+ });
+ currentIndicator.textContent = currentSlideIndex + 1;
+ 
+ prevBtn.disabled = currentSlideIndex === 0;
+ nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+ }
+
+ function nextSlide() {
+ if (currentSlideIndex < totalSlides - 1) {
+ currentSlideIndex++;
+ updateView();
+ }
+ }
+
+ function prevSlide() {
+ if (currentSlideIndex > 0) {
+ currentSlideIndex--;
+ updateView();
+ }
+ }
+
+ document.addEventListener('keydown', (e) => {
+ if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+ if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+ });
+ </script>
+</body>
+</html>
