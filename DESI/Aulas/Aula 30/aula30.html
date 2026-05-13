@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 30 - Blindagem de Dados e Representação de Objetos com PHP</title>
+<style>
+ body {
+ margin: 0; 
+ padding: 0; 
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ background-color: #f8f9fa; 
+ color: #212529;
+ display: flex; 
+ flex-direction: column; 
+ height: 100vh;
+ overflow: hidden;
+ }
+ .slide-container {
+ width: 95vw;
+ height: 85vh;
+ margin: auto;
+ display: flex; 
+ align-items: center; 
+ justify-content: center;
+ padding: 20px; 
+ box-sizing: border-box; 
+ position: relative;
+ }
+ .slide {
+ display: none; 
+ width: 100%; 
+ max-width: 1200px; 
+ height: 80vh;
+ background: #ffffff; 
+ border-radius: 12px;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+ padding: 50px;
+ font-size: 24px; 
+ line-height: 1.5; 
+ overflow-y: auto;
+ }
+ .slide.active { 
+ display: block; 
+ animation: fadeIn 0.4s ease-in-out;
+ }
+ @keyframes fadeIn {
+ from { opacity: 0; transform: translateY(10px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
+ h1, h2, h3 { 
+ color: #6f42c1; /* Roxo para temática PHP */
+ margin-top: 0; 
+ }
+ code, pre { 
+ background: #f1f3f5; 
+ padding: 10px 15px; 
+ border-radius: 8px; 
+ font-family: 'Courier New', Courier, monospace; 
+ display: block; 
+ font-size: 18px;
+ overflow-x: auto;
+ white-space: pre-wrap;
+ border-left: 4px solid #6f42c1;
+ }
+ .controls {
+ height: 80px; 
+ background: #ffffff; 
+ border-top: 1px solid #dee2e6;
+ display: flex; 
+ justify-content: space-between; 
+ align-items: center; 
+ padding: 0 50px;
+ }
+ button {
+ background: #6f42c1; 
+ color: white; 
+ border: none; 
+ padding: 12px 25px;
+ font-size: 18px; 
+ border-radius: 8px; 
+ cursor: pointer;
+ transition: background 0.2s;
+ }
+ button:hover {
+ background: #5a32a3;
+ }
+ button:disabled { 
+ background: #adb5bd; 
+ cursor: not-allowed; 
+ }
+ .progress { 
+ font-size: 20px; 
+ font-weight: bold; 
+ color: #495057;
+ }
+ .slide-label { font-weight: bold; text-transform: uppercase; color: #6c757d; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px; }
+ .callout { padding: 20px 30px; border-radius: 8px; margin: 20px 0; border-left: 8px solid; }
+ .callout.blue { background: #cce5ff; border-color: #004085; color: #004085; }
+ .callout.red { background: #f8d7da; border-color: #721c24; color: #721c24; }
+ .callout.yellow { background: #fff3cd; border-color: #856404; color: #856404; }
+ .section-header { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+ .section-num { font-size: 80px; font-weight: bold; color: #e9ecef; margin-bottom: -20px; }
+ .section-header h2 { font-size: 48px; color: #6f42c1; margin-bottom: 20px; }
+ table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+ table th, table td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+ table th { background-color: #f1f3f5; }
+ img { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; border: 1px solid #dee2e6; }
+</style>
+</head>
+<body>
+ <div class="slide-container" id="slides">
+
+ <div class="slide active">
+ <div class="slide-label">Aula 30</div>
+ <h1>Blindagem de Dados e Representação de Objetos com PHP</h1>
+ <p><strong>Descrição:</strong> Exploração profunda do mecanismo de encapsulamento para garantir a integridade dos dados, implementação de Getters e Setters com validações e uso do método mágico __toString() para representação de objetos.</p>
+ <div class="callout blue">
+ <p><strong>Antes de começarmos, pense:</strong> se você fosse o desenvolvedor responsável por um sistema de votação, qual seria o risco técnico de permitir que qualquer parte do código alterasse o contador de votos diretamente, sem passar por uma função de validação?</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">01</div>
+ <h2>Encapsulamento e Níveis de Visibilidade</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Encapsulamento</div>
+ <h2>A. CONCEITO</h2>
+ <p>Para entender o <strong>Encapsulamento</strong>, imagine que você está construindo um controle remoto.</p>
+ <p>O usuário só precisa ver os botões (a interface); ele não deve mexer nos fios e circuitos internos, ou o controle vai parar de funcionar.</p>
+ <p>No PHP, as "palavras-chave" de visibilidade são os cadeados que usamos para decidir quem pode mexer nos "fios" da nossa classe.</p>
+ 
+ <h3>Os Três Níveis de Visibilidade</h3>
+ <p>Imagine uma agência bancária para entender como o PHP separa os acessos:</p>
+ <ul>
+ <li><strong>Public (Público):</strong> É o <strong>Saguão do Banco</strong>. Qualquer pessoa que entra na agência tem acesso. No código, qualquer arquivo do seu sistema pode ler ou alterar um atributo public.</li>
+ <li><strong>Protected (Protegido):</strong> É a <strong>Área dos Funcionários</strong>. Apenas quem trabalha lá (a própria classe) ou os estagiários e gerentes (classes filhas que herdaram os dados) podem entrar. O cliente (mundo externo) não entra aqui.</li>
+ <li><strong>Private (Privado):</strong> É o <strong>Cofre Principal</strong>. Só quem tem a chave mestra (a própria classe que criou o atributo) pode abrir. Nem mesmo as classes filhas (herança) conseguem mexer aqui. É o nível máximo de segurança.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Encapsulamento</div>
+ <h3>Por que "blindar" os dados?</h3>
+ <p>Se você deixa a senha de um usuário como public, qualquer parte do código pode fazer <code>$usuario->senha = "123"</code>.</p>
+ <p>Isso quebra a <strong>integridade</strong>.</p>
+ <p>Com o encapsulamento, você tranca a senha como private. Se alguém quiser mudar a senha, terá que usar um método que você criou (como um alterarSenha()), onde você pode exigir a senha antiga e validar se a nova é forte o suficiente.</p>
+ <p>O objeto agora é o dono das próprias regras.</p>
+
+ <h3>A Grande Vantagem: Manutenção</h3>
+ <p>Imagine que seu sistema tem 500 arquivos. Se o seu atributo é public e você resolve mudar o nome dele de $valor para $preco, você terá que procurar e alterar o nome nesses 500 arquivos.</p>
+ <p>Se ele for private, você só precisa mudar <strong>dentro daquela classe</strong>.</p>
+ <p>Como o resto do sistema só conversa com ela através de "portas seguras" (métodos), ninguém lá fora precisa saber que você trocou o nome dos fios internos.</p>
+ <p>Isso evita o famoso "efeito dominó", onde você conserta uma coisa e quebra dez.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Encapsulamento</div>
+ <h2>B. VISUALIZANDO</h2>
+ <table>
+ <thead>
+ <tr>
+ <th>Visibilidade</th>
+ <th>De fora da classe</th>
+ <th>Classes filhas (Herança)</th>
+ <th>Própria Classe</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td>Public</td>
+ <td>✅ Sim</td>
+ <td>✅ Sim</td>
+ <td>✅ Sim</td>
+ </tr>
+ <tr>
+ <td>Protected</td>
+ <td>❌ Não</td>
+ <td>✅ Sim</td>
+ <td>✅ Sim</td>
+ </tr>
+ <tr>
+ <td>Private</td>
+ <td>❌ Não</td>
+ <td>❌ Não</td>
+ <td>✅ Sim</td>
+ </tr>
+ </tbody>
+ </table>
+ <div style="text-align:center;">
+  </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Encapsulamento</div>
+ <h2>C. EXEMPLO DE CÓDIGO</h2>
+ <pre><code>&lt;?php
+class ContaBancaria {
+ // Atributos privados: ninguém altera o saldo diretamente de fora
+ private $saldo;
+ protected $titular;
+
+ public function __construct($titular, $valorInicial) {
+ $this->titular = $titular;
+ // Atribuição interna permitida
+ $this->saldo = $valorInicial;
+ }
+
+ // Método público: a "interface" segura para o mundo externo
+ public function depositar($valor) {
+ if ($valor > 0) {
+ $this->saldo += $valor;
+ echo "Depósito de R$ $valor realizado com sucesso!&lt;br&gt;";
+ }
+ }
+}
+
+$minhaConta = new ContaBancaria("João Silva", 100);
+// $minhaConta->saldo = 5000; // ISSO GERARIA UM FATAL ERROR! O saldo está blindado.
+$minhaConta->depositar(500); // Forma correta e segura
+?&gt;</code></pre>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Encapsulamento</div>
+ <h2>D. EXPLICAÇÃO DO CÓDIGO</h2>
+ <ul>
+ <li><strong>private $saldo:</strong> O saldo está trancado. Tentar acessá-lo via <code>$obj->saldo</code> fora da classe interromperá a execução do programa com um erro.</li>
+ <li><strong>protected $titular:</strong> O nome do titular pode ser usado em uma classe ContaPoupanca que herda desta, mas não pelo programador no arquivo index.php.</li>
+ <li><strong>public function depositar:</strong> Criamos uma regra. O saldo só aumenta se o valor for positivo. Essa é a essência do encapsulamento: <strong>validação na entrada</strong>.</li>
+ </ul>
+ 
+ <h2>E. ATENÇÃO!</h2>
+ <div class="callout red">
+ <p>Um erro comum de iniciantes é colocar tudo como public para facilitar o desenvolvimento.</p>
+ <p>Isso é uma dívida técnica perigosa. Lembre-se: <strong>Seja restritivo por padrão</strong>.</p>
+ <p>Comece com private e só mude se houver uma necessidade real de herança (protected) ou acesso externo (public).</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">02</div>
+ <h2>Métodos de Acesso (Getters e Setters)</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Getters e Setters</div>
+ <h2>A. CONCEITO</h2>
+ <p>Para explicar esses conceitos de forma simples, vamos usar uma analogia do cotidiano: <strong>o controle de uma encomenda em um prédio</strong>.</p>
+ <p>Imagine que os dados da sua classe (os atributos) são as encomendas que chegam.</p>
+ <p>Se elas ficassem na calçada (<strong>públicas</strong>), qualquer um poderia mexer, levar ou estragar.</p>
+ <p>Por isso, nós as guardamos dentro do prédio (<strong>private</strong>).</p>
+
+ <h3>O que são Getters e Setters?</h3>
+ <p>Eles funcionam como o <strong>porteiro</strong> do prédio. Você não entra no almoxarifado para pegar sua encomenda; você pede ao porteiro.</p>
+ <ul>
+ <li><strong>Setter (O Recebedor):</strong> É o método que "carrega" o valor para dentro do objeto. O nome sempre começa com set (do inglês, definir/colocar). Exemplo: <code>setCpf($valor)</code>.</li>
+ <li><strong>Getter (O Entregador):</strong> É o método que "pega" o valor de dentro e te mostra. O nome sempre começa com get (do inglês, pegar/obter). Exemplo: <code>getCpf()</code>.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Getters e Setters</div>
+ <h3>Por que usá-los? (A grande vantagem)</h3>
+ <p>A maior vantagem é o <strong>controle (validação)</strong>. Se você deixa um atributo como público, alguém pode digitar um CPF com 20 números ou uma idade negativa.</p>
+ <p>Com o <strong>Setter</strong>, você coloca uma "regra na porta":</p>
+ <ul>
+ <li><strong>Analogia do Porteiro:</strong> O Setter é como o porteiro conferindo se o entregador está com o documento certo antes de aceitar o pacote. Se o pacote estiver aberto ou sem etiqueta, ele rejeita.</li>
+ </ul>
+
+ <h3>Por que não usar atributos públicos?</h3>
+ <p>Se você usar um atributo público (<code>public $cpf</code>), e depois de um ano decidir que o CPF deve ser salvo apenas com números (sem pontos e traços), você terá que abrir <strong>todos</strong> os arquivos do seu sistema e mudar onde o CPF é digitado.</p>
+ <p>Com o <strong>Setter</strong>, você muda apenas <strong>uma linha</strong> dentro da classe: você limpa os pontos dentro do método setCPF() e pronto!</p>
+ <p>O resto do sistema continua funcionando sem nem saber que a regra mudou. Isso se chama <strong>Encapsulamento</strong>.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Getters e Setters</div>
+ <h2>B. VISUALIZANDO</h2>
+ <div style="text-align:center;">
+  </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Getters e Setters</div>
+ <h2>C. EXEMPLO DE CÓDIGO</h2>
+ <pre><code>&lt;?php
+class Pessoa {
+ private $nascimento;
+
+ // Setter: Valida a data antes de gravar
+ public function setNascimento($data) {
+ $partes = explode('-', $data);
+ // Verifica se a data é real (Ano, Mês, Dia)
+ if (count($partes) == 3 && checkdate($partes[1], $partes[2], $partes[0])) {
+ $this->nascimento = $data;
+ } else {
+ throw new Exception("Data de nascimento inválida!");
+ }
+ }
+
+ // Getter: Apenas retorna o valor trancado
+ public function getNascimento() {
+ return $this->nascimento;
+ }
+}
+?&gt;</code></pre>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Getters e Setters</div>
+ <h2>D. EXPLICAÇÃO DO CÓDIGO</h2>
+ <ul>
+ <li><strong>setNascimento($data):</strong> Recebe uma string. Usa explode para separar os números e checkdate do PHP para garantir que não tentem salvar "31 de fevereiro".</li>
+ <li><strong>throw new Exception:</strong> Interrompe o processo se o dado for lixo. Isso evita que o banco de dados seja corrompido com informações erradas.</li>
+ <li><strong>getNascimento():</strong> Fornece o acesso de leitura. Sem esse método, o valor ficaria inacessível para exibição.</li>
+ </ul>
+ 
+ <h2>E. DICA:</h2>
+ <div class="callout yellow">
+ <p>No mercado, usamos Setters para aplicar "Sanitização".</p>
+ <p>Se um usuário digita o nome com espaços extras ou tags HTML, o Setter pode limpar isso usando <code>trim()</code> ou <code>strip_tags()</code> antes de salvar no objeto.</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">03</div>
+ <h2>Método Mágico __toString()</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">__toString()</div>
+ <h2>A. CONCEITO</h2>
+ <p>Imagine que você tem uma caixa (o <strong>Objeto</strong>) cheia de ferramentas dentro.</p>
+ <p>Se alguém te pedir "me mostre essa caixa" em formato de texto, você não pode simplesmente entregar a caixa inteira; você precisa descrever o que tem dentro ou mostrar uma etiqueta.</p>
+ <p>O método __toString() é exatamente essa <strong>"etiqueta de identificação"</strong> do objeto.</p>
+
+ <h3>O que é o __toString()?</h3>
+ <p>No PHP, métodos que começam com dois underlines (__) são chamados de <strong>Métodos Mágicos</strong>.</p>
+ <p>Eles são "mágicos" porque você não precisa chamá-los manualmente; o PHP os executa automaticamente em certas situações.</p>
+ <p>O __toString() é ativado toda vez que você tenta usar um objeto como se ele fosse uma string (texto).</p>
+ <ul>
+ <li><strong>Sem o método:</strong> O PHP tenta imprimir o objeto, não consegue e trava o sistema com um erro fatal.</li>
+ <li><strong>Com o método:</strong> O PHP percebe que você quer um texto, entra na classe, executa o que está dentro do __toString() e exibe o resultado.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">__toString()</div>
+ <h3>Por que ele é importante?</h3>
+ <p><strong>A. Evita erros catastróficos:</strong> Impede que seu site saia do ar só porque você esqueceu que $usuario era um objeto e tentou dar um echo nele.</p>
+ <p><strong>B. Facilita a conversa entre sistemas (JSON):</strong> Hoje em dia, os sites enviam dados para aplicativos de celular ou para o JavaScript no navegador.</p>
+ <p>O formato favorito para isso é o <strong>JSON</strong>.</p>
+ <p>Se o seu objeto sabe se transformar em JSON sozinho através do __toString(), seu trabalho fica muito mais rápido.</p>
+ 
+ <div class="callout blue">
+ <p><strong>Resumo da Regra:</strong> Sempre que você precisar que seu objeto "fale" (seja exibido como texto), use o __toString(). Ele é a voz do seu objeto!</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">__toString()</div>
+ <h2>B. VISUALIZANDO</h2>
+ <div style="text-align:center;">
+  </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">__toString()</div>
+ <h2>C. EXEMPLO DE CÓDIGO</h2>
+ <pre><code>&lt;?php
+class Titulo {
+ private $dados = [];
+
+ public function __construct($vencimento, $valor) {
+ $this->dados['vencimento'] = $vencimento;
+ $this->dados['valor'] = $valor;
+ }
+
+ // Método Mágico acionado automaticamente em contextos de string
+ public function __toString() {
+ // Retorna a representação textual do objeto em formato JSON
+ return json_encode($this->dados);
+ }
+}
+
+$contaLuz = new Titulo('2026-05-20', 150.50);
+echo $contaLuz; // Saída: {"vencimento":"2026-05-20","valor":150.5}
+?&gt;</code></pre>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">__toString()</div>
+ <h2>D. EXPLICAÇÃO DO CÓDIGO</h2>
+ <ul>
+ <li><strong>private $dados = []:</strong> Usamos um array interno para organizar as propriedades.</li>
+ <li><strong>__toString():</strong> Note os dois sublinhados iniciais. O PHP entende que este é um método especial.</li>
+ <li><strong>json_encode:</strong> Transforma o array associativo em uma string padrão JSON.</li>
+ <li><strong>echo $contaLuz:</strong> O programador não precisa chamar <code>$contaLuz->exibir()</code>. O PHP "percebe" o eco e chama o __toString por baixo dos panos.</li>
+ </ul>
+ 
+ <h2>E. REFLITA:</h2>
+ <div class="callout yellow">
+ <p>Se o seu objeto representa um Erro de Sistema, o que seria mais útil no __toString(): apenas a mensagem de erro ou a mensagem acompanhada da data e do arquivo onde o erro ocorreu?</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">04</div>
+ <h2>MÃO NA MASSA</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Mão na Massa</div>
+ <h3>Objetivo:</h3>
+ <p>Construir uma classe de domínio Produto robusta, aplicando proteção de dados e integração.</p>
+ 
+ <h3>Contexto:</h3>
+ <p>Vamos desenvolver o núcleo de um sistema de estoque.</p>
+ <p>O produto não pode ter preço negativo, o estoque deve ser validado e, ao final, o sistema deve ser capaz de exportar os dados do produto para um sistema externo via JSON.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Mão na Massa</div>
+ <h3>Tutorial Passo a Passo:</h3>
+ 
+ <h4>Passo 1: Estrutura Base e Blindagem</h4>
+ <p>Crie o arquivo Produto.class.php. Declare os atributos como privados para evitar manipulação indevida.</p>
+ <pre><code>class Produto {
+ private $descricao;
+ private $preco;
+ private $estoque;
+}</code></pre>
+
+ <h4>Passo 2: Implementando o Controle de Entrada (Setters)</h4>
+ <p>Adicione validações para garantir que o estoque nunca seja negativo e o preço seja numérico.</p>
+ <pre><code>public function setDescricao($valor) {
+ $this->descricao = strtoupper($valor); // Força padrão em maiúsculas
+}
+
+public function setPreco($valor) {
+ if (is_numeric($valor) && $valor > 0) {
+ $this->preco = $valor;
+ }
+}</code></pre>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Mão na Massa</div>
+ <h4>Passo 3: Acesso de Leitura (Getters)</h4>
+ <p>Permita que o sistema leia os dados que foram validados.</p>
+ <pre><code>public function getDescricao() { return $this->descricao; }
+public function getPreco() { return $this->preco; }</code></pre>
+
+ <h4>Passo 4: Representação Mágica (Exportação)</h4>
+ <p>Crie o __toString para facilitar a integração.</p>
+ <pre><code>public function __toString() {
+ return json_encode([
+ "item" => $this->descricao,
+ "valor" => $this->preco
+ ]);
+}</code></pre>
+
+ <h4>Passo 5: Teste de Stress</h4>
+ <p>Crie um arquivo index.php para testar se as travas funcionam.</p>
+ <pre><code>$p = new Produto();
+$p->setDescricao("Teclado Mecânico");
+$p->setPreco(-50); // Não deve alterar nada
+echo "Produto: " . $p; // Deve mostrar o JSON</code></pre>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Mão na Massa</div>
+ <h2>O Que Deve Ser Entregue?</h2>
+ <p>Esta entrega simula um <strong>ticket de desenvolvimento</strong> em uma empresa real, onde não basta o código funcionar; ele precisa ser seguro e seguir os padrões da arquitetura orientada a objetos.</p>
+ <p>Você deve entregar um <strong>pacote de software</strong> contendo dois arquivos principais, organizados de forma que qualquer outro desenvolvedor da equipe consiga testar sua lógica.</p>
+ 
+ <h3>1. O Modelo Técnico (Produto.class.php)</h3>
+ <p>Este é o coração da sua entrega. O arquivo deve conter a classe Produto com os seguintes requisitos obrigatórios:</p>
+ <ul>
+ <li><strong>Atributos Privados:</strong> As variáveis $descricao, $preco e $estoque <strong>não podem</strong> ser acessadas diretamente de fora da classe.</li>
+ <li><strong>Setters Inteligentes:</strong> Métodos que validam a entrada. O preço não pode ser zero ou negativo. A descrição deve ser salva automaticamente em letras maiúsculas (higienização de dados).</li>
+ <li><strong>Getters:</strong> Métodos públicos para leitura segura dos dados.</li>
+ <li><strong>Representação Mágica:</strong> O uso do método __toString() retornando uma string em formato <strong>JSON</strong>.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Mão na Massa</div>
+ <h3>2. O Script de Teste (index.php)</h3>
+ <p>Um arquivo simples para demonstrar que seu código é "à prova de erros". Ele deve:</p>
+ <ul>
+ <li>Instanciar um objeto da classe Produto.</li>
+ <li>Tentar inserir um valor inválido (ex: preço negativo) e mostrar que o objeto <strong>rejeitou</strong> a alteração.</li>
+ <li>Imprimir o objeto diretamente (echo $p) para mostrar o JSON funcionando.</li>
+ </ul>
+
+ <h3>Formato de Entrega</h3>
+ <ul>
+ <li><strong>Arquivos:</strong> Produto.class.php e index.php.</li>
+ <li><strong>Onde:</strong> Upload no ambiente virtual (AVA).</li>
+ </ul>
+ <div class="callout blue">
+ <p><strong>Dica Profissional:</strong> Adicione um pequeno comentário no topo do arquivo com seu nome e a funcionalidade daquela classe. Isso faz parte da documentação técnica exigida no mercado.</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">?</div>
+ <h2>FAQ - Perguntas Frequentes</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">FAQ</div>
+ <p><strong>Pergunta - Posso ter um Getter sem ter um Setter?</strong></p>
+ <p><strong>Resposta -</strong> Sim! Isso cria um atributo de "apenas leitura" (read-only). O valor pode ser definido apenas no construtor e depois apenas consultado.</p>
+ <hr>
+ <p><strong>Pergunta - Por que usar protected se o private é mais seguro?</strong></p>
+ <p><strong>Resposta -</strong> O protected é essencial para o reaproveitamento de código via Herança. Se você tem uma classe Funcionario e uma filha Gerente, o Gerente precisa acessar o atributo $salario para calcular bônus. Se for private, ele não consegue.</p>
+ <hr>
+ <p><strong>Pergunta - O PHP gera Getters e Setters automaticamente como o Java?</strong></p>
+ <p><strong>Resposta -</strong> Nativamente não, mas a maioria das IDEs (VS Code com extensões, PHPStorm) gera com um clique (Alt+Insert). Use a automação, mas entenda a lógica.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">FAQ</div>
+ <p><strong>Pergunta - Posso usar IA (ChatGPT) para gerar meus Getters e Setters?</strong></p>
+ <p><strong>Resposta -</strong> Sim, é uma ótima ferramenta para evitar código repetitivo. No entanto, a IA costuma gerar Setters genéricos sem validação. Sua função como dev é adicionar a regra de negócio (ex: CPF válido, estoque positivo).</p>
+ <hr>
+ <p><strong>Pergunta - O __toString aceita argumentos?</strong></p>
+ <p><strong>Resposta -</strong> Não. Ele não pode receber nenhum parâmetro. Sua missão é apenas retornar a string do estado atual do objeto.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">RESUMINDO</div>
+ <ul>
+ <li><strong>Encapsulamento:</strong> Blindagem de atributos usando private ou protected para garantir a integridade dos dados. Aplique sempre.</li>
+ <li><strong>Setters:</strong> Portas de entrada. Servem para validar, limpar (sanitizar) e filtrar o que entra no objeto.</li>
+ <li><strong>Getters:</strong> Portas de saída. Servem para ler dados privados de forma controlada.</li>
+ <li><strong>__toString():</strong> Método mágico que define a representação textual do objeto. Excelente para gerar JSON automaticamente.</li>
+ <li><strong>Visibilidade Protected:</strong> O "meio-termo" que permite que classes filhas acessem os dados, mas o mundo externo não.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">FECHAMENTO</div>
+ <h2>Conexão com a Situação de Aprendizagem (SA)</h2>
+ <p>Esta aula é o divisor de águas para o seu projeto final.</p>
+ <p>No CRUD que estamos construindo, você não poderá mais passar dados "sujos" para o Banco de Dados.</p>
+ <p>As classes que representam suas tabelas (Models) deverão usar <strong>Encapsulamento</strong> e <strong>Setters</strong> para validar e-mails, senhas e valores monetários antes mesmo de tentarem chegar ao banco, economizando processamento e evitando erros de integridade.</p>
+ </div>
+
+ </div>
+
+ <div class="controls">
+ <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+ <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+ <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+ </div>
+
+ <script>
+ let currentSlideIndex = 0;
+ const slides = document.querySelectorAll('.slide');
+ const totalSlides = slides.length;
+ const currentIndicator = document.getElementById('current');
+ const totalIndicator = document.getElementById('total');
+ const prevBtn = document.getElementById('prevBtn');
+ const nextBtn = document.getElementById('nextBtn');
+
+ totalIndicator.textContent = totalSlides;
+
+ function updateView() {
+ slides.forEach((slide, index) => {
+ slide.classList.remove('active');
+ if (index === currentSlideIndex) {
+ slide.classList.add('active');
+ }
+ });
+ currentIndicator.textContent = currentSlideIndex + 1;
+ 
+ prevBtn.disabled = currentSlideIndex === 0;
+ nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+ }
+
+ function nextSlide() {
+ if (currentSlideIndex < totalSlides - 1) {
+ currentSlideIndex++;
+ updateView();
+ }
+ }
+
+ function prevSlide() {
+ if (currentSlideIndex > 0) {
+ currentSlideIndex--;
+ updateView();
+ }
+ }
+
+ document.addEventListener('keydown', (e) => {
+ if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+ if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+ });
+ </script>
+</body>
+</html>
