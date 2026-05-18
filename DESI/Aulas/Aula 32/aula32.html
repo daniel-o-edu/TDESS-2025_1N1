@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 32 - CRUD: Create</title>
+<style>
+ body {
+ margin: 0; 
+ padding: 0; 
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ background-color: #f8f9fa; 
+ color: #212529;
+ display: flex; 
+ flex-direction: column; 
+ height: 100vh;
+ overflow: hidden;
+ }
+ .slide-container {
+ width: 95vw;
+ height: 85vh;
+ margin: auto;
+ display: flex; 
+ align-items: center; 
+ justify-content: center;
+ padding: 20px; 
+ box-sizing: border-box; 
+ position: relative;
+ }
+ .slide {
+ display: none; 
+ width: 100%; 
+ max-width: 1200px; 
+ height: 80vh;
+ background: #ffffff; 
+ border-radius: 12px;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+ padding: 50px;
+ font-size: 24px; 
+ line-height: 1.5; 
+ overflow-y: auto;
+ }
+ .slide.active { 
+ display: block; 
+ animation: fadeIn 0.4s ease-in-out;
+ }
+ @keyframes fadeIn {
+ from { opacity: 0; transform: translateY(10px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
+ h1, h2, h3, h4 { 
+ color: #0d6efd; 
+ margin-top: 0; 
+ }
+ code, pre { 
+ background: #e9ecef; 
+ padding: 10px 15px; 
+ border-radius: 8px; 
+ font-family: 'Courier New', Courier, monospace; 
+ display: block; 
+ font-size: 20px;
+ overflow-x: auto;
+ white-space: pre-wrap;
+ }
+ .controls {
+ height: 80px; 
+ background: #ffffff; 
+ border-top: 1px solid #dee2e6;
+ display: flex; 
+ justify-content: space-between; 
+ align-items: center; 
+ padding: 0 50px;
+ }
+ button {
+ background: #0d6efd; 
+ color: white; 
+ border: none; 
+ padding: 12px 25px;
+ font-size: 18px; 
+ border-radius: 8px; 
+ cursor: pointer;
+ transition: background 0.2s;
+ }
+ button:hover {
+ background: #0b5ed7;
+ }
+ button:disabled { 
+ background: #adb5bd; 
+ cursor: not-allowed; 
+ }
+ .progress { 
+ font-size: 20px; 
+ font-weight: bold; 
+ color: #495057;
+ }
+ .slide-label { font-weight: bold; text-transform: uppercase; color: #6c757d; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px; }
+ .callout { padding: 20px 30px; border-radius: 8px; margin: 20px 0; border-left: 8px solid; }
+ .callout.blue { background: #cce5ff; border-color: #004085; color: #004085; }
+ .callout.green { background: #d4edda; border-color: #155724; color: #155724; }
+ .callout.red { background: #f8d7da; border-color: #721c24; color: #721c24; }
+ .callout.yellow { background: #fff3cd; border-color: #856404; color: #856404; }
+ .section-header { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+ .section-num { font-size: 80px; font-weight: bold; color: #e9ecef; margin-bottom: -20px; }
+ .section-header h2 { font-size: 48px; color: #0d6efd; margin-bottom: 20px; }
+ img { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; border: 1px solid #dee2e6; }
+</style>
+</head>
+<body>
+ <div class="slide-container" id="slides">
+
+ <div class="slide active">
+ <div class="slide-label">Aula 32</div>
+ <h1>Projeto CRUD em PHP (com Banco de Dados)</h1>
+ <p>Um CRUD representa um conjunto de operações básicas que consistem em Create (criar), Read (ler), Update (atualizar) e Delete (apagar).</p>
+ <p>Para realizar este projeto com sucesso, são necessários elementos como a conexão com banco de dados, criação de páginas, lógica em PHP, validação de dados e exibição de resultados.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Aula 32</div>
+ <h2>Etapa 1: Preparação do Banco de dados</h2>
+ <p>Vamos detalhar a primeira parte do projeto, que é fundamental para tudo funcionar.</p>
+ <p>Se o banco de dados não for criado corretamente no phpMyAdmin, o código PHP não terá onde salvar as informações.</p>
+ <p>Para este passo a passo, assumiremos que você está usando um servidor local (como XAMPP, WAMP ou MAMP), que já vem com o PHP, MySQL e o phpMyAdmin embutidos.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 1</div>
+ <h2>Passo 1: Iniciando o Servidor Local</h2>
+ <ol>
+ <li>Abra o painel de controle do seu servidor local (ex: XAMPP Control Panel).</li>
+ <li>Inicie os serviços Apache (o servidor web) e MySQL (o banco de dados). Ambos devem ficar com o status "Verde" ou "Rodando".</li>
+ </ol>
+
+ <h2>Passo 2: Acessando o phpMyAdmin</h2>
+ <ol>
+ <li>Abra o seu navegador de internet (Chrome, Edge, Firefox, etc.).</li>
+ <li>Na barra de endereços, digite: <code>http://localhost/phpmyadmin</code> e aperte Enter.</li>
+ <li>Isso abrirá a interface visual do phpMyAdmin, que é um gerenciador de banco de dados MySQL. (Em servidores locais padrão, não é exigido usuário e senha para entrar; você já cai direto no painel logado como administrador).</li>
+ </ol>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 1</div>
+ <h2>Passo 3: Criando o Banco de Dados</h2>
+ <ol>
+ <li>No menu lateral esquerdo do phpMyAdmin, clique na primeira opção chamada "Novo" (ou "New").</li>
+ <li>No campo de texto escrito "Nome do banco de dados", você deve digitar exatamente o nome que usou no seu código conexao.php. Portanto, digite: <strong>crudphp</strong>.</li>
+ <li>Ao lado do nome, há um menu suspenso chamado Collation (Agrupamento). É recomendável procurar e selecionar <code>utf8mb4_general_ci</code> ou <code>utf8mb4_unicode_ci</code>. Isso garante que o banco de dados aceitará perfeitamente acentuação (ç, á, ã) dos nomes inseridos.</li>
+ <li>Clique no botão "Criar".</li>
+ </ol>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 1</div>
+ <h2>Passo 4: Criando a Tabela cadastro</h2>
+ <p>Assim que você criar o banco de dados, o phpMyAdmin o selecionará automaticamente e mostrará uma tela para criar uma nova tabela.</p>
+ <ol>
+ <li>No campo "Nome da tabela", digite: <strong>cadastro</strong> (é este nome que seu arquivo cadastrar.php está buscando no comando INSERT INTO cadastro...).</li>
+ <li>No campo "Número de colunas", digite: <strong>4</strong> (já que vamos guardar ID, Nome, Sobrenome e Data de Nascimento).</li>
+ <li>Clique em "Criar" (ou "Executar").</li>
+ </ol>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 1</div>
+ <h2>Passo 5: Configurando as Colunas da Tabela</h2>
+ <p>Agora você verá uma tela com 4 linhas em branco para configurar as propriedades de cada coluna. Preencha exatamente da seguinte forma:</p>
+ 
+ <h3>Linha 1 (O Identificador Único):</h3>
+ <ul>
+ <li><strong>Nome:</strong> id</li>
+ <li><strong>Tipo:</strong> INT (Inteiro)</li>
+ <li><strong>Índice (Index):</strong> Clique no menu suspenso e escolha PRIMARY (Chave Primária). Uma janelinha pode abrir para confirmar, basta clicar em Executar.</li>
+ <li><strong>A.I. (Auto Increment):</strong> Marque esta caixinha de seleção. Isso é crucial, pois diz ao banco para numerar os cadastros automaticamente (1, 2, 3...) sem que você precise enviar o ID no PHP.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 1</div>
+ <h3>Linha 2 (O Nome):</h3>
+ <ul>
+ <li><strong>Nome:</strong> nome</li>
+ <li><strong>Tipo:</strong> VARCHAR (Texto variável)</li>
+ <li><strong>Tamanho/Valores:</strong> 255 (Limite máximo de caracteres)</li>
+ </ul>
+
+ <h3>Linha 3 (O Sobrenome):</h3>
+ <ul>
+ <li><strong>Nome:</strong> sobrenome</li>
+ <li><strong>Tipo:</strong> VARCHAR</li>
+ <li><strong>Tamanho/Valores:</strong> 255</li>
+ </ul>
+
+ <h3>Linha 4 (A Data de Nascimento):</h3>
+ <ul>
+ <li><strong>Nome:</strong> datanasc</li>
+ <li><strong>Tipo:</strong> DATE (Formato específico para datas: AAAA-MM-DD)</li>
+ </ul>
+ <p>Após preencher as 4 colunas, role a tela até o final e clique no botão "Guardar" (ou "Salvar"). Pronto! A estrutura do seu banco de dados está perfeita e pronta para receber informações.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 1</div>
+ <h2>Passo 6: Entendendo a Conexão no PHP (conexao.php)</h2>
+ <p>Agora que o banco existe no phpMyAdmin, o seu código já consegue "enxergá-lo". Olhando o seu arquivo conexao.php:</p>
+ <pre><code>$pdo = new PDO('mysql:host=localhost; dbname=crudphp', 'root', '');</code></pre>
+ <p>Aqui está a explicação detalhada do que cada pedaço dessa linha faz:</p>
+ <ul>
+ <li><strong>new PDO(...)</strong>: Cria uma nova conexão usando a tecnologia PDO (PHP Data Objects), que é a forma mais segura e moderna de conectar bancos de dados no PHP.</li>
+ <li><strong>mysql:host=localhost</strong>: Diz ao PHP qual é o tipo de banco (MySQL) e onde ele está hospedado (localhost, ou seja, no mesmo computador onde o PHP está rodando).</li>
+ <li><strong>dbname=crudphp</strong>: Informa ao PHP o nome exato do banco de dados que acabamos de criar no Passo 3.</li>
+ <li><strong>'root'</strong>: Este é o nome do usuário administrador padrão do MySQL no XAMPP/WAMP.</li>
+ <li><strong>"" (aspas vazias)</strong>: Esta é a senha. Por padrão, em ambiente local, o usuário root não possui senha, por isso deixamos vazio. Se você estivesse hospedando isso em um servidor online real, haveria uma senha forte aqui.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Aula 32</div>
+ <h2>Etapa 2: Configuração Detalhada da Conexão (conexao.php)</h2>
+ <p>Este arquivo funciona como a "ponte" de comunicação indispensável do seu projeto. Sem ele, as páginas PHP (index.php, cadastrar.php, etc.) funcionariam de forma isolada, sendo incapazes de salvar ou ler qualquer informação armazenada no banco de dados que criamos no phpMyAdmin.</p>
+ <p>Para criar essa ponte de maneira limpa e profissional, o código utiliza o PDO (PHP Data Objects). O PDO é uma extensão do PHP que define uma interface leve e consistente para acessar bancos de dados, oferecendo camadas extras de segurança (como proteção contra ataques de SQL Injection).</p>
+ <p>Abaixo está o desmembramento absoluto da única - mas poderosa linha contida no seu arquivo conexao.php:</p>
+ <pre><code>&lt;?php
+$pdo = new PDO('mysql:host=localhost; dbname=crudphp', 'root', '');</code></pre>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 2</div>
+ <h3>1. Abertura da Tag PHP (&lt;?php)</h3>
+ <ul>
+ <li>Todo arquivo que processa instruções lógicas de PHP precisa iniciar com a tag &lt;?php. Como este é um arquivo de configuração pura (ele não renderiza HTML, não tem textos estruturados nem estilos), não é necessário fechar a tag com ?&gt; no final. Manter sem o fechamento evita que espaços em branco acidentais quebrem os redirecionamentos de página (header('Location: ...')) no futuro.</li>
+ </ul>
+ 
+ <h3>2. Criação da Variável de Conexão ($pdo)</h3>
+ <p>O símbolo $ indica a criação de uma variável. O nome escolhido foi pdo. Esta variável passará a carregar o objeto da conexão ativa. Sempre que qualquer outro arquivo do seu sistema (como o cadastrar.php) precisar conversar com o banco, ele chamará essa variável $pdo para dar as ordens.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 2</div>
+ <h3>3. Instanciação do Objeto (= new PDO(...))</h3>
+ <p>O termo new serve para instanciar (criar) um novo objeto baseado em uma classe. Estamos dizendo ao PHP: "Instancie um novo mecanismo de conexão usando as regras da classe PDO". Dentro dos parênteses, passamos os três parâmetros fundamentais exigidos pelo PDO:</p>
+ 
+ <h4>Anatomia dos Parâmetros do PDO</h4>
+ <p>O construtor do PDO recebe três argumentos em formato de texto (strings), separados por vírgula: new PDO('DSN', 'Usuário', 'Senha').</p>
+ </div>
+ 
+ <div class="slide">
+ <div class="slide-label">Etapa 2</div>
+ <h4>Parâmetro 1: O DSN (Data Source Name) → 'mysql:host=localhost; dbname=crudphp'</h4>
+ <p>O DSN é uma string de texto que diz ao PHP qual é o tipo de banco de dados, onde ele está e qual banco específico deve ser aberto. Ela é dividida em três partes:</p>
+ <ul>
+ <li><strong>mysql:</strong> Define o driver de conexão. Avisa ao PHP que o banco de dados de destino é do tipo MySQL/MariaDB (o phpMyAdmin gerencia esse tipo).</li>
+ <li><strong>host=localhost</strong> Define o endereço do servidor. Como você está desenvolvendo na sua própria máquina de forma local utilizando um pacote como o XAMPP ou WAMP, o servidor de banco de dados está rodando no endereço local, identificado pela palavra-chave localhost.</li>
+ <li><strong>dbname=crudphp</strong> Especifica o nome exato do banco de dados (esquema) que foi criado previamente dentro do phpMyAdmin. O PHP tentará se conectar a essa pasta virtual. Se houver qualquer erro de digitação aqui (como escrever crud_php), a conexão falhará com um erro de "banco desconhecido".</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 2</div>
+ <h4>Parâmetro 2: O Usuário → 'root'</h4>
+ <p>É o segundo argumento inserido nos parênteses. Define as credenciais de acesso. Ambientes de desenvolvimento locais (XAMPP, WAMP, MAMP) vêm configurados de fábrica com um usuário administrador supremo padrão chamado root. Esse usuário tem permissões totais para criar, ler, modificar e deletar qualquer dado.</p>
+
+ <h4>Parâmetro 3: A Senha</h4>
+ <ul>
+ <li>É o terceiro argumento. Por padrão, em servidores locais voltados para aprendizado ou testes locais, o usuário root vem configurado sem nenhuma senha. No PHP, representamos a ausência de caracteres abrindo e fechando aspas simples imediatamente "" (ou aspas duplas "").</li>
+ <li>Nota de segurança: Caso você envie esse projeto para um servidor de hospedagem real na internet (produção), você obrigatoriamente definirá uma senha complexa aqui por motivos de segurança.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 2</div>
+ <h2>Como este arquivo é reaproveitado no sistema?</h2>
+ <p>Para não ter que digitar essa linha de conexão em todas as páginas do sistema, o PHP permite importar arquivos de configuração. No início do seu arquivo cadastrar.php e do seu index.php, você notará a seguinte linha:</p>
+ <pre><code>require('conexao.php');</code></pre>
+ <p>O comando require faz com que o PHP "copie e cole" todo o conteúdo de conexao.php para dentro da outra página no exato momento da execução. Dessa forma, a variável $pdo fica disponível instantaneamente para preparar e executar os comandos SQL que inserem e listam os dados na tela.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Aula 32</div>
+ <h2>Etapa 3: Desenvolvimento do Formulário (index.php)</h2>
+ <p>Agora vamos mergulhar na Etapa 3, que trata da interface com o usuário: o arquivo index.php. Enquanto o arquivo de conexão trabalha nos bastidores, o index.php é a "vitrine" do seu sistema. É a tela que o usuário final verá no navegador. Para que os dados cheguem até o banco de dados, precisamos de uma porta de entrada, e essa porta é o formulário HTML.</p>
+ <p>Analisando o código do seu arquivo index.php, temos o seguinte bloco responsável por essa etapa:</p>
+ <pre><code>&lt;form action="cadastrar.php" method="post"&gt;
+    &lt;input class="form-control" type="text" name="nome" placeholder="Digite seu nome"&gt;
+    &lt;input class="form-control" type="text" name="sobrenome" placeholder="Digite seu sobrenome"&gt;
+    &lt;input class="form-control" type="date" name="datanasc" placeholder="Digite sua data de nascimento"&gt;
+    &lt;input type="submit" value="Cadastrar" class="btn btn-primary"&gt;
+&lt;/form&gt;</code></pre>
+ <p>Vamos desmembrar cada elemento e entender o papel de cada atributo detalhadamente:</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 3</div>
+ <h3>1. A Tag &lt;form&gt;: O Envelope de Dados</h3>
+ <p>A tag &lt;form&gt; funciona como um "envelope" que agrupa os dados que o usuário vai digitar. Tudo o que estiver dentro dela será empacotado e enviado de uma só vez quando o botão for clicado.</p>
+ <ul>
+ <li><strong>action="cadastrar.php"</strong>: Este é o endereço de destino. Diz ao navegador: "Quando o usuário clicar em enviar, pegue todos os dados deste formulário e entregue-os para o arquivo cadastrar.php processar".</li>
+ <li><strong>method="post"</strong>: Define a forma como os dados serão transportados. O método POST envia as informações de forma "invisível" no corpo da requisição do navegador. Diferente do método GET (que mostra os dados na URL do navegador), o POST é muito mais seguro e adequado para cadastros, pois não expõe os dados sensíveis e permite o envio de um volume maior de informações.</li>
+ </ul>
+</div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 3</div>
+ <h3>2. Os Campos de Texto (&lt;input type="text"&gt;)</h3>
+ <p>Temos dois campos para capturar o nome e o sobrenome do usuário.</p>
+ <ul>
+ <li><strong>type="text"</strong>: Diz ao navegador para renderizar uma caixa de texto simples.</li>
+ <li><strong>name="nome" e name="sobrenome"</strong>: Este é o atributo mais importante para o PHP! O atributo name funciona como a "etiqueta" daquele dado. Quando a informação chegar no arquivo cadastrar.php, o PHP vai procurar exatamente por essas etiquetas para resgatar o que foi digitado (através do comando $_POST['nome'], por exemplo).</li>
+ <li><strong>placeholder="..."</strong>: É aquele texto clarinho que fica dentro do campo vazio dando uma dica ao usuário (ex: "Digite seu nome"). Ele some assim que a pessoa começa a digitar.</li>
+ <li><strong>class="form-control"</strong>: Esta é uma classe do framework CSS Bootstrap. Ela não tem função no PHP, mas serve para deixar o visual do campo bonito, arredondado e ocupando 100% da largura disponível na tela.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 3</div>
+ <h3>3. O Campo de Data (&lt;input type="date"&gt;)</h3>
+ <ul>
+ <li><strong>type="date"</strong>: Uma funcionalidade excelente do HTML5. Ao definir o tipo como date, navegadores modernos (como Chrome, Firefox, Edge) exibem automaticamente um mini-calendário (date picker) para o usuário escolher a data. Isso evita que o usuário digite a data em um formato incorreto (como "10/05/90" em vez do formato de banco de dados "1990-05-10").</li>
+ <li><strong>name="datanasc"</strong>: A etiqueta que identificará essa data lá no processamento do PHP. Lembre-se: criamos uma coluna com esse mesmo nome no banco de dados.</li>
+ </ul>
+</div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 3</div>
+ <h3>4. O Botão de Envio (&lt;input type="submit"&gt;)</h3>
+ <p>Por fim, precisamos de um gatilho para disparar o processo.</p>
+ <ul>
+ <li><strong>type="submit"</strong>: Transforma este input em um botão de envio. A função exclusiva do tipo "submit" é procurar a tag &lt;form&gt; onde ele está inserido, empacotar todos os inputs que têm um name, e enviá-los para a URL definida no action.</li>
+ <li><strong>value="Cadastrar"</strong>: É o texto que aparecerá escrito no meio do botão.</li>
+ <li><strong>class="btn btn-primary"</strong>: Mais classes do Bootstrap. btn avisa que o elemento deve ter formato de botão, e btn-primary aplica a cor primária padrão do framework (geralmente azul).</li>
+ </ul>
+ <div class="callout blue">
+ <p><strong>Resumindo:</strong> Quando o usuário preenche essas caixas e clica em "Cadastrar", o navegador cria um pacote oculto (POST) contendo variáveis como nome="João", sobrenome="Silva", datanasc="1990-01-01" e as arremessa diretamente para o arquivo cadastrar.php, que ficará encarregado de abrir esse pacote e guardá-lo no banco de dados.</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Aula 32</div>
+ <h2>Etapa 4: Lógica de Processamento (cadastrar.php)</h2>
+ <p>Chegamos à Etapa 4, o "cérebro" da operação de criação (Create). O arquivo cadastrar.php não possui interface visual (HTML); o trabalho dele é puramente nos bastidores. Ele atua como um mensageiro que pega o pacote de dados enviado pelo formulário, verifica as informações, abre a porta do banco de dados e guarda tudo lá dentro de forma segura.</p>
+ <p>Vamos desmembrar o código do seu arquivo cadastrar.php linha por linha para entender essa lógica perfeitamente:</p>
+ 
+ <h3>1. Chamando a Conexão</h3>
+ <pre><code>require('conexao.php');</code></pre>
+ <p>Antes de fazer qualquer coisa, o script precisa saber como acessar o banco de dados. O require importa o arquivo que configuramos no Passo 2, disponibilizando a variável $pdo (que contém a conexão ativa) para ser usada aqui.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 4</div>
+ <h3>2. Captura e Filtragem dos Dados</h3>
+ <pre><code>$nome = filter_input(type:INPUT_POST, var_name:'nome');
+$sobrenome = filter_input(type:INPUT_POST, var_name: 'sobrenome');
+$datanasc = filter_input(type:INPUT_POST, var_name:'datanasc');</code></pre>
+ <p>Quando o formulário (do index.php) é enviado, os dados chegam através de um método chamado POST. Para capturar essas informações, utilizamos a função embutida do PHP filter_input().</p>
+ <ul>
+ <li><strong>Por que usar filter_input?</strong> Em vez de simplesmente pegar os dados de forma bruta (usando $_POST['nome']), o filter_input é uma prática recomendada de segurança. Ele verifica se a variável realmente existe, evitando erros na tela caso o usuário tente acessar a página diretamente sem enviar o formulário.</li>
+ </ul>
+ <p>Os dados capturados são então guardados em variáveis locais do PHP ($nome, $sobrenome, $datanasc) para facilitar o manuseio.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 4</div>
+ <h3>3. O Bloco Try-Catch (Tentativa e Erro)</h3>
+ <pre><code>try {
+    // Código de inserção no banco...
+} catch (PDOException $e) {
+    // Tratamento de erro...
+}</code></pre>
+ <p>Mexer com banco de dados é uma operação "arriscada": o servidor pode cair, a tabela pode não existir, um dado pode estar no formato errado. O bloco try-catch é uma rede de segurança.</p>
+ <ul>
+ <li><strong>try { ... }</strong> Diz ao PHP: "Tente executar os comandos aqui dentro". Se tudo der certo, ele segue o fluxo normalmente.</li>
+ <li><strong>catch (...) { ... }</strong>: Se qualquer coisa der errado dentro do try, o PHP para imediatamente e "pula" para o catch. Isso evita que seu sistema trave de forma feia ou exponha dados sensíveis aos usuários.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 4</div>
+ <h3>4. A Query SQL e a Prevenção contra Invasões (SQL Injection)</h3>
+ <p>Dentro do bloco try, temos a preparação da ordem que será dada ao banco de dados:</p>
+ <pre><code>$sql = "INSERT INTO cadastro (nome, sobrenome, datanasc) VALUES (:nome, :sobrenome, :datanasc)";
+$statement = $pdo->prepare($sql);</code></pre>
+ <ul>
+ <li><strong>A Query ($sql)</strong>: Estamos escrevendo o comando SQL INSERT INTO. Dizemos para inserir na tabela cadastro, especificamente nas colunas nome, sobrenome e datanasc.</li>
+ <li><strong>Os Marcadores (:nome)</strong>: Em vez de colocar as variáveis diretas na query (o que abriria uma brecha gravíssima de segurança chamada SQL Injection, onde hackers podem destruir seu banco), usamos marcadores virtuais iniciados por dois pontos (como nome).</li>
+ <li><strong>$pdo->prepare($sql)</strong>: Dizemos ao banco: "Prepare-se, vou mandar essa estrutura de texto, mas os valores reais enviarei em seguida". Isso cria um objeto chamado $statement (declaração).</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 4</div>
+ <h3>5. Atribuindo os Valores (bindValue) e Executando</h3>
+ <pre><code>$statement->bindValue(':nome', $nome);
+$statement->bindValue(':sobrenome', $sobrenome);
+$statement->bindValue(':datanasc', $datanasc);
+$statement->execute();</code></pre>
+ <ul>
+ <li><strong>bindValue()</strong>: É aqui que ligamos os pontos. Nós informamos ao PDO qual é o valor real de cada marcador. Exemplo: "Lembra do marcador :nome? Substitua ele pela variável $nome que capturamos lá em cima". Como o banco já pré-compilou a estrutura da query no prepare(), ele agora trata essa variável estritamente como um texto comum, neutralizando qualquer código malicioso que um hacker pudesse ter digitado no formulário.</li>
+ <li><strong>execute()</strong>: Este é o gatilho final. Ele manda o comando completo e montado para o banco de dados executar. É neste exato milissegundo que a nova linha é criada na sua tabela do phpMyAdmin.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 4</div>
+ <h3>6. Redirecionamento de Volta</h3>
+ <pre><code>header('Location: index.php');</code></pre>
+ <p>Se o execute() funcionou sem erros, a linha de baixo entra em ação. A função header('Location: ...') emite uma ordem ao navegador do usuário: "O cadastro foi feito! Volte instantaneamente para a página index.php". Sem isso, o usuário ficaria preso em uma tela toda branca após clicar no botão de enviar.</p>
+</div>
+
+ <div class="slide">
+ <div class="slide-label">Etapa 4</div>
+ <h3>7. O Tratamento de Falhas (O Catch)</h3>
+ <pre><code>} catch (PDOException $e) {
+    echo "Erro ao cadastrar usuário: ".$e->getMessage();
+    exit();
+}</code></pre>
+ <p>Se algo der errado (por exemplo, você esqueceu de iniciar o servidor MySQL no XAMPP), o bloco try falha e o catch assume.</p>
+ <ul>
+ <li>A variável $e guarda todos os detalhes técnicos do erro. Usamos echo para imprimir uma mensagem amigável juntamente com a descrição do erro ($e->getMessage()), facilitando a vida do programador para descobrir o que quebrou.</li>
+ <li>A função exit() obriga o PHP a encerrar o carregamento da página ali mesmo, garantindo que nenhum outro código acidental seja rodado após o erro.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Aula 32</div>
+ <h2>Análise da Etapa de Criação (Create)</h2>
+ <p>Até este momento, o material fornecido construiu uma base robusta para o desenvolvimento de um sistema CRUD (Create, Read, Update, Delete) em PHP. A arquitetura estruturada nesta aula reflete excelentes práticas de programação voltadas para a segurança e organização do código.</p>
+ <ul>
+ <li><strong>Modelagem do Banco de Dados:</strong> A preparação inicial no phpMyAdmin, com a criação do banco crudphp e da tabela cadastro, foi bem fundamentada. A escolha de tipos de dados adequados (como DATE para a coluna datanasc e VARCHAR 255 para os textos) garante a integridade da informação logo em sua origem.</li>
+ <li><strong>Conexão e Segurança:</strong> A utilização da extensão PDO (PHP Data Objects) atua como um pilar central de segurança. O PDO padroniza o acesso e cria uma barreira nativa contra ataques de SQL Injection, que são invasões que se aproveitam de brechas em formulários.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Aula 32</div>
+ <h2>Análise da Etapa de Criação (Create) - Continuação</h2>
+<ul>
+<li><strong>Interface Front-end:</strong> O arquivo index.php foi estabelecido como a interface do usuário, utilizando um formulário com o método POST. O método POST transporta os dados de forma invisível no corpo da requisição, sendo a escolha ideal e segura para cadastros.</li>
+ <li><strong>Processamento Back-end:</strong> O arquivo cadastrar.php demonstra maturidade no tratamento de dados. A adoção da função filter_input assegura que as variáveis sejam tratadas corretamente e evita erros de acesso direto. O uso de Prepared Statements (declarações preparadas), separando a estrutura do SQL ($pdo->prepare()) da injeção de valores (bindValue()), força o banco de dados a tratar as entradas estritamente como texto inofensivo. O tratamento de erros com o bloco try-catch fecha o pacote garantindo que falhas técnicas sejam contidas.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <h2>Conclusão da Aula de Criação</h2>
+ <p>A etapa de "Create" foi concluída de maneira muito eficiente. Estabelecemos um fluxo unidirecional onde o usuário insere informações em um formulário visualmente limpo (com classes do Bootstrap como form-control), envia um pacote oculto para o servidor web, e o script PHP encarrega-se de inserir esses dados no banco de forma validada e segura. O toque final com a função de redirecionamento header('Location: index.php') garante uma experiência de uso contínua e sem travamentos de tela branca.</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Próximos Passos</div>
+ <h2>Focando no READ (Leitura e Exibição de Dados)</h2>
+ <p>Agora que nosso sistema tem a capacidade de persistir (salvar) informações no banco de dados, a progressão natural é extrair essas informações para devolvê-las à interface visual. Na nossa próxima etapa, o foco será totalmente na operação Read.</p>
+ </div>
+
+ <div class="slide">
+ <div class="slide-label">Próximos Passos</div>
+ <h3>O que abordaremos na próxima etapa?</h3>
+ <ol>
+ <li><strong>Consulta de Retorno (A Query SELECT):</strong> Iniciaremos modificando o topo do arquivo index.php, adicionando uma lógica de comunicação que rodará antes de a tela carregar. O PHP enviará o comando SELECT * FROM cadastro ao banco, instruindo-o a devolver todas as linhas salvas.</li>
+ <li><strong>Organizando as Respostas (O Método Fetch All):</strong> Utilizaremos o comando estrutural $statement->fetchAll(PDO::FETCH_ASSOC). Este método coleta a resposta bruta do MySQL e a converte em um array associativo (uma matriz) que o PHP consegue manipular facilmente.</li>
+ <li><strong>Construção da Tabela HTML Dinâmica:</strong> A grande mágica ocorrerá no front-end. Em vez de digitarmos os dados fixos no código HTML, utilizaremos um laço de repetição chamado foreach (que significa "para cada"). O PHP irá percorrer a nossa matriz de usuários e, para cada registro encontrado, gerará dinamicamente uma nova linha (&lt;tr&gt;) dentro de uma tabela organizada pelo Bootstrap (table-striped) exibindo colunas como "Nome" e futuramente "Opções".</li>
+ <li><strong>Teste de Integração (Criar e Ler em Tempo Real):</strong> Realizaremos um teste completo do nosso fluxo. Preencheremos o formulário de cadastro que já criamos e, ao clicar no botão "Cadastrar", o sistema processará os dados, fará o redirecionamento imediato, e você verá a nova informação surgir instantaneamente e de forma dinâmica na nossa tabela HTML.</li>
+ </ol>
+ </div>
+
+ </div>
+
+ <div class="controls">
+ <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+ <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+ <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+ </div>
+
+ <script>
+ let currentSlideIndex = 0;
+ const slides = document.querySelectorAll('.slide');
+ const totalSlides = slides.length;
+ const currentIndicator = document.getElementById('current');
+ const totalIndicator = document.getElementById('total');
+ const prevBtn = document.getElementById('prevBtn');
+ const nextBtn = document.getElementById('nextBtn');
+
+ totalIndicator.textContent = totalSlides;
+
+ function updateView() {
+ slides.forEach((slide, index) => {
+ slide.classList.remove('active');
+ if (index === currentSlideIndex) {
+ slide.classList.add('active');
+ }
+ });
+ currentIndicator.textContent = currentSlideIndex + 1;
+ 
+ prevBtn.disabled = currentSlideIndex === 0;
+ nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+ }
+
+ function nextSlide() {
+ if (currentSlideIndex < totalSlides - 1) {
+ currentSlideIndex++;
+ updateView();
+ }
+ }
+
+ function prevSlide() {
+ if (currentSlideIndex > 0) {
+ currentSlideIndex--;
+ updateView();
+ }
+ }
+
+ document.addEventListener('keydown', (e) => {
+ if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+ if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+ });
+ </script>
+</body>
+</html>
