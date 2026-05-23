@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 35 - Upload de Arquivos em PHP</title>
+<style>
+ body {
+ margin: 0; 
+ padding: 0; 
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ background-color: #f8f9fa; 
+ color: #212529;
+ display: flex; 
+ flex-direction: column; 
+ height: 100vh;
+ overflow: hidden;
+ }
+ .slide-container {
+ width: 95vw;
+ height: 85vh;
+ margin: auto;
+ display: flex; 
+ align-items: center; 
+ justify-content: center;
+ padding: 20px; 
+ box-sizing: border-box; 
+ position: relative;
+ }
+ .slide {
+ display: none; 
+ width: 100%; 
+ max-width: 1200px; 
+ height: 80vh;
+ background: #ffffff; 
+ border-radius: 12px;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+ padding: 50px;
+ font-size: 24px; 
+ line-height: 1.5; 
+ overflow-y: auto;
+ }
+ .slide.active { 
+ display: block; 
+ animation: fadeIn 0.4s ease-in-out;
+ }
+ @keyframes fadeIn {
+ from { opacity: 0; transform: translateY(10px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
+ h1, h2, h3, h4 { 
+ color: #0d6efd; 
+ margin-top: 0; 
+ }
+ code, pre { 
+ background: #e9ecef; 
+ padding: 10px 15px; 
+ border-radius: 8px; 
+ font-family: 'Courier New', Courier, monospace; 
+ display: block; 
+ font-size: 20px;
+ overflow-x: auto;
+ white-space: pre-wrap;
+ }
+ .controls {
+ height: 80px; 
+ background: #ffffff; 
+ border-top: 1px solid #dee2e6;
+ display: flex; 
+ justify-content: space-between; 
+ align-items: center; 
+ padding: 0 50px;
+ }
+ button {
+ background: #0d6efd; 
+ color: white; 
+ border: none; 
+ padding: 12px 25px;
+ font-size: 18px; 
+ border-radius: 8px; 
+ cursor: pointer;
+ transition: background 0.2s;
+ }
+ button:hover {
+ background: #0b5ed7;
+ }
+ button:disabled { 
+ background: #adb5bd; 
+ cursor: not-allowed; 
+ }
+ .progress { 
+ font-size: 20px; 
+ font-weight: bold; 
+ color: #495057;
+ }
+ .slide-label { font-weight: bold; text-transform: uppercase; color: #6c757d; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px; }
+ .callout { padding: 20px 30px; border-radius: 8px; margin: 20px 0; border-left: 8px solid; }
+ .callout.blue { background: #cce5ff; border-color: #004085; color: #004085; }
+ .callout.green { background: #d4edda; border-color: #155724; color: #155724; }
+ .callout.red { background: #f8d7da; border-color: #721c24; color: #721c24; }
+ .callout.yellow { background: #fff3cd; border-color: #856404; color: #856404; }
+ .section-header { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+ .section-num { font-size: 80px; font-weight: bold; color: #e9ecef; margin-bottom: -20px; }
+ .section-header h2 { font-size: 48px; color: #0d6efd; margin-bottom: 20px; }
+ img { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; border: 1px solid #dee2e6; }
+ table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 20px; }
+ th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+ th { background-color: #e9ecef; color: #0d6efd; }
+</style>
+</head>
+<body>
+ <div class="slide-container" id="slides">
+
+ <div class="slide active">
+ <div class="slide-label">Aula 35</div>
+ <h1>Aula 35 - Upload de Arquivos em PHP</h1>
+ <p><strong>Descrição:</strong> Nesta aula, vamos aprender como permitir que os usuários enviem arquivos (como documentos e imagens) do computador deles para o nosso servidor.</p>
+ <p>Esse é um recurso fundamental para sistemas web, como fotos de perfil, envio de currículos ou galerias de imagens.</p>
+ </div>
+
+ <div class="slide">
+ <h2>Introdução da Aula</h2>
+ <p>Nesta aula, vamos construir, do zero, uma das funcionalidades mais requisitadas e essenciais no desenvolvimento de sistemas web: a capacidade de permitir que os usuários enviem arquivos (como fotos de perfil, comprovantes e documentos) de seus computadores diretamente para o nosso servidor.</p>
+ <p>Ao longo da aula, nosso aprendizado será dividido em quatro etapas fundamentais e conectadas:</p>
+ <ol>
+ <li>O Frontend com HTML</li>
+ <li>A anatomia da Superglobal $_FILES</li>
+ <li>Segurança Máxima no Processamento</li>
+ <li>Otimização Gráfica com a Biblioteca GD</li>
+ </ol>
+ </div>
+
+ <div class="slide">
+ <h2>Etapas do Aprendizado</h2>
+ <p><strong>1. O Frontend com HTML:</strong> Entenderemos a estrutura obrigatória do protocolo HTTP necessária para criar um formulário capaz de transportar dados binários (como arquivos de imagens), além de preparar a interface para uma boa experiência do usuário.</p>
+ <p><strong>2. A anatomia da Superglobal $_FILES:</strong> Descobriremos como o PHP intercepta as requisições de arquivos e organiza todas as suas informações brutas e metadados dentro de uma estrutura em matriz de memória.</p>
+ </div>
+
+ <div class="slide">
+ <h2>Etapas do Aprendizado (Continuação)</h2>
+ <p><strong>3. Segurança Máxima no Processamento:</strong> Aprenderemos que nunca devemos confiar nos dados vindos do usuário. Construiremos um script backend robusto focado em blindagem, aplicando validações binárias de conteúdo com finfo, limites estritos de armazenamento e técnicas criptográficas para renomear arquivos de forma imprevisível.</p>
+ <p><strong>4. Otimização Gráfica com a Biblioteca GD:</strong> Iremos além do simples armazenamento. Utilizaremos os recursos nativos do PHP para tratar as imagens salvas, calculando suas proporções matemáticas de forma dinâmica para redimensioná-las na memória RAM, garantindo economia de espaço em disco e máxima velocidade no carregamento de páginas.</p>
+ <p>Ao final, você terá o domínio completo sobre o fluxo de entrada de arquivos na web, sabendo diferenciar um código puramente funcional de um código seguro para produção.</p>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">01</div>
+ <h2>1. O Formulário HTML (O Frontend)</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>1. O Formulário HTML (O Frontend)</h2>
+ <p>Para que o upload de arquivos funcione em uma aplicação web, o formulário HTML precisa seguir uma especificação rigorosa definida pelo protocolo HTTP. Sem essa configuração, o navegador enviará apenas o nome do texto do arquivo e o PHP não receberá o conteúdo binário.</p>
+ <h3>Regras cruciais e seus porquês didáticos:</h3>
+ <ul>
+ <li><strong>O método de envio deve ser obrigatoriamente method="POST":</strong> O método GET envia os dados anexados à URL do navegador, possuindo um limite rígido de caracteres e aceitando apenas texto simples. Como arquivos podem ser muito grandes e contêm dados binários, o POST é obrigatório, pois envia as informações escondidas dentro do corpo da requisição HTTP, sem limitação de tamanho textual.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>1. O Formulário HTML (O Frontend) - Continuação</h2>
+ <ul>
+ <li><strong>A tag &lt;form&gt; precisa do atributo enctype="multipart/form-data":</strong> Por padrão, os formulários codificam os dados como texto simples (application/x-www-form-urlencoded). Imagens, PDFs e músicas não podem ser lidos como texto puro. O atributo enctype (codificação do conteúdo) avisa ao navegador que a requisição deve ser "fatiada" em múltiplas partes (multipart), permitindo que o servidor PHP separe os campos de texto comuns dos fluxos binários dos arquivos.</li>
+ <li><strong>O uso do atributo accept no &lt;input type="file"&gt;:</strong> Embora a validação final ocorra no backend por segurança, adicionar o atributo accept melhora a experiência do usuário (UX). Ele instrui o sistema operacional a filtrar a janela de seleção, exibindo apenas extensões permitidas e impedindo que o usuário selecione arquivos incorretos por engano antes mesmo do envio.</li>
+ </ul>
+ <div class="callout blue">
+ <p><strong>Arquivo de referência:</strong> index.html</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">02</div>
+ <h2>2. A Superglobal (O Backend)</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>2. A Superglobal (O Backend)</h2>
+ <p>Quando um formulário configurado para upload é submetido, o protocolo HTTP separa os dados textuais dos dados binários. Por esse motivo, o PHP não coloca as informações do arquivo na variável $_POST, mas sim em uma superglobal exclusiva chamada $_FILES.</p>
+ <p>Se o campo de seleção no seu HTML foi definido com o atributo name="arquivo", o PHP gerará automaticamente um array associativo bidimensional estruturado como $_FILES['arquivo']. Esse array contém cinco chaves fundamentais para o rastreamento e validação do documento:</p>
+ </div>
+
+ <div class="slide">
+ <h2>As Chaves do Array $_FILES</h2>
+ <ul>
+ <li><strong>name:</strong> Representa o nome original que o arquivo possuía no dispositivo do usuário antes do envio (ex: foto.jpg).</li>
+ <li><strong>type:</strong> Indica o tipo MIME do arquivo que foi detectado e enviado pelo navegador web (ex: image/jpeg ou application/pdf). <br><small><strong>Atenção:</strong> Como essa informação nasce no navegador do cliente, ela pode ser facilmente adulterada por usuários maliciosos.</small></li>
+ <li><strong>tmp_name:</strong> O caminho do diretório temporário dentro do servidor onde o PHP armazenou provisoriamente o arquivo binário bruto. O arquivo permanecerá nesta pasta de transição apenas durante a execução deste script. Se não for movido para um local definitivo, ele será descartado automaticamente pelo servidor.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>As Chaves do Array $_FILES (Continuação)</h2>
+ <ul>
+ <li><strong>error:</strong> Um código numérico inteiro associado ao status do upload. O valor 0 (mapeado pela constante UPLOAD_ERR_OK) indica que o upload foi concluído com sucesso absoluto. Outros números indicam falhas específicas, como arquivos que excederam o limite configurado no servidor.</li>
+ <li><strong>size:</strong> Informa o tamanho real do arquivo mensurado estritamente em bytes. Essencial para limitar o consumo de armazenamento do disco rígido.</li>
+ </ul>
+ <p>O script demonstra de maneira puramente didática como debugar e inspecionar a anatomia de todos esses índices gerados pela superglobal $_FILES antes de aplicar as camadas pesadas de segurança.</p>
+ <div class="callout blue">
+ <p><strong>Arquivo de referência:</strong> processa_upload.php</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Conceito: Variável Superglobal</h2>
+ <p>Uma variável superglobal é uma variável especial do PHP que está sempre disponível em qualquer parte do seu código, independentemente do escopo. Em funções ou classes comuns, as variáveis criadas fora delas não podem ser acessadas lá dentro sem o uso di instruções específicas. As superglobais quebram essa regra: elas são arrays globais automáticos criados e gerenciados pelo próprio motor do PHP.</p>
+ <p>Isso significa que você pode acessá-las de qualquer arquivo, função, método ou classe sem precisar passar nenhuma variável como parâmetro. Elas são utilizadas principalmente para capturar informações que vêm de fora do script atual, como dados enviados por formulários, cookies, sessões ou informações do servidor.</p>
+ </div>
+
+ <div class="slide">
+ <h2>Principais Superglobais do PHP</h2>
+ <p>As mais conhecidas são:</p>
+ <ul>
+ <li><strong>$_POST:</strong> Captura dados enviados por formulários via método POST.</li>
+ <li><strong>$_GET:</strong> Captura parâmetros enviados diretamente na URL da página.</li>
+ <li><strong>$_FILES:</strong> Armazena as informações e metadados de arquivos enviados ao servidor.</li>
+ <li><strong>$_SESSION:</strong> Guarda dados que precisam persistir enquanto o usuário navega pelo site.</li>
+ <li><strong>$_SERVER:</strong> Contém dados sobre o ambiente do servidor, cabeçalhos e caminhos do script.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">03</div>
+ <h2>3. Processando o Upload de Forma Segura</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>3. Processando o Upload de Forma Segura</h2>
+ <p>Receber arquivos em um servidor é uma das operações mais sensíveis no desenvolvimento web. Como o backend aceita dados externos diretamente para o disco rígido, nunca devemos confiar nos arquivos ou nas informações textuais enviadas pelos usuários. É mandatório criar uma barreira de validações rigorosas antes de salvar o arquivo definitivamente no servidor através da função move_uploaded_file().</p>
+ <p>Para construir uma arquitetura de proteção profissional, o script de processing deve executar as seguintes etapas de auditoria:</p>
+ </div>
+
+ <div class="slide">
+ <h2>Etapas de Auditoria e Segurança</h2>
+ <ul>
+ <li><strong>Tratamento preventivo de erros estruturais:</strong> Antes de analisar o conteúdo, o código verifica o índice ['error'] da superglobal. Se o valor for diferente da constante UPLOAD_ERR_OK (que vale 0), o fluxo é interrompido imediatamente. Isso evita processar arquivos corrompidos, uploads incompletos ou que quebraram regras de capacidade do próprio servidor web.</li>
+ <li><strong>Filtro rigoroso de capacidade (Tamanho limite):</strong> Definir e checar o tamanho máximo em bytes através do índice ['size'] protege o servidor contra ataques de negação de serviço (DoS), impedindo que usuários maliciosos enviem arquivos gigantescos para esgotar o armazenamento em disco e travar a aplicação.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Validação em Dupla Camada</h2>
+ <ul>
+ <li><strong>Validação em dupla camada (Extensão vs. Conteúdo Real):</strong>
+ <ol>
+ <li>A primeira camada analisa apenas o texto do nome do arquivo utilizando a função pathinfo(), isolando a extensão (como .jpg ou .png) para verificar se ela consta na lista de permissões.</li>
+ <li>A segunda camada - altamente crítica - ignora o nome do arquivo e inspeciona seus bytes internos usando a extensão nativa finfo (Fileinfo). Ela lê o cabeçalho binário real do arquivo armazenado temporariamente para garantir que o conteúdo condiz com o formato declarado. Isso impede que um invasor mude o nome de um script malicioso (como ataque.php) para foto.jpg e consiga burlar o sistema.</li>
+ </ol>
+ </li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Anonimização e Persistência</h2>
+ <ul>
+ <li><strong>Descaracterização e anonimização do nome do arquivo:</strong> Salvar o arquivo com o nome original gerado pelo usuário abre brechas para a substituição acidental de documentos homônimos e permite ataques de injeção de caracteres especiais no sistema de arquivos. A solução profissional consiste em gerar uma sequência de caracteres criptograficamente imprevisível usando bin2hex(random_bytes(16)), anexando a extensão higienizada ao final.</li>
+ <li><strong>Persistência isolada com move_uploaded_file():</strong> Esta função nativa é desenhada especificamente para transporte seguro de uploads. Ela realiza uma checagem interna para garantir que o arquivo de origem realmente nasceu de uma requisição de upload HTTP legítima antes de movê-lo do diretório temporário isolado para a pasta de destino final com permissões restritas.</li>
+ </ul>
+ <div class="callout blue">
+ <p><strong>Arquivo de referência:</strong> upload.php</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">04</div>
+ <h2>4. Manipulação Básica de Imagens no Servidor</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>4. Manipulação Básica de Imagens no Servidor</h2>
+ <p>Muitas vezes, realizar apenas o upload do arquivo bruto não atende às necessidades de um projeto profissional. Fotos tiradas por smartphones modernos possuem resoluções altíssimas e tamanhos pesados, o que esgota o armazenamento do servidor e torna o carregamento das páginas lento para os usuários.</p>
+ <p>Para resolver isso, o PHP oferece suporte nativo à manipulação de arquivos gráficos por meio da extensão GD Library. Ao integrar rotinas de pós-upload, conseguimos tratar as imagens diretamente na memória do servidor antes de consolidar o armazenamento definitivo, aplicando um fluxo estruturado em etapas claras:</p>
+ </div>
+
+ <div class="slide">
+ <h2>O Fluxo da GD Library na Memória</h2>
+ <ul>
+ <li><strong>Carregamento e Alocação de Memória:</strong> O arquivo recém-salvo no disco é lido e transformado em um recurso gráfico temporário na memória RAM do servidor através de funções como imagecreatefromjpeg().</li>
+ <li><strong>Mapeamento e Proporção Dinâmica:</strong> Utilizando imagesx() e imagesy(), o motor do PHP extrai a largura e a altura originais. A partir desses dados, calcula-se o fator de proporção matemática (aspect ratio) para deduzir a nova altura de forma automática, impedindo que a imagem final sofra distorções ou achatamentos visuais.</li>
+ <li><strong>Criação da Matriz de Destino:</strong> Uma nova tela virtual completamente em branco e com suporte a milhões de cores é gerada pelo comando imagecreatetruecolor(), utilizando as dimensões reduzidas e otimizadas calculadas previamente.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>O Fluxo da GD Library na Memória (Continuação)</h2>
+ <ul>
+ <li><strong>Processamento e Amostragem (Resample):</strong> A função de alta performance imagecopyresampled() realiza a cópia dos pixels da imagem gigante para a nova tela reduzida. Este método aplica algoritmos internos de interpolação suave que preservam a nitidez e a qualidade visual da imagem, mesmo após uma redução drástica de escala.</li>
+ <li><strong>Compactação e Escrita em Disco:</strong> A imagem tratada é gravada de volta no disco rígido do servidor através de imagejpeg(), permitindo também configurar um nível percentual de compressão (ex: qualidade a 80%). Esse ajuste fino remove metadados invisíveis e otimiza o peso do arquivo final sem perdas perceptíveis ao olho humano.</li>
+ <li><strong>Desalocação e Limpeza de Cache:</strong> Como recursos gráficos consomem muita memória RAM do servidor, o encerramento do ciclo com imagedestroy() é mandatório para liberar os blocos de memória ocupados pelas imagens antigas e novas, prevenindo lentidões e gargalos no sistema.</li>
+ </ul>
+ </div>
+ 
+ <div class="slide">
+ <h2>O Fluxo da GD Library na Memória (Continuação)</h2>
+ <p>O arquivo encapsula toda essa lógica de maneira isolada em uma função reaproveitável, permitindo que o script principal de upload faça a chamada de otimização de forma limpa assim que o arquivo binário for validado e persistido no servidor.</p>
+ <div class="callout blue">
+ <p><strong>Arquivo de referência:</strong> manipula.php</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">05</div>
+ <h2>Conclusão</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Conclusão: A Importância de uma Arquitetura Profissional</h2>
+ <p>A construção de um sistema de upload de arquivos ilustra perfeitamente o divisor de águas entre o desenvolvimento amador e a Engenharia de Software profissional. Um código puramente funcional preocupa-se apenas com o "caminho feliz": se o usuário envia uma imagem válida e ela aparece na tela, a tarefa é considerada concluída. No entanto, mover um software para o ambiente real de produção exige a adoção de uma arquitetura profissional.</p>
+ <p>A importância de estruturar seu software sob padrões profissionais reflete-se em três pilares indispensáveis:</p>
+ <ul>
+ <li>Segurança e Mitigação de Riscos</li>
+ <li>Desempenho e Gerenciamento de Recursos</li>
+ <li>Manutenibilidade e Escalabilidade</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Os Três Pilares da Arquitetura Profissional</h2>
+ <ul>
+ <li><strong>Segurança e Mitigação de Riscos:</strong> Um sistema de upload sem validação profunda (como o uso do cabeçalho binário via finfo) torna-se uma porta aberta para invasões. Hackers podem facilmente mascarar scripts maliciosos (arquivos .php disfarçados com a extensão .jpg) para assumir o controle total do servidor. Arquitetar com foco em segurança protege os dados dos usuários e a reputação da infraestrutura.</li>
+ <li><strong>Desempenho e Gerenciamento de Recursos:</strong> Servidores possuem limites de memória, processamento e armazenamento. Permitir uploads sem controle de tamanho ou sem rotinas de otimização gráfica (como o redimensionamento dinâmico estudado na biblioteca GD) resulta em custos inflacionados com discos rígidos e sistemas extremamente lentos. Tratar o recurso antes de armazená-lo preserva a saúde técnica do ecossistema.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Os Três Pilares da Arquitetura Profissional (Continuação)</h2>
+ <ul>
+ <li><strong>Manutenibilidade e Escalabilidade:</strong> Separar o sistema em módulos claros (um arquivo para interface, um para validação e um dedicado exclusivamente à manipulação de mídia) garante que o código possa crescer de forma sustentável. Se no futuro for necessário trocar o armazenamento local por um serviço de nuvem (como o Amazon S3) ou adicionar suporte para arquivos PDF, a alteração será cirúrgica e isolada, sem o risco de quebrar outras partes do software.</li>
+ </ul>
+ <div class="callout green">
+ <p>Adotar uma arquitetura profissional significa programar prevendo falhas, blindando brechas e otimizando recursos. É essa mentalidade técnica refinada que diferencia quem apenas escreve linhas de código de quem constrói soluções digitais resilientes, seguras e de alto valor de mercado.</p>
+ </div>
+ </div>
+
+ </div>
+
+ <div class="controls">
+ <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+ <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+ <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+ </div>
+
+ <script>
+ let currentSlideIndex = 0;
+ const slides = document.querySelectorAll('.slide');
+ const totalSlides = slides.length;
+ const currentIndicator = document.getElementById('current');
+ const totalIndicator = document.getElementById('total');
+ const prevBtn = document.getElementById('prevBtn');
+ const nextBtn = document.getElementById('nextBtn');
+
+ totalIndicator.textContent = totalSlides;
+
+ function updateView() {
+ slides.forEach((slide, index) => {
+ slide.classList.remove('active');
+ if (index === currentSlideIndex) {
+ slide.classList.add('active');
+ }
+ });
+ currentIndicator.textContent = currentSlideIndex + 1;
+ 
+ prevBtn.disabled = currentSlideIndex === 0;
+ nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+ }
+
+ function nextSlide() {
+ if (currentSlideIndex < totalSlides - 1) {
+ currentSlideIndex++;
+ updateView();
+ }
+ }
+
+ function prevSlide() {
+ if (currentSlideIndex > 0) {
+ currentSlideIndex--;
+ updateView();
+ }
+ }
+
+ document.addEventListener('keydown', (e) => {
+ if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+ if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+ });
+ </script>
+</body>
+</html>
