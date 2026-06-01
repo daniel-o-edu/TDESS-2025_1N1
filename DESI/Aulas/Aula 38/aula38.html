@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 38 - Princípios SOLID</title>
+<style>
+ body {
+ margin: 0; 
+ padding: 0; 
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ background-color: #f8f9fa; 
+ color: #212529;
+ display: flex; 
+ flex-direction: column; 
+ height: 100vh;
+ overflow: hidden;
+ }
+ .slide-container {
+ width: 95vw;
+ height: 85vh;
+ margin: auto;
+ display: flex; 
+ align-items: center; 
+ justify-content: center;
+ padding: 20px; 
+ box-sizing: border-box; 
+ position: relative;
+ }
+ .slide {
+ display: none; 
+ width: 100%; 
+ max-width: 1200px; 
+ height: 80vh;
+ background: #ffffff; 
+ border-radius: 12px;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+ padding: 50px;
+ font-size: 24px; 
+ line-height: 1.5; 
+ overflow-y: auto;
+ }
+ .slide.active { 
+ display: block; 
+ animation: fadeIn 0.4s ease-in-out;
+ }
+ @keyframes fadeIn {
+ from { opacity: 0; transform: translateY(10px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
+ h1, h2, h3, h4 { 
+ color: #0d6efd; 
+ margin-top: 0; 
+ }
+ code, pre { 
+ background: #e9ecef; 
+ padding: 10px 15px; 
+ border-radius: 8px; 
+ font-family: 'Courier New', Courier, monospace; 
+ display: block; 
+ font-size: 20px;
+ overflow-x: auto;
+ white-space: pre-wrap;
+ }
+ .controls {
+ height: 80px; 
+ background: #ffffff; 
+ border-top: 1px solid #dee2e6;
+ display: flex; 
+ justify-content: space-between; 
+ align-items: center; 
+ padding: 0 50px;
+ }
+ button {
+ background: #0d6efd; 
+ color: white; 
+ border: none; 
+ padding: 12px 25px;
+ font-size: 18px; 
+ border-radius: 8px; 
+ cursor: pointer;
+ transition: background 0.2s;
+ }
+ button:hover {
+ background: #0b5ed7;
+ }
+ button:disabled { 
+ background: #adb5bd; 
+ cursor: not-allowed; 
+ }
+ .progress { 
+ font-size: 20px; 
+ font-weight: bold; 
+ color: #495057;
+ }
+ .slide-label { font-weight: bold; text-transform: uppercase; color: #6c757d; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px; }
+ .callout { padding: 20px 30px; border-radius: 8px; margin: 20px 0; border-left: 8px solid; }
+ .callout.blue { background: #cce5ff; border-color: #004085; color: #004085; }
+ .callout.green { background: #d4edda; border-color: #155724; color: #155724; }
+ .callout.red { background: #f8d7da; border-color: #721c24; color: #721c24; }
+ .callout.yellow { background: #fff3cd; border-color: #856404; color: #856404; }
+ .section-header { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+ .section-num { font-size: 80px; font-weight: bold; color: #e9ecef; margin-bottom: -20px; }
+ .section-header h2 { font-size: 48px; color: #0d6efd; margin-bottom: 20px; }
+ img { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; border: 1px solid #dee2e6; }
+ table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 20px; }
+ th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+ th { background-color: #e9ecef; color: #0d6efd; }
+</style>
+</head>
+<body>
+ <div class="slide-container" id="slides">
+
+ <div class="slide active">
+ <div class="slide-label">Aula 38</div>
+ <h1>Aula 38 - Princípios SOLID</h1>
+ <p><strong>Descrição:</strong> Nesta aula vamos entender profundamente os princípios SOLID focando principalmente no SRP e OCP.</p>
+ <hr>
+ <p>O <b>SOLID</b> é um acrônimo criado por <b>Michael Feathers</b> para condensar cinco princípios de design de software orientado a objetos que foram apresentados por <b>Robert C. Martin</b> (conhecido como "Uncle Bob").</p>
+ <p>Eles servem como um guia para criar códigos fáceis de manter, estender, testar e adaptar ao longo do tempo, evitando que o software se transforme em um "sistema legado monolítico e frágil".</p>
+ <hr>
+ <p>Aqui está a explicação detalhada de cada um dos cinco princípios:</p>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">01</div>
+ <h2>S - Single Responsibility Principle</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>S - Single Responsibility Principle (Princípio da Responsabilidade Única)</h2>
+ <div class="callout blue">
+ "Uma classe deve ter um, e apenas um, motivo para mudar."
+ </div>
+ <p>Uma classe não deve ser uma "ferramenta multifuncional". Ela deve ser especialista em uma única área de negócio ou papel dentro do sistema.</p>
+ <p>Quando uma classe faz coisas demais (acumula responsabilidades), qualquer alteração em uma regra de negócio pode quebrar, acidentalmente, outra funcionalidade não relacionada.</p>
+ </div>
+
+ <div class="slide">
+ <h2>SRP - Violação e Solução</h2>
+ <ul>
+ <li><strong>Violação comum:</strong> Uma classe Usuario que contém as propriedades do usuário, o método para salvar o usuário no banco de dados e o método para enviar um e-mail de boas-vindas.</li>
+ <hr>
+ <li><strong>Solução SOLID:</strong> Separar em três classes: Usuario (dados), Usuario Repository (banco de dados) e EmailService (comunicação).</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">02</div>
+ <h2>O - Open/Closed Principle</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>O - Open/Closed Principle (Princípio do Aberto/Fechado)</h2>
+ <div class="callout blue">
+ "Entidades de software devem estar abertas para extensão, mas fechadas para modificação."
+ </div>
+ <p>Você deve ser capaz de adicionar novos comportamentos ou funcionalidades ao sistema sem precisar alterar o código-fonte que já está escrito, testado e funcionando.</p>
+ <p>Isso previne a introdução de novos bugs em recursos antigos.</p>
+ <p>Esse princípio é atingido principalmente através do uso de interfaces e polimorfismo.</p>
+ </div>
+
+ <div class="slide">
+ <h2>OCP - Violação e Solução</h2>
+ <ul>
+ <li><strong>Violação comum:</strong> Uma classe Calculadora Delmposto com um método cheio de if/else ou switch testando o tipo de produto para aplicar a alíquota correspondente. Toda vez que um novo produto surgir, você terá que modificar essa classe.</li>
+ <hr>
+ <li><strong>Solução SOLID:</strong> Criar uma interface ImpostoInterface com o método calcular(). Cada novo produto será uma nova classe que implementa essa interface. A Calculadora Delmposto passa a depender apenas da interface, ficando blindada contra modificações futuras.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">03</div>
+ <h2>L - Liskov Substitution Principle</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>L - Liskov Substitution Principle (Princípio da Substituição de Liskov)</h2>
+ <div class="callout blue">
+ "As classes derivadas devem ser substituíveis por suas classes base."
+ </div>
+ <p>Formulado por Barbara Liskov, este princípio diz que se uma classe B é herdeira (subclasse) de uma classe A, então nós deveríamos ser capazes de substituir A por B em qualquer parte do código sem que o sistema quebre ou mude de comportamento inesperadamente.</p>
+ <p>A herança deve expressar uma relação real de comportamento, e não apenas de semelhança semântica.</p>
+ </div>
+
+ <div class="slide">
+ <h2>LSP - Violações Comuns</h2>
+ <ul>
+ <li><strong>O clássico exemplo do Retângulo e do Quadrado:</strong> Se você criar uma classe Quadrado que herda de Retângulo, ao tentar alterar apenas a largura do "Quadrado", ele forçará a alteração da altura também (para manter os lados iguais). Se o seu código esperava o comportamento de um retângulo padrão, ele vai quebrar. Outra violação clássica é criar uma subclasse que lança uma exceção do tipo Método NãolmplementadoException para um método da classe pai.</li>
+<hr>
+<li><strong>Solução SOLID:</strong> Se a subclasse não consegue fazer tudo o que a classe pai faz de forma natural, a herança está errada. Use composição ou interfaces mais específicas em vez de herança forçada.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">04</div>
+ <h2>I - Interface Segregation Principle</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Interface Segregation Principle (Princípio da Segregação de Interface)</h2>
+ <div class="callout blue">
+ "Uma classe não deve ser forçada a depender de interfaces que ela não utiliza."
+ </div>
+ <p>É melhor criar várias interfaces específicas e pequenas do que uma única interface genérica e "gorda".</p>
+ <p>Quando uma interface possui métodos demais, as classes que a implementam são frequentemente obrigadas a criar métodos vazios apenas para satisfazer o contrato do compilador.</p>
+ </div>
+
+ <div class="slide">
+ <h2>ISP - Violação e Solução</h2>
+ <ul>
+ <li><strong>Violação comum:</strong> Uma interface AveInterface que possui os métodos bicar(), chocar Ovos() e voar(). Se você criar uma classe Pinguim que implementa essa interface, será obrigado a implementar o método voar(), mesmo que pinguins não voem.</li>
+<hr>
+<li><strong>Solução SOLID:</strong> Dividir em interfaces menores, como AveInterface (com os métodos comuns) e AveVoadoralnterface (apenas com o método voar()). O pinguim implementa apenas a primeira.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">05</div>
+ <h2>D - Dependency Inversion Principle</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>D - Dependency Inversion Principle (Princípio da Inversão de Dependência)</h2>
+ <div class="callout blue">
+ "Dependa de abstrações, não de implementações concretas."
+ </div>
+ <p>Módulos de alto nível (as regras de negócio principais) não devem depender de módulos de baixo nível (detalhes de infraestrutura, como bancos de dados, APIs externas ou bibliotecas). Ambos devem depender de abstrações (interfaces).</p>
+ <p>Isso desacopla o sistema e torna as peças facilmente substituíveis.</p>
+ </div>
+
+ <div class="slide">
+ <h2>DIP - Violação e Solução</h2>
+ <p><strong>Violação comum:</strong> Dentro da sua classe de negócio principal Processador De Pedido, você instancia diretamente a classe do banco de dados: <b><i>$banco = new MySQLConnection();</i></b>. Seu código principal ficou totalmente amarrado e dependente do MySQL.</p>
+ <p><strong>Solução SOLID:</strong> O Processador De Pedido deve exigir no seu construtor uma interface chamada DbConnectionInterface. Quem decide se vai passar uma conexão MySQL, PostgreSQL ou MongoDB é quem está chamando a classe de fora (Injeção de Dependência).</p>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">06</div>
+ <h2>Resumo do SOLID</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Resumo Visual do SOLID</h2>
+ <table>
+ <thead>
+ <tr>
+ <th>Princípio</th>
+ <th>Em poucas palavras...</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td><strong>S</strong> - Responsabilidade Única (SRP)</td>
+ <td>Cada classe cuida apenas do seu próprio quadrado.</td>
+ </tr>
+ <tr>
+ <td><strong>O</strong> - Aberto/Fechado (OCP)</td>
+ <td>Adicione novas funções criando novo código, não alterando o antigo.</td>
+ </tr>
+ <tr>
+ <td><strong>L</strong> - Substituição de Liskov (LSP)</td>
+ <td>Uma classe filha deve honrar e conseguir fazer tudo o que a classe pai fazia.</td>
+ </tr>
+ <tr>
+ <td><strong>I</strong> - Segregação de Interface (ISP)</td>
+ <td>Não force uma classe a implementar algo que ela não precisa.</td>
+ </tr>
+ <tr>
+ <td><strong>D</strong> - Inversão de Dependência (DIP)</td>
+ <td>Amarre seu código a contratos (interfaces), não a tecnologias específicas.</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">07</div>
+ <h2>Fechamento</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Fechamento: Consolidação do Aprendizado</h2>
+ <p>Para fechar com chave de ouro e consolidar nosso aprendizado sobre o SOLID, think nesses cinco princípios não como regras rígidas de preenchimento de tabela, mas como um investimento na sua paz de espírito profissional.</p>
+ <p>Dominar o SRP, OCP e os demais pilares transforma a sua relação com o código de duas formas fundamentais:</p>
+ <ul>
+ <li><strong>Do ponto de vista técnico:</strong> Você deixa de escrever códigos em bloco (onde mexer em uma linha parece desarmar uma bomba) e passa a construir sistemas baseados em "blocos de Lego", onde encaixar uma nova peça (como uma nova API de pagamento ou um novo relatório) é natural, seguro e rápido.</li>
+ <li><strong>Do ponto de vista de carreira:</strong> Você para de apenas "codificar" e passa a arquitetar soluções. Um desenvolvedor que domina o SOLID gasta menos tempo caçando bugs inexplicáveis e mais tempo criando softwares escaláveis que sobrevivem ao crescimento das empresas.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Fechamento:</h2>
+ <p>A melhor maneira de fixar esses conceitos é o treino ativo: da próxima vez que abrir um arquivo legível e sentir aquela "dor de cabeça" ao ver um método com dezenas de linhas e condicionais, tente isolar o problema.</p>
+ <hr>
+ <p><i><b>Pergunte-se:</b> "Como posso quebrar isso em uma nova classe (SRP)?" ou "Como uma interface me ajudaria a eliminar esse excesso de if/else (OCP)?".</p>
+ <p>É esse exercício diário que transforma teoria em excelência.</i></p>
+ <hr>
+ <div class="callout green">
+ Que o seu próximo código seja tão limpo que sirva de documentação!
+ </div>
+ </div>
+
+ </div>
+
+ <div class="controls">
+ <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+ <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+ <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+ </div>
+
+ <script>
+ let currentSlideIndex = 0;
+ const slides = document.querySelectorAll('.slide');
+ const totalSlides = slides.length;
+ const currentIndicator = document.getElementById('current');
+ const totalIndicator = document.getElementById('total');
+ const prevBtn = document.getElementById('prevBtn');
+ const nextBtn = document.getElementById('nextBtn');
+
+ totalIndicator.textContent = totalSlides;
+
+ function updateView() {
+ slides.forEach((slide, index) => {
+ slide.classList.remove('active');
+ if (index === currentSlideIndex) {
+ slide.classList.add('active');
+ }
+ });
+ currentIndicator.textContent = currentSlideIndex + 1;
+ 
+ prevBtn.disabled = currentSlideIndex === 0;
+ nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+ }
+
+ function nextSlide() {
+ if (currentSlideIndex < totalSlides - 1) {
+ currentSlideIndex++;
+ updateView();
+ }
+ }
+
+ function prevSlide() {
+ if (currentSlideIndex > 0) {
+ currentSlideIndex--;
+ updateView();
+ }
+ }
+
+ document.addEventListener('keydown', (e) => {
+ if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+ if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+ });
+ </script>
+</body>
+</html>
