@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 39 - Padrão MVC em PHP</title>
+<style>
+ body {
+ margin: 0; 
+ padding: 0; 
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ background-color: #f8f9fa; 
+ color: #212529;
+ display: flex; 
+ flex-direction: column; 
+ height: 100vh;
+ overflow: hidden;
+ }
+ .slide-container {
+ width: 95vw;
+ height: 85vh;
+ margin: auto;
+ display: flex; 
+ align-items: center; 
+ justify-content: center;
+ padding: 20px; 
+ box-sizing: border-box; 
+ position: relative;
+ }
+ .slide {
+ display: none; 
+ width: 100%; 
+ max-width: 1200px; 
+ height: 80vh;
+ background: #ffffff; 
+ border-radius: 12px;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+ padding: 50px;
+ font-size: 24px; 
+ line-height: 1.5; 
+ overflow-y: auto;
+ }
+ .slide.active { 
+ display: block; 
+ animation: fadeIn 0.4s ease-in-out;
+ }
+ @keyframes fadeIn {
+ from { opacity: 0; transform: translateY(10px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
+ h1, h2, h3, h4 { 
+ color: #0d6efd; 
+ margin-top: 0; 
+ }
+ code, pre { 
+ background: #e9ecef; 
+ padding: 10px 15px; 
+ border-radius: 8px; 
+ font-family: 'Courier New', Courier, monospace; 
+ display: block; 
+ font-size: 20px;
+ overflow-x: auto;
+ white-space: pre-wrap;
+ }
+ .controls {
+ height: 80px; 
+ background: #ffffff; 
+ border-top: 1px solid #dee2e6;
+ display: flex; 
+ justify-content: space-between; 
+ align-items: center; 
+ padding: 0 50px;
+ }
+ button {
+ background: #0d6efd; 
+ color: white; 
+ border: none; 
+ padding: 12px 25px;
+ font-size: 18px; 
+ border-radius: 8px; 
+ cursor: pointer;
+ transition: background 0.2s;
+ }
+ button:hover {
+ background: #0b5ed7;
+ }
+ button:disabled { 
+ background: #adb5bd; 
+ cursor: not-allowed; 
+ }
+ .progress { 
+ font-size: 20px; 
+ font-weight: bold; 
+ color: #495057;
+ }
+ .slide-label { font-weight: bold; text-transform: uppercase; color: #6c757d; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px; }
+ .callout { padding: 20px 30px; border-radius: 8px; margin: 20px 0; border-left: 8px solid; }
+ .callout.blue { background: #cce5ff; border-color: #004085; color: #004085; }
+ .callout.green { background: #d4edda; border-color: #155724; color: #155724; }
+ .callout.red { background: #f8d7da; border-color: #721c24; color: #721c24; }
+ .callout.yellow { background: #fff3cd; border-color: #856404; color: #856404; }
+ .section-header { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+ .section-num { font-size: 80px; font-weight: bold; color: #e9ecef; margin-bottom: -20px; }
+ .section-header h2 { font-size: 48px; color: #0d6efd; margin-bottom: 20px; }
+ img { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; border: 1px solid #dee2e6; }
+ table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 20px; }
+ th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+ th { background-color: #e9ecef; color: #0d6efd; }
+</style>
+</head>
+<body>
+ <div class="slide-container" id="slides">
+
+ <div class="slide active">
+ <div class="slide-label">Aula 39</div>
+ <h1>Aula 39 - Padrão MVC em PHP</h1>
+ <p><strong>Descrição:</strong> Esta aula aborda a arquitetura do padrão MVC em PHP e a reorganização estrutural das pastas de um projeto.</p>
+ <p>Ensina o passo a passo prático para refatorar códigos "spaghetti" legados utilizando os princípios da Orientação a Objetos.</p>
+ <p>Explora também o funcionamento do Front Controller, do roteamento centralizado e do conceito de autoloading via PSR-4.</p>
+ </div>
+ 
+  <div class="slide">
+ <div class="slide-label">Aula 39</div>
+ <h3>Introdução:</h3>
+ <p>O padrão MVC (Model-View-Controller) é a espinha dorsal da arquitetura de software para a web.</p>
+ <p>Quando falamos de PHP antigo ou legado, é muito comum encontrar o famoso código "spaghetti" (onde HTML, CSS, SQL e lógica de negócios dividem alegremente a mesma linha de código).</p>
+ <p>Migrar disso para o MVC não é só uma questão de capricho; é o que vai salvar sua sanidade mental, permitindo testabilidade, manutenção e escalabilidade.</p>
+ <p>Abaixo, um guia profundo de como funciona o MVC em PHP, como organizar a estrutura de pastas e um passo a passo prático de refatoração.</p>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">01</div>
+ <h2>1. O Padrão MVC em Projetos PHP</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>1. O Padrão MVC em Projetos PHP</h2>
+ <p>O propósito do MVC é a Separação de Conceitos ( Separation of Concerns ).</p>
+ <p>Cada camada tem um papel estrito e não deve assumir a responsabilidade das outras.</p>
+ </div>
+ 
+ <div class="slide">
+   <img src="img01.png" alt="Esquema do Padrão MVC">
+ </div>
+
+ <div class="slide">
+ <h2>Model (O Coração)</h2>
+ <p>O Model gerencia os dados e as regras de negócio da aplicação.</p>
+ <p>Ele não sabe que a web existe, não sabe o que é HTML e não lida com requisições HTTP.</p>
+ <div class="callout blue">
+ <strong>O que faz:</strong> Conecta ao banco de dados, valida dados de entrada segundo regras de negócio, executa queries (via PDO ou ORM) e manipula entidades.
+ </div>
+ <p><strong>Em PHP:</strong> Geralmente são classes que representam tabelas ou serviços (ex: Usuario.php, ProdutoRepository.php).</p>
+ </div>
+
+ <div class="slide">
+ <h2>View (A Vitrine)</h2>
+ <p>A View é a interface apresentada ao usuário. Em aplicações PHP puras, é o local onde o HTML reside.</p>
+ <div class="callout blue">
+ <strong>O que faz:</strong> Recebe dados já processados e os exibe. Ela não faz requisições diretas ao banco de dados.
+ </div>
+ <p>Pode conter lógica simples de exibição (como um foreach para listar produtos ou um if para mostrar uma mensagem).</p>
+ <p><strong>Em PHP:</strong> Arquivos .php que são templates HTML com pequenas tags PHP (<code>&lt;?= $variavel ?&gt;</code>) ou motores de renderização como Twig/Blade.</p>
+ </div>
+
+ <div class="slide">
+ <h2>Controller (O Maestro)</h2>
+ <p>O Controller intermedia a comunicação entre o Model e a View. Ele recebe o impacto da requisição do usuário.</p>
+ <div class="callout blue">
+ <strong>O que faz:</strong> Intercepta a requisição HTTP (via GET ou POST), pede os dados necessários ao Model, processa qualquer lógica de fluxo e repassa o resultado para a View correspondente.
+ </div>
+ <p><strong>Em PHP:</strong> Classes com métodos (ações) chamados pelas rotas da aplicação (ex: HomeController.php, AuthController.php).</p>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">02</div>
+ <h2>2. Reorganizando o Projeto: Estrutura de Pastas</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>2. Reorganizando o Projeto: Estrutura de Pastas</h2>
+ <p>Para implementar o MVC de forma profissional, precisamos tirar os arquivos da raiz e organizá-los logicamente.</p>
+ <p>Uma estrutura moderna e segura para PHP adota o padrão de expor apenas uma pasta pública (public/) para a internet, protegendo o código-fonte.</p>
+ <p><strong>Sugestão de Arquitetura de Pastas</strong></p>
+ </div>
+ 
+ <div class="slide">
+   <img src="img02.png" alt="Sugestão de Arquitetura de Pastas">
+ </div>
+
+ <div class="slide">
+ <h2>O segredo : Front Controller e .htaccess</h2>
+ <p>Em vez de acessar meu-projeto/usuarios/listar.php diretamente, o usuário acessa meu-projeto/usuarios.</p>
+ <p>O arquivo .htaccess na raiz ou na pasta public/ redireciona todas as requisições para o public/index.php.</p>
+ <p>Este arquivo lê a URL, descobre qual Controller deve chamar (Roteamento) e inicializa a aplicação.</p>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">03</div>
+ <h2>3. Refatorando Código Spaghetti para MVC (Na Prática)</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>3. Refatorando Código Spaghetti para MVC (Na Prática)</h2>
+ <p>Vamos ver a anatomia de uma refatoração. Imagine o seguinte cenário clássico de código "tudo em um":</p>
+ <h3>O Código Spaghetti (usuarios.php)</h3>
+ <p>Este arquivo faz tudo: conecta ao banco, processa exclusão, busca dados e exibe HTML.</p>
+ </div>
+ 
+ <div class="slide">
+ <pre><code>&lt;?php
+// TUDO MISTURADO: Banco, Lógica e HTML
+$pdo = new PDO("mysql:host=localhost;dbname=teste", "root", "");
+if (isset($_GET['excluir'])) {    
+    $id = $_GET['excluir'];
+    $stmt = $pdo->prepare("DELETE FROM usuarios WHERE id = ?");    
+    $stmt->execute([$id]);    
+    header("Location: usuarios.php");
+    exit;
+}
+$stmt = $pdo->query("SELECT * FROM usuarios");
+$usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Lista de Usuários&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;    
+    <.h1>Usuários<./h1>    
+    &lt;ul&gt;        
+        &lt;?php foreach($usuarios as $u): ?&gt;            
+            &lt;li&gt;                
+                &lt;?= $u['nome'] ?&gt;                 
+                &lt;a href="usuarios.php?excluir=&lt;?= $u['id'] ?&gt;"&gt;Excluir&lt;/a&gt;            
+            &lt;/li&gt;        
+        &lt;?php endforeach; ?&gt;    
+    &lt;/ul&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+ </div>
+
+ <div class="slide">
+ <h2>Aplicando a Separação (Refatorado para MVC)</h2>
+ <p>Para organizar isso, vamos fatiar esse arquivo nas pastas corretas usando orientação a objetos e boas práticas (como injeção de dependência simplificada).</p>
+ </div>
+ 
+ <div class="slide">
+ <h3>1. A Camada de Configuração (app/config/database.php)</h3>
+ <p>Isolamos a conexão com o banco de dados.</p>
+ <pre><code>&lt;?php
+namespace App\Config;
+use PDO;
+
+class Database {    
+    public static function getConnection() {        
+        // Em produção, use variáveis de ambiente (.env)        
+        return new PDO("mysql:host=localhost;dbname=teste", "root", "");
+    }
+}</code></pre>
+ </div>
+
+ <div class="slide">
+ <h2>2. O Model (app/models/Usuario.php)</h2>
+ <p>Toda a interação com a tabela usuarios e suas regras ficam aqui.</p>
+ <p>O Model não sabe quem o chamou, ele apenas entrega ou manipula dados.</p>
+ </div>
+ 
+ <div class="slide">
+ <pre><code>&lt;?php
+namespace App\Models;
+use PDO;
+use App\Config\Database;
+
+class Usuario {    
+    private $db;
+    
+    public function __construct() {        
+        $this->db = Database::getConnection();
+    }    
+    
+    public function getAll() {        
+        $stmt = $this->db->query("SELECT * FROM usuarios");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);    
+    }    
+    
+    public function delete($id) {        
+        $stmt = $this->db->prepare("DELETE FROM usuarios WHERE id = ?");
+        return $stmt->execute([$id]);    
+    }
+}</code></pre>
+ </div>
+
+ <div class="slide">
+ <h2>3. O Controller (app/controllers/UsuarioController.php)</h2>
+ <p>Ele toma as decisões. Recebe a ação, fala com o Model e decide qual View carregar.</p>
+ </div>
+ 
+ <div class="slide">
+ <pre><code>&lt;?php
+namespace App\Controllers;
+use App\Models\Usuario;
+
+class UsuarioController {        
+    // Ação de Listar    
+    public function index() {        
+        $usuarioModel = new Usuario();
+        $usuarios = $usuarioModel->getAll();                
+        // Passa os dados para a View        
+        require_once __DIR__ . '/../views/usuarios/listar.php';    
+    }    
+    
+    // Ação de Excluir    
+    public function excluir() {        
+        if (isset($_GET['id'])) {            
+            $usuarioModel = new Usuario();
+            $usuarioModel->delete($_GET['id']);        
+        }        
+        // Redireciona usando a rota interna        
+        header("Location: /usuarios");
+        exit;    
+    }
+}</code></pre>
+ </div>
+
+ <div class="slide">
+ <h2>4. A View (app/views/usuarios/listar.php)</h2>
+ <p>Código HTML limpo. Sem conexões SQL, sem queries. Apenas lê as variáveis que o Controller disponibilizou (neste caso, $usuarios).</p>
+ </div>
+ 
+ <div class="slide">
+ <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-br"&gt;
+&lt;head&gt;    
+    &lt;meta charset="UTF-8"&gt;    
+    &lt;title&gt;Lista de Usuários&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;    
+    <.h1>Usuários<./h1>    
+    &lt;ul&gt;        
+        &lt;?php foreach($usuarios as $u): ?&gt;            
+            &lt;li&gt;                
+                &lt;?= htmlspecialchars($u['nome']) ?&gt;                 
+                &lt;a href="/usuarios/excluir?id=&lt;?= $u['id'] ?&gt;"&gt;Excluir&lt;/a&gt;            
+            &lt;/li&gt;     
+        &lt;?php endforeach; ?&gt;    
+    &lt;/ul&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+ </div>
+
+ <div class="slide">
+ <h2>Conectando tudo: O Roteador Simplificado (public/index.php)</h2>
+ <p>Para que tudo isso funcione sem um framework pesado (como Laravel ou Symfony), o seu arquivo central index.php precisa interpretar a URL e chamar o Controller certo.</p>
+ <p>Um exemplo bem básico de como isso funciona:</p>
+ </div>
+ 
+ <div class="slide">
+ <pre><code>&lt;?php
+// Autoload para carregar as classes automaticamente (PSR-4 via Composer ou manual)
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Captura a URL digitada (ex: /usuarios ou /usuarios/excluir)
+$url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+// Roteamento simples
+if ($url === '/usuarios' || $url === '/') {    
+    $controller = new \App\Controllers\UsuarioController();
+    $controller->index();
+} elseif ($url === '/usuarios/excluir') {    
+    $controller = new \App\Controllers\UsuarioController();    
+    $controller->excluir();
+} else {    
+    http_response_code(404);
+    echo "Página não encontrada!";
+}</code></pre>
+ </div>
+
+ <div class="slide">
+ <h2>Benefícios Obtidos com a Refatoração</h2>
+ <table>
+ <thead>
+ <tr>
+ <th>Aspecto</th>
+ <th>Antes (Spaghetti)</th>
+ <th>Depois (MVC Profissional)</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td><strong>Manutenção</strong></td>
+ <td>Alterar o layout corria o risco de quebrar uma query SQL.</td>
+ <td>Layout (View) e Queries (Model) estão em arquivos totalmente isolados.</td>
+ </tr>
+ <tr>
+ <td><strong>Reutilização</strong></td>
+ <td>"Se precisasse listar usuários em uma API, teria que reescrever a query."</td>
+ <td>Basta chamar o método $usuarioModel-&gt;getAll() em um novo ApiController.</td>
+ </tr>
+ <tr>
+ <td><strong>Segurança</strong></td>
+ <td>Conexões e credenciais espalhadas por múltiplos arquivos.</td>
+ <td>Centralizado em /config, facilitando o uso de variáveis de ambiente seguras.</td>
+ </tr>
+ <tr>
+ <td><strong>Trabalho em Equipe</strong></td>
+ <td>"Desenvolvedores front-end e back-end mexiam no mesmo arquivo, gerando conflitos."</td>
+ <td>Front-end mexe apenas na pasta /views, Back-end foca em /models e /controllers.</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">04</div>
+ <h2>Os Pilares Fundamentais do MVC em PHP</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Os Pilares Fundamentais do MVC em PHP</h2>
+ <p><strong>Resumindo:</strong> Aqui estão os pilares fundamentais e inegociáveis extraídos dessa análise para guiar a reestruturação do seu projeto PHP:</p>
+ <h3>1. O "Mantra" da Separação de Responsabilidades</h3>
+ <ul>
+ <li><strong>O Model é agnóstico à Web:</strong> Ele nunca deve conter códigos como echo, tags HTML ou acessar diretamente superglobais como $_POST ou $_GET. Ele lida estritamente com dados e regras de negócio.</li>
+ <li><strong>A View é "burra" (por design):</strong> Ela não sabe o que é um banco de dados, não faz conexões e não executa queries. Ela é apenas um template que recebe variáveis prontas do Controller e as exibe de forma limpa.</li>
+ <li><strong>O Controller é um intermediário magro:</strong> Ele não deve conter queries SQL complexas nem lógica de negócios pesada. Sua única função é receber a requisição do usuário, acionar o Model correto e despachar o resultado para a View adequada.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Os Pilares Fundamentais do MVC em PHP</h2>
+ <h3>2. Segurança e a Arquitetura de "Front Controller"</h3>
+ <ul>
+ <li><strong>Exposição Mínima:</strong> A raiz do seu servidor web deve apontar apenas para a pasta public/.</li>
+ <li>O arquivo public/index.php centraliza todas as requisições (com a ajuda do .htaccess).</li>
+ <li>Isso impede que usuários naveguem pela estrutura de pastas do sistema e acessem arquivos de script (.php) diretamente, blindando o código-fonte contra invasões e vazamento de credenciais.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Os Pilares Fundamentais do MVC em PHP</h2>
+ <h3>3. A Anatomia da Refatoração (O "Fatiamento")</h3>
+ <p>Migrar do código spaghetti para o MVC exige abandonar scripts puramente lineares e adotar a Orientação a Objetos (POO).</p>
+ <p>A transição bem-sucedida segue uma ordem lógica:</p>
+ <ul>
+ <li>Centralizar e isolar a conexão com o banco (config/).</li>
+ <li>Extrair e isolar as queries em métodos de classes (models/).</li>
+ <li>Isolar o HTML puro em arquivos de template (views/).</li>
+ <li>Unir os pontos usando métodos de controle (controllers/).</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Os Pilares Fundamentais do MVC em PHP</h2>
+ <h3>4. O Retorno sobre o Investimento (ROI) Técnico</h3>
+ <ul>
+ <li><strong>Desacoplamento:</strong> Alterar o design visual da aplicação (CSS/HTML) tem zero risco de quebrar uma query no banco de dados.</li>
+ <li><strong>Preparado para o Futuro:</strong> Se amanhã você precisar criar um aplicativo mobile ou integrar com outro sistema, o seu Model já está pronto para ser reutilizado por um controller de API que retorna JSON, sem que você precise reescrever uma única linha de SQL.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">05</div>
+ <h2>PONTO DE ATENÇÃO:<br> Roteamento Centralizado e Front Controller</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>PONTO DE ATENÇÃO</h2>
+ <p>Se existe um ponto nessa transição que exige total atenção e merece uma pesquisa profunda, ele é: <strong>O Roteamento Centralizado e o padrão Front Controller (com Autoloading PSR-4)</strong>.</p>
+ <p>Por que este ponto? Porque ele é a porta de entrada e a fundação técnica de todo o ecossistema MVC.</p>
+ <p>Se você não dominar o roteamento, você não conseguirá fazer o MVC funcionar na prática, e seu projeto continuará refém de arquivos soltos acessados diretamente pelo navegador.</p>
+ </div>
+
+ <div class="slide">
+ <h2>O que pesquisar a fundo neste tópico?</h2>
+ <p>Para dominar o coração da infraestrutura de um framework MVC, divida sua pesquisa em três pilares técnicos:</p>
+ <h3>1. Reescrevendo URLs com .htaccess (ou Nginx try_files)</h3>
+ <p>No código antigo, para ver os usuários, o link era meusite.com/usuarios.php. No MVC profissional, o link deve ser meusite.com/usuarios.</p>
+ <p><strong>O foco da pesquisa:</strong> Como configurar o servidor web para que qualquer URL digitada (seja /produtos, /perfil ou /usuarios/excluir) seja capturada internamente e enviada de forma invisível para o arquivo public/index.php.</p>
+ </div>
+
+ <div class="slide">
+ <h2>O que pesquisar a fundo neste tópico?</h2>
+ <h3>2. A Arquitetura do Roteador (Router)</h3>
+ <p>O index.php recebe a string da URL (ex: /usuarios/editar/5). O Roteador é o mecanismo que quebra essa string para descobrir:</p>
+ <ul>
+ <li>Qual Classe Controller instanciar (UsuarioController).</li>
+ <li>Qual Método executar (editar).</li>
+ <li>Quais Parâmetros passar para esse método (5).</li>
+ </ul>
+ <p><strong>O foco da pesquisa:</strong> Padrões de projeto para criação de roteadores simples em PHP, ou como integrar um componente de rotas profissional e seguro (como o Symfony Router ou FastRoute) usando o Composer.</p>
+ </div>
+
+ <div class="slide">
+ <h2>O que pesquisar a fundo neste tópico?</h2>
+ <h3>3. Autoloading de Classes com PSR-4</h3>
+ <p>No modelo antigo, enche-se o código de include e require no topo de cada página.</p>
+ <p>No MVC, com dezenas de Models e Controllers, gerenciar isso manualmente se torna um inferno.</p>
+ <p><strong>O foco da pesquisa:</strong> A norma PSR-4 (padrão da comunidade PHP para carregamento automático de classes baseado em Namespaces) e como o Composer automatiza isso com o comando composer dump-autoload.</p>
+ </div>
+
+ <div class="slide">
+ <h2>Por que este ponto é o mais crítico?</h2>
+ <ul>
+ <li><strong>Segurança Absoluta:</strong> É o Front Controller que garante que nenhum arquivo do seu sistema (além do index.php e dos assets como CSS/JS) possa ser executado diretamente pelo navegador. Se alguém tentar acessar meusite.com/app/config/database.php, o servidor web vai negar ou o roteador vai disparar um Erro 404.</li>
+ <li><strong>É o divisor de águas:</strong> Entender o Model, a View e o Controller isoladamente é relativamente simples (são apenas classes e HTML). O verdadeiro desafio do desenvolvedor PHP que está saindo do nível júnior/pleno para o sênior é compreender o motor que conecta essas três partes.</li>
+ </ul>
+ <p>Dominando o Roteamento e o Front Controller, você não estará apenas organizando pastas; você estará criando, do zero, a estrutura de um framework PHP proprietário, exatamente da mesma forma que gigantes como o Laravel e o Symfony operam por baixo do capô.</p>
+ </div>
+
+ </div>
+
+ <div class="controls">
+ <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+ <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+ <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+ </div>
+
+ <script>
+ let currentSlideIndex = 0;
+ const slides = document.querySelectorAll('.slide');
+ const totalSlides = slides.length;
+ const currentIndicator = document.getElementById('current');
+ const totalIndicator = document.getElementById('total');
+ const prevBtn = document.getElementById('prevBtn');
+ const nextBtn = document.getElementById('nextBtn');
+
+ totalIndicator.textContent = totalSlides;
+
+ function updateView() {
+ slides.forEach((slide, index) => {
+ slide.classList.remove('active');
+ if (index === currentSlideIndex) {
+ slide.classList.add('active');
+ }
+ });
+ currentIndicator.textContent = currentSlideIndex + 1;
+ 
+ prevBtn.disabled = currentSlideIndex === 0;
+ nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+ }
+
+ function nextSlide() {
+ if (currentSlideIndex < totalSlides - 1) {
+ currentSlideIndex++;
+ updateView();
+ }
+ }
+
+ function prevSlide() {
+ if (currentSlideIndex > 0) {
+ currentSlideIndex--;
+ updateView();
+ }
+ }
+
+ document.addEventListener('keydown', (e) => {
+ if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+ if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+ });
+ </script>
+</body>
+</html>
