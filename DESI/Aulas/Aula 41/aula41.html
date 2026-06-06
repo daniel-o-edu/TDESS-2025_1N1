@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 41 - Preparatória do Projeto de SA</title>
+<style>
+ body {
+ margin: 0; 
+ padding: 0; 
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ background-color: #f8f9fa; 
+ color: #212529;
+ display: flex; 
+ flex-direction: column; 
+ height: 100vh;
+ overflow: hidden;
+ }
+ .slide-container {
+ width: 95vw;
+ height: 85vh;
+ margin: auto;
+ display: flex; 
+ align-items: center; 
+ justify-content: center;
+ padding: 20px; 
+ box-sizing: border-box; 
+ position: relative;
+ }
+ .slide {
+ display: none; 
+ width: 100%; 
+ max-width: 1200px; 
+ height: 80vh;
+ background: #ffffff; 
+ border-radius: 12px;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+ padding: 50px;
+ font-size: 24px; 
+ line-height: 1.5; 
+ overflow-y: auto;
+ }
+ .slide.active { 
+ display: block; 
+ animation: fadeIn 0.4s ease-in-out;
+ }
+ @keyframes fadeIn {
+ from { opacity: 0; transform: translateY(10px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
+ h1, h2, h3, h4 { 
+ color: #0d6efd; 
+ margin-top: 0; 
+ }
+ code, pre { 
+ background: #e9ecef; 
+ padding: 10px 15px; 
+ border-radius: 8px; 
+ font-family: 'Courier New', Courier, monospace; 
+ display: block; 
+ font-size: 20px;
+ overflow-x: auto;
+ white-space: pre-wrap;
+ }
+ .controls {
+ height: 80px; 
+ background: #ffffff; 
+ border-top: 1px solid #dee2e6;
+ display: flex; 
+ justify-content: space-between; 
+ align-items: center; 
+ padding: 0 50px;
+ }
+ button {
+ background: #0d6efd; 
+ color: white; 
+ border: none; 
+ padding: 12px 25px;
+ font-size: 18px; 
+ border-radius: 8px; 
+ cursor: pointer;
+ transition: background 0.2s;
+ }
+ button:hover {
+ background: #0b5ed7;
+ }
+ button:disabled { 
+ background: #adb5bd; 
+ cursor: not-allowed; 
+ }
+ .progress { 
+ font-size: 20px; 
+ font-weight: bold; 
+ color: #495057;
+ }
+ .slide-label { font-weight: bold; text-transform: uppercase; color: #6c757d; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px; }
+ .callout { padding: 20px 30px; border-radius: 8px; margin: 20px 0; border-left: 8px solid; }
+ .callout.blue { background: #cce5ff; border-color: #004085; color: #004085; }
+ .callout.green { background: #d4edda; border-color: #155724; color: #155724; }
+ .callout.red { background: #f8d7da; border-color: #721c24; color: #721c24; }
+ .callout.yellow { background: #fff3cd; border-color: #856404; color: #856404; }
+ .section-header { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+ .section-num { font-size: 80px; font-weight: bold; color: #e9ecef; margin-bottom: -20px; }
+ .section-header h2 { font-size: 48px; color: #0d6efd; margin-bottom: 20px; }
+ img { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; border: 1px solid #dee2e6; }
+ table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 20px; }
+ th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+ th { background-color: #e9ecef; color: #0d6efd; }
+</style>
+</head>
+<body>
+ <div class="slide-container" id="slides">
+
+ <div class="slide active">
+ <div class="slide-label">Aula 41</div>
+ <h1>Aula 41 - Preparatória do Projeto de SA</h1>
+ <p><strong>Descrição :</strong> Nesta aula prática, as equipes de estudantes irão apresentar a prévia do projeto de SA. Cada equipe terá um tempo para realizar a apresentação e receber o feedback dos professores.</p>
+ <hr>
+ <p><strong>Introdução :</strong> Vamos estruturar esse passo a passo para o software do projeto de SA, mantendo a arquitetura robusta e a stack tecnológica nativa (PHP 8.x, MySQL, JavaScript ES6, HTML5/CSS3).</p>
+ <p>Aqui está o roteiro de desenvolvimento, organizado com as entregas e configurações esperadas fase:</p>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">01</div>
+ <h2>Fase 1: Levantamento e Engenharia de Requisitos</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Fase 1: Levantamento e Engenharia de Requisitos</h2>
+ <p>Nesta fase, traduzimos as necessidades do negócio em regras claras.</p>
+ <p><strong>Documentos a entregar:</strong> Documento de Especificação de Requisitos (SRS).</p>
+ <p><strong>Ações:</strong></p>
+ <ul>
+ <li>Mapear as entidades principais do sistema genérico.</li>
+ <li>Definir a matriz de Controle de Acesso Baseado em Papéis (RBAC), determinando quem pode ler, criar ou editar dados.</li>
+ <li>Estabelecer os fluxos de operação padrão (casos de uso).</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">02</div>
+ <h2>Fase 2: Modelagem de Dados e Integridade</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Fase 2: Modelagem de Dados e Integridade</h2>
+ <p>Preparação da camada de persistência com foco em auditoria.</p>
+ <p><strong>Documentos a entregar:</strong> Diagrama Entidade-Relacionamento (DER), Dicionário de Dados.</p>
+ <p><strong>Arquivos/Configurações:</strong> database_schema.sql.</p>
+ <p><strong>Ações:</strong></p>
+ <ul>
+ <li>Criar as tabelas no MySQL.</li>
+ <li>Adicionar uma coluna status (ex: ativo/inativo) em todas as tabelas principais para garantir o Soft Delete (baixa lógica).</li>
+ <li>Configurar chaves estrangeiras (Foreign Keys) para garantir integridade referencial.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">03</div>
+ <h2>Fase 3: Infraestrutura e Arquitetura do Back-end</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Fase 3: Infraestrutura e Arquitetura do Back-end</h2>
+ <p>Configuração da base do projeto em PHP nativo utilizando padrões de mercado.</p>
+ <p><strong>Documentos a entregar:</strong> Relatório Técnico de Arquitetura.</p>
+ <p><strong>Arquivos/Configurações vitais:</strong></p>
+ <ul>
+ <li><strong>composer.json:</strong> Configurado exclusivamente para o Autoloading de classes usando a norma PSR-4 (mapeando o namespace do projeto, ex: "App\\": "src/").</li>
+ <li><strong>config/database.php:</strong> Arquivo com as credenciais do banco (isolado do diretório público).</li>
+ <li><strong>public/index.php:</strong> O Front Controller . Único ponto de entrada do sistema.</li>
+ <li><strong>public/.htaccess (se usar Apache):</strong> Configurado para redirecionar todas as requisições para o index.php e bloquear acesso a outras pastas.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Fase 3: Infraestrutura e Arquitetura do Back-end (Continuação)</h2>
+ <p><strong>Ações:</strong></p>
+ <ul>
+ <li>Criar a estrutura de pastas separando o que é público do que é regra de negócio (ex: /public, /src/Controllers, /src/Models, /src/Views).</li>
+ <li>Desenvolver o roteador central no Front Controller.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">04</div>
+ <h2>Fase 4: Desenvolvimento da Camada de Domínio (MVC)</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Fase 4: Desenvolvimento da Camada de Domínio (MVC)</h2>
+ <p>Implementação da lógica de negócios e conexão segura com o banco.</p>
+ <p><strong>Arquivos:</strong> Classes dentro de src/Models/ e src/Controllers/.</p>
+ <p><strong>Ações:</strong></p>
+ <ul>
+ <li><strong>Conexão Unificada:</strong> Criar uma classe estática ou Singleton de conexão PDO para ser consumida pelos Controllers/Models.</li>
+ <li><strong>Princípios SOLID:</strong> Garantir que as classes tenham responsabilidade única (ex: separar validação de dados da gravação no banco).</li>
+ <li><strong>Transações ACID:</strong> Nas operações que alteram mais de uma tabela, implementar blocos try/catch utilizando $pdo->beginTransaction(), $pdo->commit() e $pdo->rollBack().</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">05</div>
+ <h2>Fase 5: Interface de Usuário (Front-end)</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Fase 5: Interface de Usuário (Front-end)</h2>
+ <p>Criação das telas de forma nativa e leve.</p>
+ <p><strong>Arquivos:</strong> public/css/style.css, public/js/app.js, e arquivos de visualização em src/Views/ (arquivos .php que mesclam HTML5 com as variáveis do Controller).</p>
+ <p><strong>Ações:</strong></p>
+ <ul>
+ <li>Estruturar o HTML5 de forma semântica.</li>
+ <li>Aplicar CSS3 para responsividade (preparado para desktops e tablets).</li>
+ <li>Utilizar JavaScript Vanilla (ES6) para interações assíncronas (como validações de formulário ou consumo de rotas internas via fetch API) sem sobrecarregar o cliente.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">06</div>
+ <h2>Fase 6: Testes e Implantação</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Fase 6: Testes e Implantação</h2>
+ <p>Validação da segurança e entrega final.</p>
+ <p><strong>Documentos a entregar:</strong> Manual do Usuário, Termo de Homologação.</p>
+ <p><strong>Ações:</strong></p>
+ <ul>
+ <li>Testar se o isolamento de diretórios está funcionando (tentar acessar a pasta src/ diretamente pela URL e garantir que retorna erro).</li>
+ <li>Testar as restrições do RBAC com diferentes usuários.</li>
+ <li>Realizar o deploy em ambiente de produção (servidor Linux/Apache ou Nginx).</li>
+ </ul>
+ </div>
+
+ </div>
+
+ <div class="controls">
+ <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+ <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+ <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+ </div>
+
+ <script>
+ let currentSlideIndex = 0;
+ const slides = document.querySelectorAll('.slide');
+ const totalSlides = slides.length;
+ const currentIndicator = document.getElementById('current');
+ const totalIndicator = document.getElementById('total');
+ const prevBtn = document.getElementById('prevBtn');
+ const nextBtn = document.getElementById('nextBtn');
+
+ totalIndicator.textContent = totalSlides;
+
+ function updateView() {
+ slides.forEach((slide, index) => {
+ slide.classList.remove('active');
+ if (index === currentSlideIndex) {
+ slide.classList.add('active');
+ }
+ });
+ currentIndicator.textContent = currentSlideIndex + 1;
+ 
+ prevBtn.disabled = currentSlideIndex === 0;
+ nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+ }
+
+ function nextSlide() {
+ if (currentSlideIndex < totalSlides - 1) {
+ currentSlideIndex++;
+ updateView();
+ }
+ }
+
+ function prevSlide() {
+ if (currentSlideIndex > 0) {
+ currentSlideIndex--;
+ updateView();
+ }
+ }
+
+ document.addEventListener('keydown', (e) => {
+ if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+ if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+ });
+ </script>
+</body>
+</html>

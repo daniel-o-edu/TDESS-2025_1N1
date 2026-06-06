@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 40 - Apresentação de Arquitetura de Projeto</title>
+<style>
+ body {
+ margin: 0; 
+ padding: 0; 
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ background-color: #f8f9fa; 
+ color: #212529;
+ display: flex; 
+ flex-direction: column; 
+ height: 100vh;
+ overflow: hidden;
+ }
+ .slide-container {
+ width: 95vw;
+ height: 85vh;
+ margin: auto;
+ display: flex; 
+ align-items: center; 
+ justify-content: center;
+ padding: 20px; 
+ box-sizing: border-box; 
+ position: relative;
+ }
+ .slide {
+ display: none; 
+ width: 100%; 
+ max-width: 1200px; 
+ height: 80vh;
+ background: #ffffff; 
+ border-radius: 12px;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+ padding: 50px;
+ font-size: 24px; 
+ line-height: 1.5; 
+ overflow-y: auto;
+ }
+ .slide.active { 
+ display: block; 
+ animation: fadeIn 0.4s ease-in-out;
+ }
+ @keyframes fadeIn {
+ from { opacity: 0; transform: translateY(10px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
+ h1, h2, h3, h4 { 
+ color: #0d6efd; 
+ margin-top: 0; 
+ }
+ code, pre { 
+ background: #e9ecef; 
+ padding: 10px 15px; 
+ border-radius: 8px; 
+ font-family: 'Courier New', Courier, monospace; 
+ display: block; 
+ font-size: 20px;
+ overflow-x: auto;
+ white-space: pre-wrap;
+ }
+ .controls {
+ height: 80px; 
+ background: #ffffff; 
+ border-top: 1px solid #dee2e6;
+ display: flex; 
+ justify-content: space-between; 
+ align-items: center; 
+ padding: 0 50px;
+ }
+ button {
+ background: #0d6efd; 
+ color: white; 
+ border: none; 
+ padding: 12px 25px;
+ font-size: 18px; 
+ border-radius: 8px; 
+ cursor: pointer;
+ transition: background 0.2s;
+ }
+ button:hover {
+ background: #0b5ed7;
+ }
+ button:disabled { 
+ background: #adb5bd; 
+ cursor: not-allowed; 
+ }
+ .progress { 
+ font-size: 20px; 
+ font-weight: bold; 
+ color: #495057;
+ }
+ .slide-label { font-weight: bold; text-transform: uppercase; color: #6c757d; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px; }
+ .callout { padding: 20px 30px; border-radius: 8px; margin: 20px 0; border-left: 8px solid; }
+ .callout.blue { background: #cce5ff; border-color: #004085; color: #004085; }
+ .callout.green { background: #d4edda; border-color: #155724; color: #155724; }
+ .callout.red { background: #f8d7da; border-color: #721c24; color: #721c24; }
+ .callout.yellow { background: #fff3cd; border-color: #856404; color: #856404; }
+ .section-header { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+ .section-num { font-size: 80px; font-weight: bold; color: #e9ecef; margin-bottom: -20px; }
+ .section-header h2 { font-size: 48px; color: #0d6efd; margin-bottom: 20px; }
+ img { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; border: 1px solid #dee2e6; }
+ table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 20px; }
+ th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+ th { background-color: #e9ecef; color: #0d6efd; }
+</style>
+</head>
+<body>
+ <div class="slide-container" id="slides">
+
+ <div class="slide active">
+ <div class="slide-label">Aula 40</div>
+ <h1>Aula 40 - Apresentação de Arquitetura de Projeto</h1>
+ <p><strong>Descrição:</strong> Apresentação de uma arquitetura de projeto de ferramentaria na indústria 4.0 como exemplo de arquitetura de software para ser utilizado no projeto de SA.</p>
+ <hr>
+ <p><strong>Roteiro da Apresentação:</strong> Este material foi estruturado para guiar a apresentação em sala de aula sobre a arquitetura e engenharia do Sistema de Gestão de Ferramentaria (SGF).</p>
+ <p>O foco é demonstrar as decisões técnicas, justificar as tecnologias adotadas e servir como um modelo de excelência em desenvolvimento de software.</p>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">01</div>
+ <h2>1. Visão Geral e Objetivos do Projeto</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>1. Visão Geral e Objetivos do Projeto</h2>
+ <p>O SGF foi projetado pela <b>AuraTech Development</b> para a <b>NexaForge Industrial Solutions</b> com um propósito claro, otimizar o chão de fábrica.</p>
+ <div class="callout green">
+ É fundamental entender que um software não é apenas código, mas uma solução para problemas reais de negócio:</div>
+ <ul>
+ <li><strong>Mitigação de Perdas:</strong> Evitar o extravio de ativos valiosos.</li>
+ <li><strong>Redução de Setup:</strong> Agilizar a preparação de máquinas para produção.</li>
+ <li><strong>Manutenção Preventiva:</strong> Garantir que as ferramentas estejam sempre calibradas e prontas para uso.</li>
+ <li><strong>Automação:</strong> Digitalizar e controlar o fluxo de empréstimos de forma temporal e rastreável.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">02</div>
+ <h2>2. Regras de Negócio e Segurança Corporativa</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>2. Regras de Negócio e Segurança Corporativa</h2>
+ <p>Para transformar a realidade industrial em lógica de programação, o sistema implementa regras estritas de segurança e rastreabilidade.</p>
+ <hr>
+ <h3>2.1. Controle de Acesso (RBAC)</h3>
+ <p>O acesso é moldado pelo princípio do menor privilégio, dividido em papéis (Role-Based Access Control):</p>
+ <ul>
+ <li><strong>Administrador:</strong> Acesso irrestrito, relatórios financeiros e baixas definitivas.</li>
+ <li><strong>Ferramenteiro:</strong> Operador do balcão, cadastra ativos e gerencia entradas/saídas.</li>
+ <li><strong>Operador:</strong> Técnico de fábrica, apenas consulta catálogo e histórico pessoal.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>2. Regras de Negócio e Segurança Corporativa</h2>
+ <h3>2.2. O Paradigma do "Soft Delete" (Baixa Lógica)</h3>
+ <div class="callout red">
+ Ponto crucial, em sistemas industriais e de auditoria, dados não se apagam.
+ </div>
+ <p>É estritamente proibida a exclusão física (Delete). Ativos danificados sofrem uma "baixa lógica" com mudança de status e exigência de justificativa.</p>
+ </div>
+
+ <div class="slide">
+ <h2>2. Regras de Negócio e Segurança Corporativa</h2>
+ <h3>2.3. Controle Temporal (Datetime) e Punição Sistêmica</h3>
+ <p>A temporalidade exige precisão. O sistema registra a saída, previsão e devolução com base no relógio do banco de dados.</p>
+ <div class="callout yellow">
+ Se a devolução atrasar, o sistema bloqueia automaticamente novos empréstimos ao operador inadimplente, forçando a regularização.
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">03</div>
+ <h2>3. Arquitetura de Software: O Padrão MVC e Isolamento</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>3. Arquitetura de Software: O Padrão MVC e Isolamento</h2>
+ <p>O sistema eleva o nível técnico ao afastar-se do "código espaguete" e abraçar o padrão Model-View-Controller (MVC) nativo, trazendo escalabilidade e manutenção reduzida.</p>
+ <table>
+ <thead>
+ <tr>
+ <th>Camada MVC</th>
+ <th>Responsabilidade no Sistema (SGF)</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td>Model (Modelo)</td>
+ <td>Abstração de dados, comunicação com o MySQL e encapsulamento das regras de negócio pesadas.</td>
+ </tr>
+ <tr>
+ <td>View (Visão)</td>
+ <td>Páginas HTML5/CSS3 renderizadas para os usuários, livres de consultas ao banco de dados.</td>
+ </tr>
+ <tr>
+ <td>Controller (Controlador)</td>
+ <td>Cérebro do fluxo, recebe as requisições (via index.php), processa com o Model e devolve a View adequada.</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+
+ <div class="slide">
+ <h2>Segurança via Front Controller</h2>
+ <p>Apenas a pasta <i><b>public/</b></i> fica exposta ao servidor web. O núcleo da aplicação (regras e dados) repousa protegido na pasta <i><b>app/</i></b>, blindando o software contra injeções maliciosas.</p>
+ <hr>
+ <p>O roteamento utiliza namespaces via norma PSR-4.</p>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">04</div>
+ <h2>4. Stack Tecnológico e Justificativas de Mercado</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>4. Stack Tecnológico e Justificativas de Mercado</h2>
+ <p>Neste tópico, vocês devem compreender o porquê das escolhas tecnológicas. A stack é enxuta, robusta e independente.</p>
+ <ul>
+ <li><strong>PHP 8.x Nativo:</strong> Utilizado sem frameworks externos (como Laravel) para garantir imunidade a licenças e quebras de atualização de terceiros.</li>
+ <li><strong>MySQL (ACID):</strong> Banco de dados relacional escolhido pela garantia de transações seguras e suporte a grandes fluxos industriais.</li>
+ <li><strong>JavaScript (Vanilla/ES6):</strong> Essencial para requisições assíncronas (AJAX/Fetch) no Dashboard, atualizando KPIs de fábrica a cada 30 segundos sem recarregar a tela.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">05</div>
+ <h2>5. Qualidade de Código: Princípios SOLID</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>5. Qualidade de Código: Princípios SOLID</h2>
+ <p>Destacamos a adoção de princípios avançados de Orientação a Objetos, que devem ser perseguidos por vocês:</p>
+ <ul>
+ <li><strong>SRP (Responsabilidade Única):</strong> Modelos acessam dados, Controladores gerenciam fluxo, Visões mostram interface. Nada se mistura.</li>
+ <li><strong>OCP (Aberto/Fechado):</strong> Sistema projetado para receber novos canais de notificação (Ex: SMS, E-mail) futuramente, estendendo a lógica sem alterar o núcleo atual.</li>
+ <li><strong>DIP (Inversão de Dependência):</strong> Controladores não criam a conexão com o banco; eles recebem estaticamente a conexão PDO unificada.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">06</div>
+ <h2>6. Transações ACID (Exemplo Prático)</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>6. Transações ACID (Exemplo Prático)</h2>
+ <p>Como demonstrar estabilidade crítica? Ao registrar um empréstimo o sistema precisa, 1º Gravar o registro e 2º Atualizar o status da ferramenta.</p>
+ <p>Se a energia cair entre os dois passos, os dados corrompem. A solução é o uso de transações PDO:</p>
+ <pre><code>try {
+    $this->db->beginTransaction();
+    // 1. Inserir Empréstimo
+    // 2. Atualizar Status para EMPRESTADA
+    $this->db->commit();
+} catch (Exception $e) {
+    $this->db->rollBack(); // Desfaz tudo se houver erro!
+}</code></pre>
+ <div class="callout green">
+ Isso garante a " Atomicidade ", um conceito vital para engenheiros de software.
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">07</div>
+ <h2>7. Limitações de Escopo (Como gerenciar projetos)</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>7. Limitações de Escopo (Como gerenciar projetos)</h2>
+ <p>Parte de ser um bom engenheiro de software é saber delimitar o escopo.</p>
+ <p>Partes do projeto foram deixadas para o futuro de forma estratégica:</p>
+ <ul>
+ <li><strong>Integração com ERP (SAP/TOTVS):</strong> A arquitetura está pronta para virar API depois, mas a V1 é autônoma.</li>
+ <li><strong>Aplicativos Mobile Nativos:</strong> Substituídos por interfaces web responsivas (HTML5) super leves para tablets industriais.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">08</div>
+ <h2>8. Conclusão</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>8. Conclusão</h2>
+ <p>Este projeto serve como um <strong>Laboratório Perfeito</strong>. Ele ensina que desenvolver software corporativo vai muito além de "fazer funcionar".</p>
+ <hr>
+ <p>Envolve planejar a segurança (Front Controller), garantir integridade de dados (Transações/Soft Delete), facilitar manutenções futuras (SOLID/MVC) e entender as restrições e necessidades vitais de um chão de fábrica operando em ritmo de Indústria 4.0.</p>
+ </div>
+
+ </div>
+
+ <div class="controls">
+ <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+ <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+ <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+ </div>
+
+ <script>
+ let currentSlideIndex = 0;
+ const slides = document.querySelectorAll('.slide');
+ const totalSlides = slides.length;
+ const currentIndicator = document.getElementById('current');
+ const totalIndicator = document.getElementById('total');
+ const prevBtn = document.getElementById('prevBtn');
+ const nextBtn = document.getElementById('nextBtn');
+
+ totalIndicator.textContent = totalSlides;
+
+ function updateView() {
+ slides.forEach((slide, index) => {
+ slide.classList.remove('active');
+ if (index === currentSlideIndex) {
+ slide.classList.add('active');
+ }
+ });
+ currentIndicator.textContent = currentSlideIndex + 1;
+ 
+ prevBtn.disabled = currentSlideIndex === 0;
+ nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+ }
+
+ function nextSlide() {
+ if (currentSlideIndex < totalSlides - 1) {
+ currentSlideIndex++;
+ updateView();
+ }
+ }
+
+ function prevSlide() {
+ if (currentSlideIndex > 0) {
+ currentSlideIndex--;
+ updateView();
+ }
+ }
+
+ document.addEventListener('keydown', (e) => {
+ if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+ if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+ });
+ </script>
+</body>
+</html>
