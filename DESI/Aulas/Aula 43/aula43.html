@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 43 - Verbos HTTP e Endpoints de Leitura</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+ *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+ :root {
+ --ink: #0d2a4a;
+ --ink-light: #1e4976;
+ --accent: #1565c0;
+ --accent2: #1976d2;
+ --accent3: #0288d1;
+ --bg: #e8f0fe;
+ --surface: #ffffff;
+ --border: #b3cde8;
+ --code-bg: #eaf2fb;
+ --tag-bg: #dceefb;
+ --tag-border: #1976d2;
+ --slide-max: 100%;
+ --slide-title-max: 90%;
+ }
+
+ html, body {
+ font-family: 'Roboto', sans-serif;
+ background: #c5d8f0;
+ color: var(--ink);
+ min-height: 100vh;
+ }
+
+ /* ── NAV ── */
+ #nav {
+ position: fixed;
+ bottom: 0; left: 0; right: 0;
+ z-index: 100;
+ background: var(--ink);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 0;
+ padding: 0;
+ height: 52px;
+ box-shadow: 0 -2px 12px rgba(13,42,74,.28);
+ }
+ #nav button {
+ background: none; border: none;
+ color: #fff;
+ font-family: 'Roboto', sans-serif;
+ font-size: 1rem;
+ cursor: pointer;
+ padding: 0 24px;
+ height: 52px;
+ transition: background .15s;
+ }
+ #nav button:hover { background: rgba(255,255,255,.12); }
+ #nav button:disabled { opacity: .35; cursor: default; }
+ #slide-counter {
+ color: rgba(255,255,255,.65);
+ font-size: .85rem;
+ min-width: 80px;
+ text-align: center;
+ font-family: 'Source Code Pro', monospace;
+ }
+
+ /* ── PROGRESS ── */
+ #progress {
+ position: fixed;
+ top: 0; left: 0; right: 0;
+ height: 3px;
+ background: var(--border);
+ z-index: 101;
+ }
+ #progress-bar {
+ height: 100%;
+ background: var(--accent2);
+ transition: width .3s ease;
+ }
+
+ /* ── SLIDE WRAPPER ── */
+ #stage {
+ min-height: 100vh;
+ padding: 0 0 52px 0;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ }
+
+ /* ── SLIDES GENÉRICOS ── */
+ .slide {
+ display: none;
+ width: var(--slide-max);
+ max-width: var(--slide-max);
+ min-height: calc(100vh - 52px);
+ background: var(--surface);
+ border: none;
+ border-radius: 6px;
+ box-shadow: 0 4px 32px rgba(13,42,74,.12);
+ padding: 7vh 8vw;
+ animation: fadeIn .3s ease;
+ margin: 0 auto;
+ }
+ .slide.active { display: block; }
+
+ .slide.slide-section,
+ .slide.slide-cover {
+ width: var(--slide-title-max);
+ max-width: var(--slide-title-max);
+ }
+
+ @keyframes fadeIn {
+ from { opacity: 0; transform: translateY(6px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
+
+ /* ── TYPOGRAPHY ── */
+ .slide-label {
+ font-family: 'Source Code Pro', monospace;
+ font-size: .72rem;
+ letter-spacing: .12em;
+ text-transform: uppercase;
+ color: var(--accent2);
+ margin-bottom: 10px;
+ font-weight: 600;
+ }
+ .slide h1 {
+ font-family: 'Montserrat', sans-serif;
+ font-size: clamp(2rem, 5vw, 3.2rem);
+ font-weight: 900;
+ color: var(--ink);
+ line-height: 1.1;
+ margin-bottom: 20px;
+ }
+ .slide h2 {
+ font-family: 'Montserrat', sans-serif;
+ font-size: clamp(1.4rem, 3.5vw, 2rem);
+ font-weight: 700;
+ color: var(--ink);
+ line-height: 1.2;
+ margin-bottom: 16px;
+ border-left: 4px solid var(--accent2);
+ padding-left: 14px;
+ }
+ .slide h3 {
+ font-family: 'Montserrat', sans-serif;
+ font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+ font-weight: 700;
+ color: var(--ink-light);
+ margin: 20px 0 10px;
+ }
+ .slide p {
+ font-size: clamp(1.5rem, 2vw, 1.5rem);
+ line-height: 1.75;
+ color: var(--ink-light);
+ margin-bottom: 14px;
+ }
+ .slide ul, .slide ol {
+ padding-left: 22px;
+ margin-bottom: 14px;
+ }
+ .slide li {
+ font-size: clamp(1.5rem, 2vw, 1.2rem);
+ line-height: 1.7;
+ color: var(--ink-light);
+ margin-bottom: 6px;
+ }
+ .slide li strong { color: var(--ink); }
+
+ /* ── DIVIDER ── */
+ .divider {
+ border: none;
+ border-top: 2px solid var(--border);
+ margin: 24px 0;
+ }
+
+ /* ── COVER ── */
+ .cover-meta {
+ display: flex;
+ gap: 12px;
+ flex-wrap: wrap;
+ margin-top: 28px;
+ }
+ .cover-meta span {
+ background: var(--code-bg);
+ border: 1px solid var(--border);
+ border-radius: 3px;
+ font-family: 'Source Code Pro', monospace;
+ font-size: .8rem;
+ padding: 4px 12px;
+ color: var(--ink-light);
+ }
+ .cover-desc {
+ font-size: clamp(1rem, 2.2vw, 1.15rem);
+ line-height: 1.7;
+ color: var(--ink-light);
+ border-left: 3px solid var(--border);
+ padding-left: 18px;
+ margin: 24px 0;
+ }
+ .topics-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+ gap: 12px;
+ margin-top: 8px;
+ }
+ .topic-chip {
+ background: var(--tag-bg);
+ border: 1px solid var(--tag-border);
+ border-radius: 3px;
+ padding: 10px 14px;
+ font-size: .95rem;
+ color: var(--accent2);
+ font-weight: 600;
+ }
+
+ /* ── CODE BLOCK ── */
+ .code-block {
+ background: var(--code-bg);
+ border: 1px solid var(--border);
+ border-left: 4px solid var(--accent2);
+ border-radius: 3px;
+ padding: 18px 20px;
+ font-family: 'Source Code Pro', monospace;
+ font-size: clamp(.78rem, 1.6vw, .88rem);
+ line-height: 1.65;
+ color: var(--ink);
+ overflow-x: auto;
+ margin: 16px 0;
+ white-space: pre;
+ }
+
+ /* ── CALLOUT BOXES ── */
+ .callout {
+ border-radius: 3px;
+ padding: 16px 20px;
+ margin: 16px 0;
+ font-size: clamp(1.7rem, 2vw, 1.5rem);
+ line-height: 1.7;
+ }
+ .callout.blue {
+ background: #dceefb;
+ border-left: 4px solid var(--accent2);
+ color: var(--ink);
+ }
+ .callout.green {
+ background: #e1f5e8;
+ border-left: 4px solid #2e7d32;
+ color: #1a3a28;
+ }
+ .callout.red {
+ background: #e3f0fb;
+ border-left: 4px solid var(--accent);
+ color: var(--ink);
+ }
+ .callout.yellow {
+ background: #e8f4fd;
+ border-left: 4px solid var(--accent3);
+ color: var(--ink);
+ }
+ .callout .callout-title {
+ font-weight: 700;
+ font-family: 'Roboto', sans-serif;
+ font-size: .78rem;
+ letter-spacing: .1em;
+ text-transform: uppercase;
+ margin-bottom: 6px;
+ opacity: .75;
+ }
+
+ /* ── TWO COLUMN ── */
+ .two-col {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 28px;
+ margin: 16px 0;
+ }
+ @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+ .col-card {
+ background: var(--code-bg);
+ border: 1px solid var(--border);
+ border-radius: 3px;
+ padding: 18px;
+ }
+ .col-card h4 {
+ font-family: 'Montserrat', sans-serif;
+ font-size: 1rem;
+ font-weight: 700;
+ color: var(--ink);
+ margin-bottom: 10px;
+ padding-bottom: 8px;
+ border-bottom: 1px solid var(--border);
+ }
+
+ /* ── TABLE ── */
+ .table-wrap { overflow-x: auto; margin: 16px 0; }
+ table {
+ width: 100%;
+ border-collapse: collapse;
+ font-size: clamp(1.5rem, 1.8vw, 1.5rem);
+ }
+ thead th {
+ background: var(--ink);
+ color: #fff;
+ font-family: 'Roboto', sans-serif;
+ font-weight: 600;
+ padding: 10px 14px;
+ text-align: left;
+ font-size: .85rem;
+ letter-spacing: .04em;
+ }
+ tbody tr:nth-child(even) { background: var(--code-bg); }
+ tbody tr:hover { background: #d0e8f8; }
+ tbody td {
+ padding: 9px 14px;
+ border-bottom: 1px solid var(--border);
+ color: var(--ink-light);
+ vertical-align: top;
+ line-height: 1.55;
+ }
+ tbody td strong { color: var(--ink); }
+
+ /* ── FAQ ── */
+ .faq-item {
+ border: 1px solid var(--border);
+ border-radius: 3px;
+ margin-bottom: 12px;
+ overflow: hidden;
+ }
+ .faq-q {
+ background: var(--code-bg);
+ padding: 12px 18px;
+ font-weight: 700;
+ font-size: clamp(1.4rem, 2vw, 1.5rem);
+ color: var(--ink);
+ border-left: 4px solid var(--accent2);
+ }
+ .faq-a {
+ padding: 12px 18px;
+ font-size: clamp(1.3rem, 1.9vw, 1.5rem);
+ color: var(--ink-light);
+ line-height: 1.7;
+ background: var(--surface);
+ }
+
+ /* ── NUMBERED STEPS ── */
+ .step {
+ display: flex;
+ gap: 16px;
+ align-items: flex-start;
+ margin-bottom: 14px;
+ }
+ .step-num {
+ flex-shrink: 0;
+ width: 32px; height: 32px;
+ background: var(--accent2);
+ color: #fff;
+ border-radius: 50%;
+ display: flex; align-items: center; justify-content: center;
+ font-weight: 700;
+ font-size: .9rem;
+ font-family: 'Source Code Pro', monospace;
+ margin-top: 2px;
+ }
+ .step-body { flex: 1; }
+ .step-body p { margin: 0; }
+
+ /* ── SECTION HEADER SLIDES ── */
+ .section-header {
+ text-align: center;
+ padding: 60px 20px;
+ }
+ .section-num {
+ font-family: 'Source Code Pro', monospace;
+ font-size: 3rem;
+ font-weight: 600;
+ color: #b3cde8;
+ line-height: 1;
+ margin-bottom: 12px;
+ }
+ .section-header h2 {
+ border: none;
+ padding: 0;
+ text-align: center;
+ font-size: clamp(1.8rem, 4vw, 2.6rem);
+ color: var(--ink);
+ }
+ .section-header p {
+ max-width: 560px;
+ margin: 16px auto 0;
+ text-align: center;
+ }
+
+ /* ── RESPONSIVE ── */
+ @media (max-width: 700px) {
+ .slide { padding: 28px 22px 36px; width: 97%; max-width: 97%; }
+ .slide.slide-section, .slide.slide-cover { width: 97%; max-width: 97%; }
+ #nav button { padding: 0 14px; font-size: .9rem; }
+ }
+ @media (max-width: 400px) {
+ .slide { padding: 20px 14px 28px; }
+ }
+</style>
+</head>
+<body>
+
+<div id="progress"><div id="progress-bar"></div></div>
+
+<div id="stage">
+
+ <div class="slide slide-cover active">
+ <div class="slide-label">Aula 43</div>
+ <h1>Verbos HTTP e Endpoints de Leitura</h1>
+ <p class="cover-desc"><b>Descrição:</b> Esta aula introduz os verbos HTTP no padrão REST, com foco profundo no método GET para leitura de dados. O conteúdo alia teoria sobre parâmetros de busca à construção prática de um endpoint em PHP simulando a Brasil API. Por fim, vamos validar o aprendizado realizando requisições passo a passo através do Postman.</p>
+ <hr class="divider">
+ <h3>Tópicos desta aula</h3>
+ <div class="topics-grid">
+ <div class="topic-chip">Verbos HTTP</div>
+ <div class="topic-chip">Modelo CRUD</div>
+ <div class="topic-chip">Endpoint GET</div>
+ <div class="topic-chip">PHP e Postman</div>
+ </div>
+ </div>
+
+ <div class="slide slide-section">
+ <div class="section-header">
+ <div class="section-num">01</div>
+ <h2>Verbos HTTP e Convenções</h2>
+ </div>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Verbos HTTP e Convenções</div>
+ <h2>1.1 Os Verbos HTTP e o Modelo CRUD</h2>
+ <p>As APIs baseadas no estilo arquitetural REST utilizam os métodos (verbos) do protocolo HTTP para determinar qual operação está sendo executada sobre um recurso. O acrônimo CRUD correlaciona-se diretamente com esses métodos:</p>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Verbos HTTP e Convenções</div>
+ <h2>O acrônimo CRUD</h2>
+ <ul>
+ <li><b>GET (Read / Leitura):</b> Utilizado estritamente para extrair, listar ou buscar dados de uma API. É um método seguro e idempotente, o que significa que realizar a mesma chamada GET múltiplas vezes não deve alterar o estado do servidor ou do banco de dados.</li>
+ <li><b>POST (Create / Criação):</b> Usado para enviar novas informações ao servidor e criar um novo registro.</li>
+ <li><b>PUT (Update / Atualização):</b> Destinado à modificação e substituição integral de dados já existentes.</li>
+ <li><b>DELETE (Delete / Remoção):</b> Utilizado para apagar um recurso específico do sistema.</li>
+ </ul>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Verbos HTTP e Convenções</div>
+ <h2>1.2 Convenções de URL Design Semântico</h2>
+ <p>Para construir uma Interface Uniforme (um dos 6 pilares do REST), as URLs devem seguir padrões semânticos claros:</p>
+ <ul>
+ <li><b>Use Substantivos no Plural:</b> A URL aponta para a coleção do recurso (ex: /api/produtos, /api/usuarios).</li>
+ <li><b>Não use verbos na URL:</b> Evite caminhos como /api/buscar Produto ou /api/listar Produtos. O verbo da ação já é determinado pelo método HTTP (GET, POST, etc.).</li>
+ </ul>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Verbos HTTP e Convenções</div>
+ <h2>Tabela de Convenções de Endpoints</h2>
+ <div class="table-wrap">
+ <table>
+ <thead>
+ <tr>
+ <th>Método HTTP</th>
+ <th>Endpoint (Rota)</th>
+ <th>Ação Semântica</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td>GET</td>
+ <td>/api/produtos</td>
+ <td>Lista todos os produtos da base de dados.</td>
+ </tr>
+ <tr>
+ <td>GET</td>
+ <td>/api/produtos/:id</td>
+ <td>Busca os detalhes de um único produto específico pelo ID.</td>
+ </tr>
+ <tr>
+ <td>POST</td>
+ <td>/api/produtos</td>
+ <td>Cria um novo produto a partir dos dados enviados.</td>
+ </tr>
+ <tr>
+ <td>PUT</td>
+ <td>/api/produtos/:id</td>
+ <td>Atualiza completamente o produto identificado por aquele ID.</td>
+ </tr>
+ <tr>
+ <td>DELETE</td>
+ <td>/api/produtos/:id</td>
+ <td>Remove permanentemente o produto indicado por aquele ID.</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+ </div>
+
+ <div class="slide slide-section">
+ <div class="section-header">
+ <div class="section-num">02</div>
+ <h2>Endpoints de Leitura - GET: Listar e Buscar</h2>
+ </div>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Endpoints de Leitura</div>
+ <h2>1. O Conceito: O que é o GET?</h2>
+ <p>No modelo CRUD (Create, Read, Update, Delete), o método GET é o responsável pela Leitura. Ele serve exclusivamente para pedir dados ao servidor.</p>
+ <div class="callout.yellow">
+ <p>Regras de ouro do GET:</p>
+ <ul>
+ <li>É Seguro: Chamar um GET não deve apagar, alterar ou criar nada no banco de dados.</li>
+ <li>Endpoint Semântico: A URL deve indicar o recurso no plural.</li>
+ <li>Exemplo da Brasil API: https://brasilapi.com.br/api/pix/v1/participants (Lista os participantes do PIX).</li>
+ </ul>
+ </div>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Endpoints de Leitura</div>
+ <h2>2. Path Parameters vs. Query Strings</h2>
+ <p>Para os endpoints de leitura (GET), existem duas formas principais de enviar informações complementares na URL para buscar dados específicos:</p>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Endpoints de Leitura</div>
+ <h2>2.1 Path Parameters (Parâmetros de Caminho)</h2>
+ <ul>
+ <li>Definição: São variáveis incorporadas diretamente na estrutura da URL (representados na documentação por :id ou {id}).</li>
+ <li>Uso: Identificar um recurso específico e obrigatório dentro de uma coleção.</li>
+ <li>Exemplo: Na rota /api/produtos/5, o número 5 é um path parameter indicando que queremos ler especificamente o produto com ID igual a 5.</li>
+ </ul>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Endpoints de Leitura</div>
+ <h2>2.2 Query Strings / Query Parameters (Parâmetros de Busca)</h2>
+ <ul>
+ <li>Definição: São parâmetros opcionais anexados ao final da URL após o caractere de interrogação (?) e estruturados no formato chave=valor. Múltiplos parâmetros são separados pelo caractere &amp;.</li>
+ <li>Uso: Filtrar, ordenar ou paginar uma lista de recursos existentes sem alterar o endpoint base.</li>
+ <li>Exemplo: Na rota /api/produtos?categoria=eletronicos&amp;preco_max=1500, estamos requisitando a listagem geral, porém filtrando apenas itens da categoria 'eletrônicos' e com preço abaixo de 1500.</li>
+ </ul>
+ </div>
+
+ <div class="slide slide-section">
+ <div class="section-header">
+ <div class="section-num">03</div>
+ <h2>Implementando nossa própria "Brasil API - PIX" em PHP</h2>
+ </div>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Implementação em PHP</div>
+ <h2>A Lógica do Endpoint</h2>
+ <p>Para que vocês entendam como a API funciona "por baixo dos panos" utilizando parâmetros, vamos criar um script PHP que simula esse endpoint. Ele terá duas funções:</p>
+ <ul>
+ <li>Retornar todos os participantes do PIX.</li>
+ <li>Retornar um participante específico filtrado via Query String.</li>
+ </ul>
+ <p>Crie um arquivo chamado pix.php:</p>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Implementação em PHP</div>
+ <h2>Código PHP: pix.php (Parte 1)</h2>
+ <div class="code-block">
+&lt;?php
+// 1. Configura o cabeçalho para dizer ao cliente (Postman/Navegador) que a resposta é em JSON
+header("Content-Type: application/json; charset=UTF-8");
+
+// 2. Simulando o Banco de Dados (Inspirado nos dados reais da Brasil API)
+$participantes = [
+  [
+    "ispb" =&gt; "00000000",
+    "nome" =&gt; "BANCO DO BRASIL S.A.",
+    "nome_reduzido" =&gt; "BCO DO BRASIL S.A.",
+    "modalidade_participacao" =&gt; "PDTA"
+  ],
+  [
+    "ispb" =&gt; "00360305",
+    "nome" =&gt; "CAIXA ECONOMICA FEDERAL",
+    "nome_reduzido" =&gt; "CAIXA ECONOMICA FEDERAL",
+    "modalidade_participacao" =&gt; "PDTA"
+  ],
+  [
+    "ispb" =&gt; "18236120",
+    "nome" =&gt; "NU PAGAMENTOS S.A. - INSTITUIÇÃO DE PAGAMENTO",
+    "nome_reduzido" =&gt; "NUBANK",
+    "modalidade_participacao" =&gt; "PDTA"
+  ]
+];
+ </div>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Implementação em PHP</div>
+ <h2>Código PHP: pix.php (Parte 2)</h2>
+ <div class="code-block">
+// 3. Verifica se o método utilizado é realmente o GET
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+  http_response_code(405); // Method Not Allowed
+  echo json_encode(["erro" =&gt; "Método não permitido. Utilize apenas GET."]);
+  exit;
+}
+
+// 4. Captura o parâmetro de busca (Query String), se existir. Ex: pix.php?ispb=18236120
+$ispbBuscado = isset($_GET['ispb']) ? $_GET['ispb'] : null;
+ </div>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Implementação em PHP</div>
+ <h2>Código PHP: pix.php (Parte 3)</h2>
+ <div class="code-block">
+// 5. Lógica de Resposta
+if ($ispbBuscado) {
+  // BUSCA ESPECÍFICA (Filtrando pelo ISPB)
+  $resultado = array_filter($participantes, function($p) use ($ispbBuscado) {
+    return $p['ispb'] === $ispbBuscado;
+  });
+
+  if (!empty($resultado)) {
+    http_response_code(200); // OK
+    // array_values reseta as chaves do array, pegamos o índice [0] para devolver apenas 1 objeto
+    echo json_encode(array_values($resultado)[0]);
+  } else {
+    http_response_code(404); // Not Found
+    echo json_encode(["erro" =&gt; "Participante PIX não encontrado com o ISPB informado."]);
+  }
+} else {
+  // LISTAGEM GERAL (Nenhum filtro foi passado)
+  http_response_code(200); // OK
+  echo json_encode($participantes);
+}
+?&gt;
+ </div>
+ </div>
+
+ <div class="slide slide-section">
+ <div class="section-header">
+ <div class="section-num">04</div>
+ <h2>Laboratório Prático: Executando a API no Postman</h2>
+ </div>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Laboratório Prático</div>
+ <h2>Etapa 1: Criando o arquivo pix.php e preparando o Servidor</h2>
+ <ul>
+ <li>1. Certifique-se de que o seu servidor local (como o Apache no XAMPP) está iniciado e rodando.</li>
+ <li>2. Navegue até a pasta pública do seu servidor, a pasta htdocs no XAMPP.</li>
+ <li>3. Dentro dessa pasta, crie um novo arquivo de texto e nomeie-o exatamente como pix.php.</li>
+ <li>4. Abra este arquivo no seu editor de código (como o VS Code), cole todo o código PHP da nossa "Brasil API simulada" (visto no passo anterior) e salve o arquivo.</li>
+ </ul>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Laboratório Prático</div>
+ <h2>Etapa 2: Preparando a Requisição no Postman</h2>
+ <ul>
+ <li>1. Abra o aplicativo do Postman.</li>
+ <li>2. Clique no botão "+" (ou em New &gt; HTTP Request) para abrir uma nova aba de requisição em branco.</li>
+ <li>3. Observe a barra superior principal. O menu suspenso à esquerda deve estar configurado com o método GET.</li>
+ </ul>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Laboratório Prático</div>
+ <h2>Teste 1: Listagem Geral (Nossa API)</h2>
+ <p>Vamos testar se o nosso servidor está devolvendo a lista completa de bancos.</p>
+ <ul>
+ <li>1. Na barra de requisição principal, certifique-se de que a caixa de seleção de métodos (o verbo HTTP) está configurada como GET (geralmente é o padrão).</li>
+ <li>2. Na barra de endereços (ao lado do método), digite a URL local: http://localhost/pix.php.</li>
+ <li>3. Clique no grande botão azul "Send" (Enviar) no canto direito.</li>
+ </ul>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Laboratório Prático</div>
+ <h2>Analisando o Resultado do Teste 1</h2>
+ <p>4. Analisando o Resultado:</p>
+ <ul>
+ <li>Olhe para a parte inferior da tela (seção Response).</li>
+ <li>Na aba Body, você deverá ver o formato de texto colorido (JSON) exibindo o array com os 3 bancos que cadastramos no código.</li>
+ <li>No canto superior direito da caixa de resposta, verifique o Status. Deve estar verde exibindo 200 OK.</li>
+ </ul>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Laboratório Prático</div>
+ <h2>Teste 2: Consumindo a Brasil API Real</h2>
+ <p>Vamos mostrar aos alunos que o que eles construíram é a exata lógica usada no mundo real.</p>
+ <ul>
+ <li>1. Crie uma nova requisição na coleção (Add Request) e chame de "Listar Todos - Brasil API".</li>
+ <li>2. Método: GET.</li>
+ <li>3. URL: https://brasilapi.com.br/api/pix/v1/participants.</li>
+ <li>4. Clique em Send.</li>
+ <li>5. Analisando o Resultado: A estrutura de retorno no Body é exatamente igual à que programamos, mas trará centenas de bancos e instituições financeiras reais.</li>
+ </ul>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Laboratório Prático</div>
+ <h2>Teste 3: Busca Específica usando Query Params</h2>
+ <p>A interface do Postman facilita a criação de Query Strings sem que você precise digitar o ponto de interrogação (?) manualmente.</p>
+ <ul>
+ <li>1. Logo abaixo da barra de endereço onde você digitou a URL, clique na aba "Params".</li>
+ <li>2. Você verá uma tabela com as colunas Key (Chave) e Value (Valor).</li>
+ <li>3. Na coluna Key, digite ispb. Na coluna Value, digite 18236120 (o código do Nubank).</li>
+ <li>4. Observe a mágica: A sua barra de endereço foi atualizada automaticamente para http://localhost/pix.php?ispb=18236120.</li>
+ </ul>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Laboratório Prático</div>
+ <h2>Analisando o Resultado do Teste 3</h2>
+ <ul>
+ <li>5. Clique em Send novamente.</li>
+ <li>6. Analisando o Resultado: A aba de resposta inferior agora mostrará apenas um único bloco JSON, contendo os dados exclusivos do Nubank.</li>
+ <li>O status continuará 200 OK.</li>
+ </ul>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Laboratório Prático</div>
+ <h2>Teste 4: O Caminho Triste (Erro 404 - Not Found)</h2>
+ <p>Um bom desenvolvedor sempre testa o que acontece quando as coisas dão errado.</p>
+ <ul>
+ <li>1. Mantenha-se na mesma aba e vá até a tabela de Params.</li>
+ <li>2. Altere o valor da chave ispb para um número inexistente, como 99999999.</li>
+ <li>3. Clique em Send.</li>
+ </ul>
+ </div>
+
+ <div class="slide slide-common">
+ <div class="slide-label">Laboratório Prático</div>
+ <h2>Analisando o Resultado do Teste 4</h2>
+ <p>4. Analisando o Resultado:</p>
+ <ul>
+ <li>Verifique o código de Status à direita. Ele mudará para a cor vermelha/laranja, indicando o erro 404 Not Found.</li>
+ <li>No Body da resposta, você verá a mensagem de erro que programamos no PHP: {"erro": "Participante PIX não encontrado com o ISPB informado."}.</li>
+ </ul>
+ </div>
+
+ <div class="slide slide-section">
+ <div class="section-header">
+ <div class="section-num">05</div>
+ <h2>Atividade Prática - Após o intervalo</h2>
+ </div>
+ </div>
+
+</div>
+
+<nav id="nav">
+ <button id="btn-prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+ <span id="slide-counter">1 / 23</span>
+ <button id="btn-next" onclick="changeSlide(1)">Próximo →</button>
+</nav>
+
+<script>
+ const slides = document.querySelectorAll('.slide');
+ const total = slides.length;
+ let current = 0;
+
+ function showSlide(n) {
+ slides[current].classList.remove('active');
+ current = Math.max(0, Math.min(n, total - 1));
+ slides[current].classList.add('active');
+ document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+ document.getElementById('btn-prev').disabled = current === 0;
+ document.getElementById('btn-next').disabled = current === total - 1;
+ document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+ window.scrollTo({ top: 0, behavior: 'smooth' });
+ }
+
+ function changeSlide(dir) { showSlide(current + dir); }
+
+ document.addEventListener('keydown', e => {
+ if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') changeSlide(1);
+ if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') changeSlide(-1);
+ });
+
+ // Touch swipe
+ let touchX = 0;
+ document.addEventListener('touchstart', e => touchX = e.changedTouches[0].screenX);
+ document.addEventListener('touchend', e => {
+ let diff = e.changedTouches[0].screenX - touchX;
+ if (Math.abs(diff) > 50) changeSlide(diff < 0 ? 1 : -1);
+ });
+</script>
+</body>
+</html>
